@@ -1,0 +1,313 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Menu - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .form-header {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .menu-type-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .menu-type-breakfast { background: #e3f2fd; color: #1976d2; }
+    .menu-type-lunch { background: #f3e5f5; color: #7b1fa2; }
+    .menu-type-dinner { background: #fce4ec; color: #c2185b; }
+    .menu-type-bar { background: #f3e5f5; color: #7b1fa2; }
+    .menu-type-dessert { background: #fff3e0; color: #f57c00; }
+    .menu-type-catering { background: #e8f5e8; color: #4caf50; }
+    .menu-type-seasonal { background: #fff8e1; color: #ffc107; }
+    .menu-type-tasting { background: #e1f5fe; color: #03a9f4; }
+    
+    .help-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    
+    .date-inputs {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .date-inputs .form-group {
+        flex: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5">📋 Create New Menu</h1>
+            <p class="text-muted">Design a new menu with sections and items</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'menu_management:menu_list' %}" class="btn btn-secondary btn-lg">
+                ← Back to Menus
+            </a>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="form-section">
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- Basic Information -->
+            <div class="form-header">
+                <h3>📝 Basic Information</h3>
+            </div>
+            
+            <div class="form-group">
+                <label for="name" class="form-label">Menu Name *</label>
+                <input type="text" class="form-control" id="name" name="name" required 
+                       placeholder="e.g., Summer Dinner Menu 2024">
+                <small class="help-text">Give your menu a descriptive name</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="menu_type" class="form-label">Menu Type *</label>
+                <select class="form-select" id="menu_type" name="menu_type" required>
+                    <option value="">Select a menu type...</option>
+                    <option value="breakfast">🌅 Breakfast</option>
+                    <option value="lunch">🌞 Lunch</option>
+                    <option value="dinner">🍽️ Dinner</option>
+                    <option value="bar">🍺 Bar</option>
+                    <option value="dessert">🍰 Dessert</option>
+                    <option value="catering">🥘 Catering</option>
+                    <option value="seasonal">🍂 Seasonal</option>
+                    <option value="tasting">👨‍🍳 Tasting Menu</option>
+                </select>
+                <small class="help-text">Choose the type of menu you're creating</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="4" 
+                          placeholder="Describe your menu concept, target audience, or special features..."></textarea>
+                <small class="help-text">Optional: Add a description to help users understand this menu</small>
+            </div>
+            
+            <!-- Date Settings -->
+            <div class="form-header">
+                <h3>📅 Availability Settings</h3>
+            </div>
+            
+            <div class="date-inputs">
+                <div class="form-group">
+                    <label for="start_date" class="form-label">Start Date</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date">
+                    <small class="help-text">When this menu becomes available</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="end_date" class="form-label">End Date</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date">
+                    <small class="help-text">When this menu expires (leave blank for ongoing)</small>
+                </div>
+            </div>
+            
+            <!-- Menu Type Preview -->
+            <div class="form-header">
+                <h3>🎯 Menu Type Features</h3>
+            </div>
+            
+            <div class="alert alert-info">
+                <h5>Menu Type Capabilities:</h5>
+                <div id="menu-type-preview">
+                    <p>Select a menu type above to see its specific features and capabilities.</p>
+                </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <button type="submit" class="btn btn-primary w-100">
+                        ✅ Create Menu
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <a href="{% url 'menu_management:menu_list' %}" class="btn btn-secondary w-100">
+                        ❌ Cancel
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const menuTypeSelect = document.getElementById('menu_type');
+    const menuTypePreview = document.getElementById('menu-type-preview');
+    
+    const menuTypeDescriptions = {
+        'breakfast': `
+            <h6>🌅 Breakfast Menu Features:</h6>
+            <ul>
+                <li>Early morning items (6 AM - 11 AM)</li>
+                <li>Continental and à la carte options</li>
+                <li>Quick service items for busy mornings</li>
+                <li>Hot and cold beverage pairings</li>
+                <li>Family-friendly pricing</li>
+            </ul>
+        `,
+        'lunch': `
+            <h6>🌞 Lunch Menu Features:</h6>
+            <ul>
+                <li>Midday items (11 AM - 3 PM)</li>
+                <li>Business lunch specials</li>
+                <li>Quick service options</li>
+                <li>Healthy and light choices</li>
+                <li>Combo deals and value meals</li>
+            </ul>
+        `,
+        'dinner': `
+            <h6>🍽️ Dinner Menu Features:</h6>
+            <ul>
+                <li>Evening items (5 PM - 10 PM)</li>
+                <li>Full-service dining experience</li>
+                <li>A la carte and tasting menus</li>
+                <li>Wine pairing recommendations</li>
+li>
+               >Chef's specialties and seasonal items</li>
+            </ul>
+        `,
+        'bar': `
+            <h6>🍺 Bar Menu Features:</h6>
+            <ul>
+                <li>All-day availability</li>
+                <li>Cocktails and mocktails</li>
+                <li>Bar snacks and appetizers</li>
+                <li>Beer and wine selections</li>
+                <li>Happy hour specials</li>
+            </ul>
+        `,
+        'dessert': `
+            <h6>🍰 Dessert Menu Features:</h6>
+            <ul>
+                <li>Sweet endings for all meals</li>
+                <li>Seasonal fruit desserts</li>
+                <li>Chocolate and pastry items</li>
+                <li>Dietary-friendly options</li>
+                <li>Chef's signature creations</li>
+            </ul>
+        `,
+        'catering': `
+            <h6>🥘 Catering Menu Features:</h6>
+            <ul>
+                <li>Event-based pricing</li>
+                <li>Package deals and bundles</li>
+                <li>Delivery and setup options</li>
+                <li>Dietary accommodations</li>
+                <li>Minimum order requirements</li>
+            </ul>
+        `,
+        'seasonal': `
+            <h6>🍂 Seasonal Menu Features:</h6>
+            <ul>
+                <li>Limited-time availability</li>
+                <li>Fresh, seasonal ingredients</li>
+                <li>Rotating menu items</li>
+                <li>Local and sustainable sourcing</li>
+                <li>Special event menus</li>
+            </ul>
+        `,
+        'tasting': `
+            <h6>👨‍🍳 Tasting Menu Features:</h6>
+            <ul>
+                <li>Multi-course experiences</li>
+                <li>Chef's curated selections</li>
+                <li>Wine and beverage pairings</li>
+                <li>Fixed pricing per person</li>
+                <li>Advanced booking required</li>
+            </ul>
+        `
+    };
+    
+    menuTypeSelect.addEventListener('change', function() {
+        const selectedType = this.value;
+        if (menuTypeDescriptions[selectedType]) {
+            menuTypePreview.innerHTML = menuTypeDescriptions[selectedType];
+        } else {
+            menuTypePreview.innerHTML = '<p>Select a menu type above to see its specific features and capabilities.</p>';
+        }
+    });
+});
+</script>
+{% endblock %}

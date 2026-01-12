@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+
+{% block title %}Meal Pass Benefits - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .benefits-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 0;
+        text-align: center;
+        border-radius: 0 0 30px 30px;
+    }
+    
+    .benefits-section {
+        padding: 60px 0;
+        background: #f8f9fa;
+    }
+    
+    .benefit-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+    }
+    
+    .benefit-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    
+    .benefit-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .benefit-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .benefit-type {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        background: #667eea;
+        color: white;
+    }
+    
+    .benefit-value {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+    
+    .benefit-description {
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+    
+    .benefit-status {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .status-active {
+        background: #28a745;
+        color: white;
+    }
+    
+    .status-inactive {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .subscription-info {
+        background: #e9ecef;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .subscription-name {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .subscription-details {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .btn-back {
+        background: #6c757d;
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        margin-right: 1rem;
+    }
+    
+    .btn-back:hover {
+        background: #5a6268;
+        color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+    }
+    
+    .empty-state h3 {
+        margin-bottom: 1rem;
+    }
+    
+    .benefit-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+    }
+    
+    .benefit-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+    
+    .benefit-icon.discount {
+        color: #ffc107;
+    }
+    
+    .benefit-icon.free-item {
+        color: #28a745;
+    }
+    
+    .benefit-icon.priority {
+        color: #17a2b8;
+    }
+    
+    .benefit-icon.vip {
+        color: #dc3545;
+    }
+    
+    .benefit-icon.exclusive {
+        color: #6f42c1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Benefits Hero -->
+<section class="benefits-hero">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3">🎁 Meal Pass Benefits</h1>
+        <p class="lead">Discover all the exclusive benefits that come with your meal pass subscription</p>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="benefits-section">
+    <div class="container">
+        <!-- Active Subscriptions -->
+        {% if active_subscriptions %}
+        <div class="subscription-info">
+            <h3>📋 Your Active Subscriptions</h3>
+            {% for subscription in active_subscriptions %}
+            <div class="subscription-name">{{ subscription.meal_pass.name }}</div>
+            <div class="subscription-details">
+                {{ subscription.meals_remaining }} meals remaining • 
+                Valid until {{ subscription.end_date|date:"M d, Y" }}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <h3>No Active Subscriptions</h3>
+            <p>You need an active meal pass to access benefits.</p>
+            <a href="{% url 'meal_pass_options' %}" class="btn-back">Purchase Meal Pass</a>
+        </div>
+        {% endif %}
+        
+        <!-- Benefits Grid -->
+        {% if benefits %}
+        <div class="benefit-grid">
+            {% for benefit in benefits %}
+            <div class="benefit-card">
+                <div class="benefit-header">
+                    <div class="benefit-name">{{ benefit.meal_pass.name }}</div>
+                    <div class="benefit-type">{{ benefit.benefit_type|title }}</div>
+                </div>
+                
+                <div class="benefit-icon {{ benefit.benefit_type|lower }}">
+                    {% if benefit.benefit_type == 'discount' %}
+                        💰
+                    {% elif benefit.benefit_type == 'free_item' %}
+                        🎁
+                    {% elif benefit.benefit_type == 'priority' %}
+                        ⚡
+                    {% elif benefit.benefit_type == 'vip' %}
+                        👑
+                    {% elif benefit.benefit_type == 'exclusive' %}
+                        ⭐
+                    {% else %}
+                        🎯
+                    {% endif %}
+                </div>
+                
+                <div class="benefit-value">{{ benefit.benefit_value }}</div>
+                
+                <div class="benefit-description">{{ benefit.description }}</div>
+                
+                <div class="benefit-status status-{% if benefit.is_active %}active{% else %}inactive{% endif %}">
+                    {% if benefit.is_active %}✅ Available{% else %}❌ Unavailable{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <h3>No Benefits Available</h3>
+            <p>No benefits are currently configured for your meal pass subscriptions.</p>
+        </div>
+        {% endif %}
+        
+        <!-- Back Button -->
+        <div class="text-center">
+            <a href="{% url 'meal_pass_dashboard' %}" class="btn-back">← Back to Dashboard</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

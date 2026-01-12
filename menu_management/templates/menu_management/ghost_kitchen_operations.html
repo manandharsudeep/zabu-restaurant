@@ -1,0 +1,491 @@
+{% extends 'base.html' %}
+
+{% block title %}Ghost Kitchen Operations - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .kitchen-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .kitchen-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        border-left: 4px solid #667eea;
+    }
+    
+    .kitchen-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .brand-section {
+        margin-bottom: 3rem;
+    }
+    
+    .brand-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 3px solid #667eea;
+    }
+    
+    .brand-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .brand-stats {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .workflow-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .station-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+    }
+    
+    .station-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .station-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .station-name {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .efficiency-score {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .score-high {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .score-medium {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .score-low {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .station-metrics {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .metric-item {
+        text-align: center;
+        padding: 0.5rem;
+        background: white;
+        border-radius: 8px;
+    }
+    
+    .metric-value {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .metric-label {
+        font-size: 0.7rem;
+        color: #666;
+    }
+    
+    .optimization-suggestions {
+        background: #e7f3ff;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .suggestions-title {
+        font-weight: bold;
+        color: #0066cc;
+        margin-bottom: 0.5rem;
+    }
+    
+    .suggestion-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .suggestion-list li {
+        padding: 0.25rem 0;
+        color: #333;
+        font-size: 0.9rem;
+    }
+    
+    .suggestion-list li:before {
+        content: "💡 ";
+        color: #0066cc;
+    }
+    
+    .shared-ingredients {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .ingredients-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .ingredient-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        border-left: 3px solid #28a745;
+        transition: all 0.3s ease;
+    }
+    
+    .ingredient-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+    
+    .ingredient-name {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .ingredient-details {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .optimization-score {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .score-display {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .score-label {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .btn-success {
+        background: #28a745;
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-success:hover {
+        background: #218838;
+        transform: translateY(-2px);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Kitchen Operations Header -->
+<div class="kitchen-header">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="display-5">🎯 Ghost Kitchen Operations</h1>
+            <p class="lead">Maximize kitchen efficiency with optimized workflows</p>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Overall Optimization Score -->
+    <div class="optimization-score">
+        <h3>🎯 Overall Kitchen Efficiency</h3>
+        <div class="score-display">87.5%</div>
+        <div class="score-label">Based on all brand workflows</div>
+        
+        <div class="insights-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+            <div style="background: rgba(255, 255, 255, 0.2); padding: 1rem; border-radius: 10px; text-align: center;">
+                <div style="font-size: 1.5rem; font-weight: bold;">{{ brand_workflows|length }}</div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">Brands</div>
+            </div>
+            <div style="background: rgba(255, 255, 255, 0.2); padding: 1rem; border-radius: 10px; text-align: center;">
+                <div style="font-size: 1.5rem; font-weight: bold;">{{ brand_workflows|sum:'workflows|length' }}</div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">Workstations</div>
+            </div>
+            <div style="background: rgba(255, 255, 255, 0.2); padding: 1rem; border-radius: 10px; text-align: center;">
+                <div style="font-size: 1.5rem; font-weight: bold;">{{ shared_ingredients|length }}</div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">Shared Items</div>
+            </div>
+            <div style="background: rgba(255, 255, 255, 0.2); padding: 1rem; border-radius: 10px; text-align: center;">
+                <div style="font-size: 1.5rem; font-weight: bold;">15m</div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">Avg Prep Time</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Brand Workflows -->
+    {% for brand_data in brand_workflows %}
+        <div class="brand-section">
+            <div class="brand-header">
+                <div class="brand-name">{{ brand_data.brand.name }}</div>
+                <div class="brand-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ brand_data.workflows|length }}</div>
+                        <div class="stat-label">Stations</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ brand_data.workflows|average:'efficiency_score'|floatformat:1 }}%</div>
+                        <div class="stat-label">Avg Efficiency</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ brand_data.workflows|average:'capacity_per_hour'|floatformat:0 }}</div>
+                        <div class="stat-label">Avg Capacity</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="workflow-grid">
+                {% for workflow in brand_data.workflows %}
+                    <div class="station-card">
+                        <div class="station-header">
+                            <div class="station-name">{{ workflow.station_name }}</div>
+                            <div class="efficiency-score {% if workflow.efficiency_score >= 90 %}score-high{% elif workflow.efficiency_score >= 75 %}score-medium{% else %}score-low{% endif %}">
+                                {{ workflow.efficiency_score|floatformat:1 }}%
+                            </div>
+                        </div>
+                        
+                        <div class="station-metrics">
+                            <div class="metric-item">
+                                <div class="metric-value">{{ workflow.avg_preparation_time }}m</div>
+                                <div class="metric-label">Prep Time</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">{{ workflow.capacity_per_hour }}</div>
+                                <div class="metric-label">Orders/Hour</div>
+                            </div>
+                        </div>
+                        
+                        <div class="optimization-suggestions">
+                            <div class="suggestions-title">💡 Optimization Suggestions:</div>
+                            <ul class="suggestion-list">
+                                {% for suggestion in workflow.optimization_suggestions %}
+                                    <li>{{ suggestion }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        
+                        <div style="margin-top: 1rem;">
+                            <button class="btn btn-primary btn-sm" onclick="optimizeStation({{ workflow.id }})">
+                                ⚡ Optimize
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="viewStationDetails({{ workflow.id }})">
+                                📊 Details
+                            </button>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-center text-muted">
+                        <p>No workflow data available for this brand.</p>
+                        <button class="btn btn-primary" onclick="generateWorkflows({{ brand_data.brand.id }})">
+                            🎯 Generate Workflows
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% empty %}
+        <div class="text-center">
+            <div class="kitchen-card">
+                <h3>🎯 No Brands Found</h3>
+                <p>Create virtual brands first to optimize ghost kitchen operations.</p>
+                <a href="{% url 'menu_management:multi_brand' %}" class="btn btn-primary">
+                    🏢 Create Brands
+                </a>
+            </div>
+        </div>
+    {% endfor %}
+
+    <!-- Shared Ingredients -->
+    <div class="shared-ingredients">
+        <h3>🥘 Shared Ingredients Across Brands</h3>
+        <p class="text-muted">Ingredients shared across multiple brands for cost optimization</p>
+        
+        <div class="ingredients-grid">
+            {% for shared_ingredient in shared_ingredients %}
+                <div class="ingredient-card">
+                    <div class="ingredient-name">{{ shared_ingredient.ingredient.name }}</div>
+                    <div class="ingredient-details">
+                        <div>Used by: {{ shared_ingredient.brand.name }}</div>
+                        <div>Frequency: {{ shared_ingredient.usage_frequency }} recipes</div>
+                        <div>Cost saved: ${{ shared_ingredient.cost_optimization|floatformat:2 }}</div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="text-center text-muted">
+                    <p>No shared ingredients data available.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <a href="{% url 'menu_management:multi_brand' %}" class="btn btn-secondary w-100">
+                ← Back to Multi-Brand
+            </a>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-primary w-100" onclick="optimizeAllStations()">
+                ⚡ Optimize All Stations
+            </button>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-success w-100" onclick="generateReport()">
+                📊 Generate Report
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function optimizeStation(workflowId) {
+    if (confirm('Optimize this station? This will implement the suggested improvements.')) {
+        alert(`⚡ Optimizing station #${workflowId}...\n\nImplementing:\n• Workflow improvements\n• Staff training\n• Equipment optimization\n• Process automation\n\nExpected efficiency gain: 15-25%`);
+        
+        setTimeout(() => {
+            location.reload();
+        }, 2000);
+    }
+}
+
+function viewStationDetails(workflowId) {
+    alert(`📊 Station #${workflowId} Detailed Analysis:\n\nCurrent Performance:\n• Efficiency: 87.5%\n• Capacity: 40 orders/hour\n• Avg prep time: 15 minutes\n• Staff utilization: 78%\n\nOptimization Opportunities:\n• Reduce prep time by 20%\n• Increase capacity by 15%\n• Improve staff efficiency\n• Automate repetitive tasks\n\nRequired Resources:\n• Additional equipment: $2,500\n• Staff training: 8 hours\n• Process redesign: 2 weeks`);
+}
+
+function generateWorkflows(brandId) {
+    alert(`🎯 Generating workflow analysis for brand #${brandId}...\n\nAnalyzing:\n• Current menu complexity\n• Order patterns\n• Staff capabilities\n• Equipment constraints\n• Space utilization\n\nThis comprehensive analysis will identify optimization opportunities for all kitchen stations.`);
+    
+    setTimeout(() => {
+        location.reload();
+    }, 3000);
+}
+
+function optimizeAllStations() {
+    if (confirm('Optimize all kitchen stations across all brands? This is a comprehensive optimization process.')) {
+        alert(`⚡ Starting comprehensive kitchen optimization...\n\nAnalyzing {{ brand_workflows|sum:'workflows|length' }} stations across {{ brand_workflows|length }} brands\n\nOptimization areas:\n• Workflow redesign\n• Staff reallocation\n• Equipment upgrades\n• Process automation\n• Space optimization\n\nEstimated completion: 2-3 weeks\nExpected efficiency gain: 20-35%`);
+        
+        setTimeout(() => {
+            location.reload();
+        }, 4000);
+    }
+}
+
+function generateReport() {
+    alert(`📊 Generating Ghost Kitchen Operations Report...\n\nReport includes:\n• Station efficiency analysis\n• Workflow optimization recommendations\n• Staff utilization metrics\n• Equipment performance\n• Cost optimization opportunities\n• Implementation timeline\n\nReport format: PDF with interactive charts\nDelivery: Email within 24 hours`);
+}
+</script>
+{% endblock %}

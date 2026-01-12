@@ -1,0 +1,394 @@
+{% extends 'menu_management/base.html' %}
+{% load nepali_currency %}
+
+{% block title %}User Details - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>👤 User Details - {{ user.username }}</h1>
+                <div>
+                    <a href="{% url 'menu_management:user_management_dashboard' %}" class="btn btn-outline-secondary">
+                        ← Back to Users
+                    </a>
+                    <a href="{% url 'menu_management:edit_user' user.id %}" class="btn btn-primary">
+                        ✏️ Edit User
+                    </a>
+                    <a href="{% url 'menu_management:change_user_password' user.id %}" class="btn btn-warning">
+                        🔐 Change Password
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Information -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📋 User Information</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>Username:</strong></td>
+                            <td>{{ user.username }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Full Name:</strong></td>
+                            <td>{{ user.get_full_name|default:"Not set" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Email:</strong></td>
+                            <td>{{ user.email|default:"Not set" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Phone:</strong></td>
+                            <td>{{ user.profile.phone|default:"Not set" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>First Name:</strong></td>
+                            <td>{{ user.first_name|default:"Not set" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Last Name:</strong></td>
+                            <td>{{ user.last_name|default:"Not set" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>User ID:</strong></td>
+                            <td><code>{{ user.id }}</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">⚙️ Account Status</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>Status:</strong></td>
+                            <td>
+                                {% if user.is_active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Role:</strong></td>
+                            <td>
+                                {% if user.is_superuser %}
+                                <span class="badge bg-danger">Superuser</span>
+                                {% elif user.is_staff %}
+                                <span class="badge bg-warning">Staff</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Regular User</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Staff Status:</strong></td>
+                            <td>
+                                {% if user.is_staff %}
+                                <span class="badge bg-success">Yes</span>
+                                {% else %}
+                                <span class="badge bg-secondary">No</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Superuser:</strong></td>
+                            <td>
+                                {% if user.is_superuser %}
+                                <span class="badge bg-danger">Yes</span>
+                                {% else %}
+                                <span class="badge bg-secondary">No</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Information -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📅 Activity Information</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>Date Joined:</strong></td>
+                            <td>{{ user.date_joined|date:"F d, Y H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Last Login:</strong></td>
+                            <td>{{ user.last_login|date:"F d, Y H:i"|default:"Never" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Account Age:</strong></td>
+                            <td>{{ user.date_joined|timesince }} ago</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Days Since Last Login:</strong></td>
+                            <td>
+                                {% if user.last_login %}
+                                {{ user.last_login|timesince }} ago
+                                {% else %}
+                                Never logged in
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📊 Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>Total Orders:</strong></td>
+                            <td>{{ order_count }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Meal Passes:</strong></td>
+                            <td>{{ meal_pass_count }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Account Type:</strong></td>
+                            <td>
+                                {% if user.is_superuser %}
+                                Administrator
+                                {% elif user.is_staff %}
+                                Staff Member
+                                {% else %}
+                                Customer
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    {% if user_orders %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🛒 Recent Orders ({{ order_count }} total)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Total</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in user_orders %}
+                                <tr>
+                                    <td><code>{{ order.id }}</code></td>
+                                    <td>{{ order.created_at|date:"M d, Y H:i" }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ order.status|default:'secondary' }}">
+                                            {{ order.get_status_display|default:order.status }}
+                                        </span>
+                                    </td>
+                                    <td>{{ order.total|nepali_currency|default:"-" }}</td>
+                                    <td>{{ order.order_type|default:"-" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">No orders found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if order_count > 10 %}
+                    <div class="text-center">
+                        <small class="text-muted">Showing 10 most recent orders</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Meal Passes -->
+    {% if user_meal_passes %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🎫 Meal Passes ({{ meal_pass_count }} total)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Pass Type</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Status</th>
+                                    <th>Meals Left</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pass in user_meal_passes %}
+                                <tr>
+                                    <td>{{ pass.meal_pass.name|default:"-" }}</td>
+                                    <td>{{ pass.start_date|date:"M d, Y"|default:"-" }}</td>
+                                    <td>{{ pass.end_date|date:"M d, Y"|default:"-" }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ pass.status|default:'secondary' }}">
+                                            {{ pass.get_status_display|default:pass.status }}
+                                        </span>
+                                    </td>
+                                    <td>{{ pass.meals_remaining|default:"-" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">No meal passes found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if meal_pass_count > 5 %}
+                    <div class="text-center">
+                        <small class="text-muted">Showing 5 most recent meal passes</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <a href="{% url 'menu_management:user_management_dashboard' %}" class="btn btn-outline-secondary">
+                        ← Back to Users
+                    </a>
+                    <button class="btn btn-outline-info" onclick="toggleUserStatus('{{ user.id }}')">
+                        {% if user.is_active %}🔒 Deactivate User{% else %}🔓 Activate User{% endif %}
+                    </button>
+                </div>
+                <div>
+                    <a href="{% url 'menu_management:edit_user' user.id %}" class="btn btn-primary">
+                        ✏️ Edit User
+                    </a>
+                    <a href="{% url 'menu_management:change_user_password' user.id %}" class="btn btn-warning">
+                        🔐 Change Password
+                    </a>
+                    {% if user.id != request.user.id %}
+                    <a href="{% url 'menu_management:delete_user' user.id %}" class="btn btn-danger">
+                        🗑️ Delete User
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleUserStatus(userId) {
+    const action = confirm('Are you sure you want to toggle this user\'s status?');
+    if (action) {
+        fetch(`/menu-management/users/${userId}/toggle/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while toggling user status.');
+        });
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+
+<style>
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+.table-responsive {
+    border-radius: 0.375rem;
+}
+
+code {
+    background-color: #f8f9fa;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+}
+</style>
+{% endblock %}

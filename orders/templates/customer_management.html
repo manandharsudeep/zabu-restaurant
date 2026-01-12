@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+
+{% block title %}Customer Management - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .customer-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        text-align: center;
+        border-left: 4px solid #667eea;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .customer-table {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .table {
+        margin-bottom: 0;
+    }
+    
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        color: #333;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .customer-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-inactive {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .search-box {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .export-btn {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .export-btn:hover {
+        background: linear-gradient(135deg, #20c997 0%, #28a745 100%);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Customer Management Header -->
+<div class="customer-header">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="display-5">👥 Customer Management</h1>
+            <p class="lead">Manage customer accounts and analyze customer behavior</p>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Statistics Overview -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_customers }}</div>
+            <div class="stat-label">Total Customers</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ active_customers }}</div>
+            <div class="stat-label">Active Customers</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ recent_customers }}</div>
+            <div class="stat-label">New (30 days)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ customer_stats|length }}</div>
+            <div class="stat-label">Top Customers</div>
+        </div>
+    </div>
+
+    <!-- Search and Actions -->
+    <div class="search-box">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <input type="text" 
+                       id="customerSearch" 
+                       class="search-input" 
+                       placeholder="🔍 Search customers by name, email, or username...">
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'export_customers' %}" class="export-btn">
+                    📊 Export Data
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Table -->
+    <div class="customer-table">
+        <h3>Customer List</h3>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Contact</th>
+                        <th>Joined</th>
+                        <th>Total Orders</th>
+                        <th>Total Spent</th>
+                        <th>Avg Order</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="customerTableBody">
+                    {% for stat in customer_stats %}
+                    <tr data-customer-id="{{ stat.customer.id }}">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="customer-avatar me-3">
+                                    {{ stat.customer.first_name.0|default:stat.customer.username.0|upper }}
+                                </div>
+                                <div>
+                                    <div class="fw-bold">{{ stat.customer.get_full_name|default:stat.customer.username }}</div>
+                                    <div class="text-muted small">@{{ stat.customer.username }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="small">
+                                <div>{{ stat.customer.email }}</div>
+                                {% if stat.customer.last_name %}
+                                <div class="text-muted">{{ stat.customer.first_name }} {{ stat.customer.last_name }}</div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="small">
+                                {{ stat.customer.date_joined|date:"M d, Y" }}
+                                <div class="text-muted">{{ stat.customer.date_joined|timesince }} ago</div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary">{{ stat.total_orders }}</span>
+                        </td>
+                        <td>
+                            <strong>Nrs {{ stat.total_spent|floatformat:2 }}</strong>
+                        </td>
+                        <td>
+                            Nrs {{ stat.avg_order_value|floatformat:2 }}
+                        </td>
+                        <td>
+                            <span class="status-badge {% if stat.customer.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                {% if stat.customer.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'customer_detail' stat.customer.id %}" class="btn btn-sm btn-outline-primary">
+                                    👁️ View
+                                </a>
+                                <button class="btn btn-sm {% if stat.customer.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}" 
+                                        onclick="toggleCustomerStatus({{ stat.customer.id }})">
+                                    {% if stat.customer.is_active %}🔒 Deactivate{% else %}✅ Activate{% endif %}
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <div class="text-muted">
+                                <h4>No customers found</h4>
+                                <p>Customers will appear here when they sign up for accounts.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="text-center mt-4">
+        <a href="{% url 'customer_analytics' %}" class="btn btn-primary btn-lg me-2">
+            📊 View Customer Analytics
+        </a>
+        <a href="{% url 'menu_management:unified_management' %}" class="btn btn-secondary btn-lg">
+            ← Back to Admin Dashboard
+        </a>
+    </div>
+</div>
+
+<script>
+// Search functionality
+document.getElementById('customerSearch').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('#customerTableBody tr');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+
+// Toggle customer status
+function toggleCustomerStatus(customerId) {
+    if (!confirm('Are you sure you want to toggle this customer\'s status?')) {
+        return;
+    }
+    
+    fetch(`/customers/${customerId}/toggle-status/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload(); // Reload to show updated status
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating customer status.');
+    });
+}
+
+// Helper function to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

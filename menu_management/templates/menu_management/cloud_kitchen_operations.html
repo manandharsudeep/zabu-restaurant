@@ -1,0 +1,497 @@
+{% extends 'base.html' %}
+
+{% block title %}Cloud Kitchen Operations - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cloud-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .operations-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .operation-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border-left: 4px solid #667eea;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .operation-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .operation-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .operation-icon {
+        font-size: 2rem;
+        margin-right: 1rem;
+    }
+    
+    .operation-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .operation-description {
+        color: #666;
+        margin-bottom: 1rem;
+    }
+    
+    .operation-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 0.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .operation-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .btn-action {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        flex: 1;
+        text-align: center;
+    }
+    
+    .btn-primary {
+        background: #667eea;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #5a67d8;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-secondary {
+        background: #48bb78;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #38a169;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-danger {
+        background: #f56565;
+        color: white;
+    }
+    
+    .btn-danger:hover {
+        background: #e53e3e;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .status-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+    
+    .status-online {
+        background: #48bb78;
+    }
+    
+    .status-offline {
+        background: #f56565;
+    }
+    
+    .status-busy {
+        background: #ed8936;
+    }
+    
+    .back-button {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .back-button:hover {
+        background: #5a67d8;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    
+    .alert-info {
+        background: #e3f2fd;
+        color: #1976d2;
+        border: 1px solid #bbdefb;
+    }
+    
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .metric-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .metric-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+    
+    .metric-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .brand-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .brand-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-left: 4px solid #48bb78;
+    }
+    
+    .brand-name {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .brand-status {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .platform-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .platform-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-left: 4px solid #ed8936;
+    }
+    
+    .platform-name {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .platform-status {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.9rem;
+    }
+    
+    .platform-orders {
+        font-weight: bold;
+        color: #667eea;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="cloud-header">
+    <div class="container">
+        <h1 class="display-4">☁️ Cloud Kitchen Operations</h1>
+        <p class="lead">Manage virtual brands, platform integrations, and delivery operations</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Back Button -->
+    <a href="{% url 'menu_management:unified_management' %}" class="back-button">
+        ← Back to Admin Dashboard
+    </a>
+
+    <!-- Alert -->
+    <div class="alert alert-info">
+        <strong>📊 Cloud Kitchen Status:</strong> All systems operational. Managing 3 virtual brands across 2 delivery platforms.
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-number">{{ virtual_brands|length }}</div>
+            <div class="metric-label">Active Virtual Brands</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-number">{{ total_orders }}</div>
+            <div class="metric-label">Orders Today</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-number">{{ active_kitchens }}</div>
+            <div class="metric-label">Active Kitchens</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-number">{{ delivery_partners|length }}</div>
+            <div class="metric-label">Delivery Partners</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-number">${{ total_revenue|floatformat:0 }}</div>
+            <div class="metric-label">Revenue Today</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-number">{{ avg_prep_time }}min</div>
+            <div class="metric-label">Avg Prep Time</div>
+        </div>
+    </div>
+
+    <!-- Virtual Brands -->
+    <div class="operations-grid">
+        <div class="operation-card">
+            <div class="operation-header">
+                <div class="operation-icon">🏷️</div>
+                <div class="operation-title">Virtual Brands</div>
+            </div>
+            <div class="operation-description">
+                Manage your virtual restaurant brands and menus
+            </div>
+            <div class="brand-grid">
+                {% for brand in virtual_brands %}
+                <div class="brand-card">
+                    <div class="brand-name">{{ brand.name }}</div>
+                    <div class="brand-status">
+                        <span class="status-indicator status-online"></span>
+                        {{ brand.get_status_display }} - {{ brand.menu_items }} items
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="operation-actions">
+                <a href="{% url 'menu_management:virtual_brands_management' %}" class="btn-action btn-primary">Manage Brands</a>
+                <a href="{% url 'menu_management:create_virtual_brand' %}" class="btn-action btn-secondary">Create Brand</a>
+            </div>
+        </div>
+
+        <!-- Platform Integrations -->
+        <div class="operation-card">
+            <div class="operation-header">
+                <div class="operation-icon">🔗</div>
+                <div class="operation-title">Platform Integrations</div>
+            </div>
+            <div class="operation-description">
+                Connect with delivery platforms and manage integrations
+            </div>
+            <div class="platform-grid">
+                {% for platform in delivery_partners %}
+                <div class="platform-card">
+                    <div class="platform-name">{{ platform.name }}</div>
+                    <div class="platform-status">
+                        <span class="status-indicator status-online"></span>
+                        <span>{{ platform.orders_today }} orders today</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="operation-actions">
+                <a href="{% url 'menu_management:platform_integrations' %}" class="btn-action btn-primary">Manage Platforms</a>
+                <a href="{% url 'menu_management:add_platform_integration' %}" class="btn-action btn-secondary">Add Platform</a>
+            </div>
+        </div>
+
+        <!-- Order Management -->
+        <div class="operation-card">
+            <div class="operation-header">
+                <div class="operation-icon">📦</div>
+                <div class="operation-title">Order Management</div>
+            </div>
+            <div class="operation-description">
+                Track and manage orders from all platforms
+            </div>
+            <div class="operation-stats">
+                <div class="stat-item">
+                    <div class="stat-number">{{ pending_orders }}</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ preparing_orders }}</div>
+                    <div class="stat-label">Preparing</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ ready_orders }}</div>
+                    <div class="stat-label">Ready</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ completed_orders }}</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </div>
+            <div class="operation-actions">
+                <a href="{% url 'menu_management:cloud_order_management' %}" class="btn-action btn-primary">View Orders</a>
+                <a href="{% url 'menu_management:order_queue_management' %}" class="btn-action btn-secondary">Order Queue</a>
+            </div>
+        </div>
+
+        <!-- Kitchen Operations -->
+        <div class="operation-card">
+            <div class="operation-header">
+                <div class="operation-icon">👨‍🍳</div>
+                <div class="operation-title">Kitchen Operations</div>
+            </div>
+            <div class="operation-description">
+                Monitor kitchen stations and workflow efficiency
+            </div>
+            <div class="operation-stats">
+                <div class="stat-item">
+                    <div class="stat-number">{{ active_stations }}</div>
+                    <div class="stat-label">Active Stations</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ kitchen_efficiency }}%</div>
+                    <div class="stat-label">Efficiency</div>
+                </div>
+            </div>
+            <div class="operation-actions">
+                <a href="{% url 'menu_management:kitchen_station_monitoring' %}" class="btn-action btn-primary">Kitchen Display</a>
+                <a href="#" class="btn-action btn-secondary">Station Status</a>
+            </div>
+        </div>
+
+        <!-- Inventory Management -->
+        <div class="operation-card">
+            <div class="operation-header">
+                <div class="operation-icon">📦</div>
+                <div class="operation-title">Inventory Management</div>
+            </div>
+            <div class="operation-description">
+                Track ingredients and manage stock levels
+            </div>
+            <div class="operation-stats">
+                <div class="stat-item">
+                    <div class="stat-number">{{ low_stock_items }}</div>
+                    <div class="stat-label">Low Stock</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ out_of_stock_items }}</div>
+                    <div class="stat-label">Out of Stock</div>
+                </div>
+            </div>
+            <div class="operation-actions">
+                <a href="{% url 'menu_management:cloud_inventory_management' %}" class="btn-action btn-primary">View Inventory</a>
+                <a href="#" class="btn-action btn-secondary">Order Supplies</a>
+            </div>
+        </div>
+
+        <!-- Performance Analytics -->
+        <div class="operation-card">
+            <div class="operation-header">
+                <div class="operation-icon">📊</div>
+                <div class="operation-title">Performance Analytics</div>
+            </div>
+            <div class="operation-description">
+                Analyze performance metrics and trends
+            </div>
+            <div class="operation-stats">
+                <div class="stat-item">
+                    <div class="stat-number">{{ customer_rating }}</div>
+                    <div class="stat-label">Avg Rating</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ on_time_delivery }}%</div>
+                    <div class="stat-label">On-Time Delivery</div>
+                </div>
+            </div>
+            <div class="operation-actions">
+                <a href="{% url 'menu_management:cloud_performance_analytics' %}" class="btn-action btn-primary">View Analytics</a>
+                <a href="#" class="btn-action btn-secondary">Export Reports</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div style="background: white; border-radius: 15px; padding: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+        <h3 style="margin-bottom: 1.5rem; color: #333;">⚡ Quick Actions</h3>
+        <div class="operations-grid">
+            <div class="operation-actions" style="margin-bottom: 0;">
+                <a href="#" class="btn-action btn-primary">📊 Generate Daily Report</a>
+                <a href="#" class="btn-action btn-secondary">🔄 Sync Platforms</a>
+                <a href="#" class="btn-action btn-secondary">📦 Update Inventory</a>
+                <a href="#" class="btn-action btn-secondary">👨‍🍳 Update Kitchen Status</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

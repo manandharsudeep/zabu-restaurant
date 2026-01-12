@@ -1,0 +1,357 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Inventory Item - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .inventory-form-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+    
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .form-header h1 {
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-header p {
+        color: #6c757d;
+    }
+    
+    .inventory-form {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-input {
+        padding: 0.75rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+    }
+    
+    .form-textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    .form-select {
+        padding: 0.75rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+        background: white;
+    }
+    
+    .form-select:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+    }
+    
+    .form-checkbox {
+        display: flex;
+        align-items: center;
+        margin-top: 0.5rem;
+    }
+    
+    .form-checkbox input {
+        margin-right: 0.5rem;
+    }
+    
+    .btn-container {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-secondary:hover {
+        background: #545b62;
+        text-decoration: none;
+        color: white;
+    }
+    
+    .required {
+        color: #dc3545;
+    }
+    
+    .cost-input-group {
+        position: relative;
+    }
+    
+    .cost-input-group::before {
+        content: "$";
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-weight: 600;
+    }
+    
+    .cost-input {
+        padding-left: 25px;
+    }
+    
+    .info-box {
+        background: #e3f2fd;
+        border-left: 4px solid #1976d2;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 4px;
+    }
+    
+    .info-box h6 {
+        color: #1976d2;
+        margin-bottom: 0.5rem;
+    }
+    
+    .info-box p {
+        margin: 0;
+        color: #424242;
+        font-size: 0.9rem;
+    }
+    
+    .help-text {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="inventory-form-container">
+    <div class="form-header">
+        <h1>📦 Create Inventory Item</h1>
+        <p>Add items to your inventory reordering system</p>
+    </div>
+    
+    <div class="info-box">
+        <h6>💡 What is an Inventory Item?</h6>
+        <p>Inventory items are ingredients and supplies you need to stock for your restaurant. Set reorder levels to automatically know when to order more.</p>
+    </div>
+    
+    <form method="POST" class="inventory-form">
+        {% csrf_token %}
+        
+        <!-- Basic Information -->
+        <div class="form-section">
+            <div class="section-title">📋 Basic Information</div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Item Name <span class="required">*</span></label>
+                    <input type="text" name="name" class="form-input" value="{{ form_data.name|default:'' }}" required placeholder="e.g., Chicken Breast, Tomatoes, Olive Oil">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">SKU (optional)</label>
+                    <input type="text" name="sku" class="form-input" value="{{ form_data.sku|default:'' }}" placeholder="Auto-generated if empty">
+                    <div class="help-text">Unique identifier for tracking</div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Unit <span class="required">*</span></label>
+                    <select name="unit" class="form-select" required>
+                        <option value="">Select a unit</option>
+                        {% for unit_value, unit_label in unit_choices %}
+                            <option value="{{ unit_value }}" {% if form_data.unit|default:'' == unit_value %}selected{% endif %}>
+                                {{ unit_label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Category <span class="required">*</span></label>
+                    <input type="text" name="category" class="form-input" value="{{ form_data.category|default:'' }}" required placeholder="e.g., Proteins, Vegetables, Dairy">
+                </div>
+            </div>
+            
+            <div class="form-group full-width">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-input form-textarea" placeholder="Describe the item, quality specifications, usage...">{{ form_data.description|default:'' }}</textarea>
+            </div>
+        </div>
+        
+        <!-- Cost Information -->
+        <div class="form-section">
+            <div class="section-title">💰 Cost Information</div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Standard Cost</label>
+                    <div class="cost-input-group">
+                        <input type="number" name="standard_cost" class="form-input cost-input" value="{{ form_data.standard_cost|default:0 }}" step="0.01" min="0" placeholder="12.99">
+                    </div>
+                    <div class="help-text">Base cost for budgeting</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Current Cost</label>
+                    <div class="cost-input-group">
+                        <input type="number" name="current_cost" class="form-input cost-input" value="{{ form_data.current_cost|default:0 }}" step="0.01" min="0" placeholder="15.50">
+                    </div>
+                    <div class="help-text">Current purchase price</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Inventory Management -->
+        <div class="form-section">
+            <div class="section-title">📊 Inventory Management</div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Par Level</label>
+                    <input type="number" name="par_level" class="form-input" value="{{ form_data.par_level|default:0 }}" step="0.1" min="0" placeholder="50">
+                    <div class="help-text">Standard stock level to maintain</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Reorder Point</label>
+                    <input type="number" name="reorder_point" class="form-input" value="{{ form_data.reorder_point|default:0 }}" step="0.1" min="0" placeholder="10">
+                    <div class="help-text">Order more when stock drops below this level</div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Maximum Level</label>
+                    <input type="number" name="max_level" class="form-input" value="{{ form_data.max_level|default:0 }}" step="0.1" min="0" placeholder="100">
+                    <div class="help-text">Maximum quantity to keep in stock</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Barcode (optional)</label>
+                    <input type="text" name="barcode" class="form-input" value="{{ form_data.barcode|default:'' }}" placeholder="1234567890">
+                    <div class="help-text">For scanning and tracking</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Storage & Handling -->
+        <div class="form-section">
+            <div class="section-title">🏪 Storage & Handling</div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <div class="form-checkbox">
+                        <input type="checkbox" name="is_perishable" {% if form_data.is_perishable %}checked{% endif %}>
+                        <label for="is_perishable">Perishable Item</label>
+                    </div>
+                    <div class="help-text">Item has limited shelf life</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Shelf Life (days)</label>
+                    <input type="number" name="shelf_life_days" class="form-input" value="{{ form_data.shelf_life_days|default:'' }}" min="1" placeholder="7">
+                    <div class="help-text">Days until expiration</div>
+                </div>
+            </div>
+            
+            <div class="form-group full-width">
+                <label class="form-label">Storage Requirements</label>
+                <textarea name="storage_requirements" class="form-input form-textarea" placeholder="e.g., Keep refrigerated at 4°C, store in dry place...">{{ form_data.storage_requirements|default:'' }}</textarea>
+            </div>
+        </div>
+        
+        <!-- Buttons -->
+        <div class="btn-container">
+            <button type="submit" class="btn-primary">✅ Create Inventory Item</button>
+            <a href="{% url 'menu_management:inventory_items' %}" class="btn-secondary">❌ Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,744 @@
+{% extends 'menu_management/base.html' %}
+{% load static %}
+
+{% block title %}Recipe Management Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+.recipe-dashboard {
+    padding: 20px;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.controls-section {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.controls-grid {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 15px;
+    align-items: center;
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 40px 10px 15px;
+    border: 2px solid #e1e8ed;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.search-box::after {
+    content: "🔍";
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.filter-select {
+    padding: 10px 15px;
+    border: 2px solid #e1e8ed;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-primary {
+    background: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #229954;
+}
+
+.btn-warning {
+    background: #f39c12;
+    color: white;
+}
+
+.btn-warning:hover {
+    background: #e67e22;
+}
+
+.btn-danger {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.recipes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.recipe-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.recipe-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+
+.recipe-header {
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.recipe-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.recipe-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+.recipe-body {
+    padding: 20px;
+}
+
+.recipe-description {
+    color: #555;
+    margin-bottom: 15px;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.recipe-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.recipe-stat {
+    text-align: center;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.recipe-stat-value {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.recipe-stat-label {
+    font-size: 0.75rem;
+    color: #7f8c8d;
+    text-transform: uppercase;
+}
+
+.menu-items-section {
+    margin-bottom: 15px;
+}
+
+.menu-items-header {
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.menu-item-tag {
+    display: inline-block;
+    padding: 4px 8px;
+    background: #e8f4fd;
+    color: #3498db;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    margin: 2px;
+}
+
+.menu-item-tag.primary {
+    background: #e8f5e8;
+    color: #27ae60;
+}
+
+.recipe-actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 15px;
+    border-top: 1px solid #e1e8ed;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-inactive {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    gap: 10px;
+}
+
+.pagination a, .pagination span {
+    padding: 8px 12px;
+    border: 1px solid #e1e8ed;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #2c3e50;
+}
+
+.pagination a:hover {
+    background: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+.pagination .current {
+    background: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+.bulk-actions {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    display: none;
+}
+
+.bulk-actions.show {
+    display: block;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    display: none;
+}
+
+.loading-overlay.show {
+    display: flex;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="recipe-dashboard">
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1>🍳 Recipe Management Dashboard</h1>
+                <p>Manage all recipes and their connections to menu items across the system</p>
+            </div>
+            <div>
+                <a href="{% url 'menu_management:recipe_create' %}" class="btn btn-success btn-lg" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border: none; color: white; font-weight: bold; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);">
+                    ➕ Create New Recipe
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.total_recipes }}</div>
+            <div class="stat-label">Total Recipes</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.active_recipes }}</div>
+            <div class="stat-label">Active Recipes</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.total_menu_items }}</div>
+            <div class="stat-label">Menu Items</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.linked_items }}</div>
+            <div class="stat-label">Linked Items</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.unlinked_menu_items }}</div>
+            <div class="stat-label">Unlinked Items</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.total_ingredients }}</div>
+            <div class="stat-label">Ingredients</div>
+        </div>
+    </div>
+
+    <!-- Controls Section -->
+    <div class="controls-section">
+        <div class="controls-grid">
+            <div class="search-box">
+                <input type="text" 
+                       placeholder="Search recipes..." 
+                       value="{{ search_query }}"
+                       id="searchInput">
+            </div>
+            <select class="filter-select" id="categoryFilter">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                <option value="{{ category.id }}" {% if category_filter == category.id|stringformat:"s" %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+                {% endfor %}
+            </select>
+            <select class="filter-select" id="availabilityFilter">
+                <option value="">All Status</option>
+                <option value="active" {% if availability_filter == 'active' %}selected{% endif %}>Active</option>
+                <option value="inactive" {% if availability_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+            </select>
+            <button class="btn btn-success" onclick="autoLinkRecipes()">
+                🔗 Auto-Link Recipes
+            </button>
+            <a href="{% url 'menu_management:recipe_create' %}" class="btn btn-primary btn-create-recipe" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border: none; color: white; font-weight: bold; padding: 10px 20px; border-radius: 8px; text-decoration: none; display: inline-block; transition: all 0.3s ease;">
+                ➕ Create New Recipe
+            </a>
+        </div>
+    </div>
+
+    <!-- Recipes Grid -->
+    <div class="recipes-grid">
+        {% for recipe in page_obj %}
+        <div class="recipe-card">
+            <div class="recipe-header">
+                <div class="recipe-name">{{ recipe.name }}</div>
+                <div class="recipe-meta">
+                    <span>By {{ recipe.created_by.username }}</span>
+                    <span class="status-badge status-{{ recipe.is_active|yesno:'active,inactive' }}">
+                        {{ recipe.is_active|yesno:"Active,Inactive" }}
+                    </span>
+                </div>
+            </div>
+            <div class="recipe-body">
+                <div class="recipe-description">
+                    {{ recipe.description|default:"No description available" }}
+                </div>
+                
+                <div class="recipe-stats">
+                    <div class="recipe-stat">
+                        <div class="recipe-stat-value">{{ recipe.ingredient_count }}</div>
+                        <div class="recipe-stat-label">Ingredients</div>
+                    </div>
+                    <div class="recipe-stat">
+                        <div class="recipe-stat-value">{{ recipe.menu_item_count }}</div>
+                        <div class="recipe-stat-label">Menu Items</div>
+                    </div>
+                    <div class="recipe-stat">
+                        <div class="recipe-stat-value">{{ recipe.prep_time }}+{{ recipe.cook_time }}</div>
+                        <div class="recipe-stat-label">Min Time</div>
+                    </div>
+                    <div class="recipe-stat">
+                        <div class="recipe-stat-value">{{ recipe.difficulty|default:1 }}</div>
+                        <div class="recipe-stat-label">Difficulty</div>
+                    </div>
+                </div>
+
+                <div class="menu-items-section">
+                    <div class="menu-items-header">Connected Menu Items:</div>
+                    {% for link in recipe.menu_item_links.all %}
+                    <span class="menu-item-tag {% if link.is_primary_recipe %}primary{% endif %}">
+                        {{ link.menu_item.name }}
+                        {% if link.is_primary_recipe %}⭐{% endif %}
+                    </span>
+                    {% empty %}
+                    <span style="color: #999; font-size: 0.85rem;">No menu items linked</span>
+                    {% endfor %}
+                </div>
+
+                <div class="recipe-actions">
+                    <a href="{% url 'menu_management:recipe_detail' recipe.id %}" class="btn btn-primary btn-sm">
+                        👁️ View
+                    </a>
+                    <button class="btn btn-warning btn-sm" onclick="linkToMenuItem({{ recipe.id }})">
+                        🔗 Link
+                    </button>
+                    <input type="checkbox" class="recipe-checkbox" value="{{ recipe.id }}" onchange="toggleBulkActions()">
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
+            <h3>No recipes found</h3>
+            <p>Try adjusting your search or filters</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}&category={{ category_filter }}&availability={{ availability_filter }}">←</a>
+        {% endif %}
+        
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <span class="current">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?page={{ num }}&search={{ search_query }}&category={{ category_filter }}&availability={{ availability_filter }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+        
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&category={{ category_filter }}&availability={{ availability_filter }}">→</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Bulk Actions Panel -->
+<div class="bulk-actions" id="bulkActions">
+    <h4>Bulk Actions</h4>
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button class="btn btn-success btn-sm" onclick="bulkUpdateStatus('activate')">
+            ✅ Activate Selected
+        </button>
+        <button class="btn btn-warning btn-sm" onclick="bulkUpdateStatus('deactivate')">
+            ⏸️ Deactivate Selected
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="clearSelection()">
+            ❌ Clear Selection
+        </button>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+</div>
+
+<!-- Link Recipe Modal -->
+<div id="linkModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%;">
+        <h3>Link Recipe to Menu Item</h3>
+        <div style="margin: 20px 0;">
+            <label>Menu Item:</label>
+            <select id="menuItemSelect" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin-top: 5px;">
+                {% for item in menu_items %}
+                <option value="{{ item.id }}">{{ item.name }} - {{ item.category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="margin: 20px 0;">
+            <label>
+                <input type="checkbox" id="isPrimaryCheckbox" checked>
+                Set as primary recipe for this menu item
+            </label>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button class="btn btn-secondary" onclick="closeLinkModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="confirmLink()">Link</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let selectedRecipeId = null;
+
+function toggleBulkActions() {
+    const checkboxes = document.querySelectorAll('.recipe-checkbox:checked');
+    const bulkActions = document.getElementById('bulkActions');
+    
+    if (checkboxes.length > 0) {
+        bulkActions.classList.add('show');
+    } else {
+        bulkActions.classList.remove('show');
+    }
+}
+
+function clearSelection() {
+    document.querySelectorAll('.recipe-checkbox').forEach(cb => cb.checked = false);
+    toggleBulkActions();
+}
+
+function bulkUpdateStatus(action) {
+    const checkboxes = document.querySelectorAll('.recipe-checkbox:checked');
+    const recipeIds = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (recipeIds.length === 0) {
+        alert('Please select at least one recipe');
+        return;
+    }
+    
+    showLoading();
+    
+    fetch('{% url "menu_management:bulk_update_recipe_status" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: `recipe_ids=${recipeIds.join('&recipe_ids=')}&action=${action}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        alert('Error updating recipes');
+    });
+}
+
+function autoLinkRecipes() {
+    if (!confirm('This will automatically link recipes to menu items based on name similarity. Continue?')) {
+        return;
+    }
+    
+    showLoading();
+    
+    fetch('{% url "menu_management:auto_link_recipes_to_menu_items" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error auto-linking recipes');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        alert('Error auto-linking recipes');
+    });
+}
+
+function linkToMenuItem(recipeId) {
+    selectedRecipeId = recipeId;
+    document.getElementById('linkModal').style.display = 'flex';
+}
+
+function closeLinkModal() {
+    document.getElementById('linkModal').style.display = 'none';
+    selectedRecipeId = null;
+}
+
+function confirmLink() {
+    const menuItemId = document.getElementById('menuItemSelect').value;
+    const isPrimary = document.getElementById('isPrimaryCheckbox').checked;
+    
+    if (!selectedRecipeId || !menuItemId) {
+        alert('Please select a menu item');
+        return;
+    }
+    
+    showLoading();
+    
+    fetch('{% url "menu_management:link_recipe_to_menu_item" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: `recipe_id=${selectedRecipeId}&menu_item_id=${menuItemId}&is_primary=${isPrimary ? 'on' : 'off'}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            alert(data.message);
+            closeLinkModal();
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        alert('Error linking recipe');
+    });
+}
+
+function showLoading() {
+    document.getElementById('loadingOverlay').classList.add('show');
+}
+
+function hideLoading() {
+    document.getElementById('loadingOverlay').classList.remove('show');
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Search and filter functionality
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    const params = new URLSearchParams(window.location.search);
+    if (e.target.value) {
+        params.set('search', e.target.value);
+    } else {
+        params.delete('search');
+    }
+    window.location.search = params.toString();
+});
+
+document.getElementById('categoryFilter').addEventListener('change', function(e) {
+    const params = new URLSearchParams(window.location.search);
+    if (e.target.value) {
+        params.set('category', e.target.value);
+    } else {
+        params.delete('category');
+    }
+    window.location.search = params.toString();
+});
+
+document.getElementById('availabilityFilter').addEventListener('change', function(e) {
+    const params = new URLSearchParams(window.location.search);
+    if (e.target.value) {
+        params.set('availability', e.target.value);
+    } else {
+        params.delete('availability');
+    }
+    window.location.search = params.toString();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,564 @@
+{% extends 'base.html' %}
+
+{% block title %}Waste Tracking - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .waste-tracking-header {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .filter-section {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .filter-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr auto;
+        gap: 1rem;
+        align-items: end;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #495057;
+    }
+    
+    .form-control {
+        padding: 0.75rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #dc3545;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+    
+    .btn-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        color: #212529;
+    }
+    
+    .waste-grid {
+        display: grid;
+        gap: 1.5rem;
+    }
+    
+    .waste-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-left: 4px solid #dc3545;
+        transition: transform 0.3s ease;
+    }
+    
+    .waste-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .waste-card.spoilage {
+        border-left-color: #6f42c1;
+    }
+    
+    .waste-card.prep_waste {
+        border-left-color: #fd7e14;
+    }
+    
+    .waste-card.over_production {
+        border-left-color: #20c997;
+    }
+    
+    .waste-card.customer_return {
+        border-left-color: #17a2b8;
+    }
+    
+    .waste-card.damage {
+        border-left-color: #e83e8c;
+    }
+    
+    .waste-card.theft {
+        border-left-color: #6c757d;
+    }
+    
+    .waste-card.expired {
+        border-left-color: #dc3545;
+    }
+    
+    .waste-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1rem;
+    }
+    
+    .waste-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .waste-type {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .waste-type.spoilage {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+    
+    .waste-type.prep_waste {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .waste-type.over_production {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .waste-type.customer_return {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .waste-type.damage {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .waste-type.theft {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+    
+    .waste-type.expired {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .waste-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .detail-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.25rem;
+    }
+    
+    .detail-value {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .waste-reason {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .waste-reason h4 {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+    
+    .waste-reason p {
+        color: #495057;
+        line-height: 1.5;
+    }
+    
+    .waste-cost {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e9ecef;
+        text-align: center;
+    }
+    
+    .cost-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #dc3545;
+    }
+    
+    .cost-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .approval-status {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .status-badge.pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-badge.approved {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .action-buttons .btn {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #dc3545;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .pagination a {
+        padding: 0.5rem 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        text-decoration: none;
+        color: #495057;
+        transition: all 0.3s ease;
+    }
+    
+    .pagination a:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+    }
+    
+    .pagination .current {
+        background: #dc3545;
+        color: white;
+        border-color: #dc3545;
+    }
+    
+    @media (max-width: 768px) {
+        .filter-form {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .waste-details {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="waste-tracking-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-4">🗑️ Waste Tracking</h1>
+                <p class="lead">Monitor and manage waste and spoilage across all locations</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'menu_management:inventory_dashboard' %}" class="btn btn-light btn-lg">
+                    ← Back to Dashboard
+                </a>
+                <a href="#" class="btn btn-success btn-lg ms-2">
+                    ➕ Report Waste
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Statistics Section -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">{{ waste_records|length }}</div>
+            <div class="stat-label">Total Records</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">${{ total_waste_cost|floatformat:2 }}</div>
+            <div class="stat-label">Total Cost</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ pending_count }}</div>
+            <div class="stat-label">Pending Approval</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ this_month_count }}</div>
+            <div class="stat-label">This Month</div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <form method="GET" class="filter-form">
+            <div class="form-group">
+                <label for="waste_type">Waste Type</label>
+                <select name="type" id="waste_type" class="form-control">
+                    <option value="">All Types</option>
+                    {% for type_value, type_label in waste_types %}
+                        <option value="{{ type_value }}" {% if selected_type == type_value %}selected{% endif %}>
+                            {{ type_label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="location">Location</label>
+                <select name="location" id="location" class="form-control">
+                    <option value="">All Locations</option>
+                    {% for location in locations %}
+                        <option value="{{ location.id }}" {% if selected_location == location.id|stringformat:"s" %}selected{% endif %}>
+                            {{ location.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="date_from">From Date</label>
+                <input type="date" name="date_from" id="date_from" class="form-control" 
+                       value="{{ date_from }}">
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">
+                    🔍 Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Waste Records Grid -->
+    <div class="waste-grid">
+        {% for record in waste_records %}
+            <div class="waste-card {{ record.waste_type }}">
+                <div class="waste-header">
+                    <div>
+                        <div class="waste-title">{{ record.item.name }}</div>
+                        <div class="text-muted">{{ record.item.sku }}</div>
+                    </div>
+                    <div class="waste-type {{ record.waste_type }}">
+                        {{ record.get_waste_type_display }}
+                    </div>
+                </div>
+                
+                <div class="waste-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Quantity</span>
+                        <span class="detail-value">{{ record.quantity }} {{ record.item.unit }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Location</span>
+                        <span class="detail-value">{{ record.location.name }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Reported By</span>
+                        <span class="detail-value">
+                            {% if record.reported_by %}
+                                {{ record.reported_by.get_full_name|default:record.reported_by.username }}
+                            {% else %}
+                                <span class="text-muted">Unknown</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Reported At</span>
+                        <span class="detail-value">{{ record.reported_at|date:"M d, Y H:i" }}</span>
+                    </div>
+                </div>
+                
+                {% if record.reason %}
+                    <div class="waste-reason">
+                        <h4>Reason</h4>
+                        <p>{{ record.reason }}</p>
+                    </div>
+                {% endif %}
+                
+                <div class="waste-cost">
+                    <div class="cost-value">${{ record.estimated_cost|floatformat:2 }}</div>
+                    <div class="cost-label">Estimated Cost</div>
+                </div>
+                
+                <div class="approval-status">
+                    <div>
+                        {% if record.is_approved %}
+                            <span class="status-badge approved">
+                                ✅ Approved by {{ record.approved_by.get_full_name|default:record.approved_by.username }}
+                            </span>
+                        {% else %}
+                            <span class="status-badge pending">
+                                ⏳ Pending Approval
+                            </span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if not record.is_approved %}
+                        <div class="action-buttons">
+                            <a href="#" class="btn btn-success btn-sm">
+                                ✅ Approve
+                            </a>
+                            <a href="#" class="btn btn-warning btn-sm">
+                                ✏️ Edit
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <div class="empty-state">
+                <div class="empty-state-icon">🗑️</div>
+                <h3>No Waste Records Found</h3>
+                <p>No waste records match your current filters.</p>
+                <a href="{% url 'menu_management:waste_tracking' %}" class="btn btn-primary">
+                    Clear Filters
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if waste_records.has_other_pages %}
+        <div class="pagination">
+            {% if waste_records.has_previous %}
+                <a href="?page={{ waste_records.previous_page_number }}{% if selected_type %}&type={{ selected_type }}{% endif %}{% if selected_location %}&location={{ selected_location }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}">
+                    ← Previous
+                </a>
+            {% endif %}
+            
+            <span class="current">
+                Page {{ waste_records.number }} of {{ waste_records.paginator.num_pages }}
+            </span>
+            
+            {% if waste_records.has_next %}
+                <a href="?page={{ waste_records.next_page_number }}{% if selected_type %}&type={{ selected_type }}{% endif %}{% if selected_location %}&location={{ selected_location }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}">
+                    Next →
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

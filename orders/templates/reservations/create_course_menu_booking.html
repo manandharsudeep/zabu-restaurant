@@ -1,0 +1,354 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Course Menu - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .course-form {
+        background: white;
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .course-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 0;
+        text-align: center;
+        border-radius: 20px;
+        margin-bottom: 3rem;
+    }
+    
+    .menu-card {
+        border: 2px solid #e9ecef;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .menu-card:hover {
+        border-color: #667eea;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        transform: translateY(-5px);
+    }
+    
+    .menu-card.selected {
+        border-color: #667eea;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    }
+    
+    .menu-card.selected::after {
+        content: '✓';
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: #667eea;
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+    
+    .menu-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 1rem;
+    }
+    
+    .menu-description {
+        color: #666;
+        margin-bottom: 1.5rem;
+    }
+    
+    .menu-details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .menu-price {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .menu-courses {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .menu-courses h6 {
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .menu-courses ul {
+        margin: 0;
+        padding-left: 1.5rem;
+        color: #666;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control, .form-select, .form-textarea {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus, .form-textarea:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .form-textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    .btn-book-course {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 1rem 3rem;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-book-course:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+    
+    .wine-pairing-option {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .price-breakdown {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Course Menu Hero Section -->
+    <div class="course-hero">
+        <h1 class="display-4 fw-bold mb-3">🍽️ Book Course Menu Experience</h1>
+        <p class="lead">Indulge in our fine dining tasting menu experience</p>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="course-form">
+                <form method="post" id="courseBookingForm">
+                    {% csrf_token %}
+                    
+                    <!-- Step 1: Select Course Menu -->
+                    <div class="mb-4">
+                        <h4 class="mb-3">Step 1: Choose Your Course Menu</h4>
+                        {% for menu in course_menus %}
+                        <div class="menu-card" data-menu-id="{{ menu.id }}" data-base-price="{{ menu.base_price }}" data-wine-price="{{ menu.wine_pairing_price }}">
+                            <div class="menu-title">{{ menu.name }}</div>
+                            <div class="menu-description">{{ menu.description }}</div>
+                            
+                            <div class="menu-details">
+                                <div>
+                                    <span class="badge bg-primary">{{ menu.num_courses }} Courses</span>
+                                    <span class="badge bg-info">{{ menu.duration }} minutes</span>
+                                </div>
+                                <div class="menu-price">${{ menu.base_price }} per person</div>
+                            </div>
+                            
+                            {% if menu.course_items %}
+                            <div class="menu-courses">
+                                <h6>Featured Courses:</h6>
+                                <ul>
+                                    {% for course in menu.course_items|slice:":3" %}
+                                    <li>{{ course.name }}</li>
+                                    {% endfor %}
+                                    {% if menu.course_items|length > 3 %}
+                                    <li>... and {{ menu.course_items|length|add:"-3" }} more</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        <input type="hidden" name="menu_template" id="selectedMenu" required>
+                    </div>
+                    
+                    <!-- Step 2: Booking Details -->
+                    <div class="mb-4">
+                        <h4 class="mb-3">Step 2: Booking Details</h4>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="date" class="form-label">Date *</label>
+                                <input type="date" class="form-control" id="date" name="date" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="time" class="form-label">Time *</label>
+                                <select class="form-select" id="time" name="time" required>
+                                    <option value="">Select time...</option>
+                                    <option value="18:00">6:00 PM</option>
+                                    <option value="18:30">6:30 PM</option>
+                                    <option value="19:00">7:00 PM</option>
+                                    <option value="19:30">7:30 PM</option>
+                                    <option value="20:00">8:00 PM</option>
+                                    <option value="20:30">8:30 PM</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="party_size" class="form-label">Party Size *</label>
+                                <select class="form-select" id="party_size" name="party_size" required>
+                                    <option value="">Select party size...</option>
+                                    {% for i in 1..20 %}
+                                    <option value="{{ i }}">{{ i }} {{ i|pluralize:"guest,guests" }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="special_occasion" class="form-label">Special Occasion</label>
+                                <input type="text" class="form-control" id="special_occasion" name="special_occasion" placeholder="e.g., Anniversary, Birthday, etc.">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Dietary Restrictions -->
+                    <div class="mb-4">
+                        <h4 class="mb-3">Step 3: Dietary Preferences</h4>
+                        <div class="mb-3">
+                            <label for="dietary_restrictions" class="form-label">Dietary Restrictions</label>
+                            <textarea class="form-textarea form-control" id="dietary_restrictions" name="dietary_restrictions" rows="3" placeholder="Please let us know about any dietary restrictions, allergies, or preferences..."></textarea>
+                        </div>
+                        
+                        <div class="wine-pairing-option">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="wine_pairing" name="wine_pairing">
+                                <label class="form-check-label" for="wine_pairing">
+                                    <strong>Add Wine Pairing</strong> - Premium wine selection curated for each course
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Price Breakdown -->
+                    <div class="price-breakdown" id="priceBreakdown" style="display: none;">
+                        <h5 class="mb-3">💰 Price Breakdown</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Base Price:</strong> $<span id="basePriceDisplay">0</span> × <span id="partySizeDisplay">0</span> guests = $<span id="baseTotal">0</span></p>
+                                <p><strong>Wine Pairing:</strong> $<span id="winePriceDisplay">0</span> × <span id="partySizeDisplay2">0</span> guests = $<span id="wineTotal">0</span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="h5"><strong>Total:</strong> $<span id="totalPrice">0</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-book-course btn-lg">
+                            🍽️ Book Course Menu
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Menu selection
+    const menuCards = document.querySelectorAll('.menu-card');
+    const selectedMenuInput = document.getElementById('selectedMenu');
+    const priceBreakdown = document.getElementById('priceBreakdown');
+    
+    menuCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Remove selected class from all cards
+            menuCards.forEach(c => c.classList.remove('selected'));
+            
+            // Add selected class to clicked card
+            this.classList.add('selected');
+            
+            // Set the hidden input value
+            selectedMenuInput.value = this.dataset.menuId;
+            
+            // Show price breakdown
+            priceBreakdown.style.display = 'block';
+            updatePriceBreakdown();
+        });
+    });
+    
+    // Update price breakdown
+    function updatePriceBreakdown() {
+        const selectedCard = document.querySelector('.menu-card.selected');
+        if (!selectedCard) return;
+        
+        const basePrice = parseFloat(selectedCard.dataset.basePrice);
+        const winePrice = parseFloat(selectedCard.dataset.winePrice);
+        const partySize = parseInt(document.getElementById('party_size').value) || 0;
+        const winePairing = document.getElementById('wine_pairing').checked;
+        
+        const baseTotal = basePrice * partySize;
+        const wineTotal = winePairing ? winePrice * partySize : 0;
+        const totalPrice = baseTotal + wineTotal;
+        
+        document.getElementById('basePriceDisplay').textContent = basePrice.toFixed(2);
+        document.getElementById('partySizeDisplay').textContent = partySize;
+        document.getElementById('partySizeDisplay2').textContent = partySize;
+        document.getElementById('winePriceDisplay').textContent = winePrice.toFixed(2);
+        document.getElementById('baseTotal').textContent = baseTotal.toFixed(2);
+        document.getElementById('wineTotal').textContent = wineTotal.toFixed(2);
+        document.getElementById('totalPrice').textContent = totalPrice.toFixed(2);
+    }
+    
+    // Event listeners for price updates
+    document.getElementById('party_size').addEventListener('change', updatePriceBreakdown);
+    document.getElementById('wine_pairing').addEventListener('change', updatePriceBreakdown);
+    
+    // Set minimum date to today
+    const dateInput = document.getElementById('date');
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.min = today;
+    
+    // Form validation
+    const form = document.getElementById('courseBookingForm');
+    form.addEventListener('submit', function(e) {
+        if (!selectedMenuInput.value) {
+            e.preventDefault();
+            alert('Please select a course menu');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

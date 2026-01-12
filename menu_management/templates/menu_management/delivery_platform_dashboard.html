@@ -1,0 +1,368 @@
+{% extends 'base.html' %}
+
+{% block title %}Delivery Platform Dashboard - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delivery-header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 10px;
+    }
+    
+    .platform-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: transform 0.2s;
+    }
+    
+    .platform-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    
+    .status-active {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .status-inactive {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #f5576c;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        margin-top: 0.5rem;
+    }
+    
+    .platform-form {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+    
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    
+    .btn-primary {
+        background-color: #f5576c;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .btn-primary:hover {
+        background-color: #d63447;
+    }
+    
+    .recent-orders {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .order-item {
+        background: white;
+        padding: 1rem;
+        border-radius: 5px;
+        margin-bottom: 0.5rem;
+        border-left: 4px solid #f5576c;
+    }
+    
+    .order-meta {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+    
+    .commission-badge {
+        background-color: #e9ecef;
+        color: #495057;
+        padding: 0.25rem 0.5rem;
+        border-radius: 15px;
+        font-size: 0.75rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="delivery-header">
+        <div class="container">
+            <h1>🚚 Delivery Platform Dashboard</h1>
+            <p class="lead mb-0">Manage delivery platform integrations and track orders</p>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_platforms }}</div>
+            <div class="stat-label">Active Platforms</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ total_orders }}</div>
+            <div class="stat-label">Total Orders</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">${{ total_revenue }}</div>
+            <div class="stat-label">Total Revenue</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ pending_orders }}</div>
+            <div class="stat-label">Pending Orders</div>
+        </div>
+    </div>
+
+    <!-- Add New Platform Form -->
+    <div class="platform-form">
+        <h3>➕ Add New Delivery Platform</h3>
+        <form method="POST" action="{% url 'menu_management:create_delivery_platform' %}">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="platform_name">Platform</label>
+                        <select name="platform_name" id="platform_name" required>
+                            <option value="">Select Platform</option>
+                            <option value="uber_eats">Uber Eats</option>
+                            <option value="doordash">DoorDash</option>
+                            <option value="grubhub">Grubhub</option>
+                            <option value="foodpanda">Foodpanda</option>
+                            <option value="zomato">Zomato</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="api_key">API Key</label>
+                        <input type="text" name="api_key" id="api_key" required>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="webhook_url">Webhook URL (Optional)</label>
+                        <input type="url" name="webhook_url" id="webhook_url">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="commission_rate">Commission Rate (%)</label>
+                        <input type="number" name="commission_rate" id="commission_rate" 
+                               step="0.01" min="0" max="100" value="15" required>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn-primary">Add Platform</button>
+        </form>
+    </div>
+
+    <!-- Existing Platforms -->
+    <div class="row">
+        <div class="col-md-8">
+            <h3>📊 Connected Platforms</h3>
+            {% for platform in platforms %}
+            <div class="platform-card">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5>{{ platform.get_platform_name_display }}</h5>
+                        <p class="mb-1">
+                            <strong>Commission:</strong> 
+                            <span class="commission-badge">{{ platform.commission_rate }}%</span>
+                        </p>
+                        <p class="mb-1">
+                            <strong>Connected:</strong> 
+                            {{ platform.created_at|date:"M d, Y" }}
+                        </p>
+                        {% if platform.webhook_url %}
+                        <p class="mb-1">
+                            <strong>Webhook:</strong> 
+                            <code>{{ platform.webhook_url }}</code>
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 text-right">
+                        <span class="status-badge status-{{ platform.is_active|yesno:'active,inactive' }}">
+                            {{ platform.is_active|yesno:"Active,Inactive" }}
+                        </span>
+                        <br><br>
+                        <button class="btn btn-sm btn-outline-primary" onclick="togglePlatform('{{ platform.platform_id }}')">
+                            {{ platform.is_active|yesno:"Deactivate,Activate" }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="alert alert-info">
+                <h4>No platforms connected</h4>
+                <p>Add your first delivery platform using the form above.</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="col-md-4">
+            <h3>📋 Recent Orders</h3>
+            <div class="recent-orders">
+                {% for order in recent_orders %}
+                <div class="order-item">
+                    <h6>{{ order.get_platform_name_display }} - #{{ order.platform_order_id }}</h6>
+                    <p class="mb-1">
+                        <strong>Customer:</strong> {{ order.customer_name }}
+                    </p>
+                    <p class="mb-1">
+                        <strong>Amount:</strong> ${{ order.total_amount }} 
+                        (Delivery: ${{ order.delivery_fee }})
+                    </p>
+                    <p class="order-meta">
+                        {{ order.order_time|date:"M d, Y H:i" }} - 
+                        <span class="status-badge status-{{ order.status }}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </p>
+                </div>
+                {% empty %}
+                <div class="alert alert-light">
+                    <p class="mb-0">No recent orders found.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Analytics -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <h3>📈 Order Analytics</h3>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Platform</th>
+                            <th>Total Orders</th>
+                            <th>Total Revenue</th>
+                            <th>Avg Order Value</th>
+                            <th>Commission Paid</th>
+                            <th>Net Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for platform in platforms %}
+                        <tr>
+                            <td>{{ platform.get_platform_name_display }}</td>
+                            <td>{{ platform.deliveryorder_set.count }}</td>
+                            <td>${{ platform.total_revenue|default:0 }}</td>
+                            <td>${{ platform.avg_order_value|default:0 }}</td>
+                            <td>${{ platform.total_commission|default:0 }}</td>
+                            <td>${{ platform.net_revenue|default:0 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No platform data available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePlatform(platformId) {
+    const button = event.target;
+    button.disabled = true;
+    
+    fetch(`/menu-management/api/delivery-platform/${platformId}/toggle/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Platform status updated successfully!');
+            location.reload();
+        } else {
+            alert('Failed to update platform: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating platform.');
+    })
+    .finally(() => {
+        button.disabled = false;
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

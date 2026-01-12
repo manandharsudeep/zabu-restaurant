@@ -1,0 +1,601 @@
+{% extends 'base.html' %}
+
+{% block title %}Ghost Kitchen Operations - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ghost-kitchen-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .ghost-kitchen-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        border-left: 4px solid #667eea;
+    }
+    
+    .ghost-kitchen-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .station-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+    }
+    
+    .station-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .station-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .station-name {
+        font-weight: bold;
+        color: #333;
+        font-size: 1.1rem;
+    }
+    
+    .station-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-busy {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-idle {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .efficiency-meter {
+        background: #e9ecef;
+        border-radius: 10px;
+        height: 8px;
+        overflow: hidden;
+        margin-top: 0.5rem;
+    }
+    
+    .efficiency-fill {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
+    
+    .workflow-step {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+    }
+    
+    .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 1rem;
+    }
+    
+    .step-content {
+        flex: 1;
+    }
+    
+    .step-title {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.25rem;
+    }
+    
+    .step-description {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .step-time {
+        color: #667eea;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .btn-success {
+        background: #28a745;
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-success:hover {
+        background: #218838;
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .order-queue {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid #e9ecef;
+    }
+    
+    .order-item {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        padding: 0.75rem;
+        border-bottom: 1px solid #f8f9fa;
+    }
+    
+    .order-item:last-child {
+        border-bottom: none;
+    }
+    
+    .order-number {
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .order-details {
+        flex: 1;
+        margin-left: 1rem;
+    }
+    
+    .order-time {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .order-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .status-preparing {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-ready {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-completed {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Ghost Kitchen Header -->
+<div class="ghost-kitchen-header">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="display-5">👻 Ghost Kitchen Operations</h1>
+            <p class="lead">Optimize your kitchen workflow and efficiency</p>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Kitchen Performance Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_orders_today }}</div>
+            <div class="stat-label">Orders Today</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ avg_prep_time }}m</div>
+            <div class="stat-label">Avg Prep Time</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ kitchen_efficiency }}%</div>
+            <div class="stat-label">Kitchen Efficiency</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ active_stations }}</div>
+            <div class="stat-label">Active Stations</div>
+        </div>
+    </div>
+
+    <!-- Kitchen Stations -->
+    <div class="ghost-kitchen-card">
+        <h3>🍳 Kitchen Stations Status</h3>
+        
+        {% for station in kitchen_stations %}
+            <div class="station-card">
+                <div class="station-header">
+                    <div class="station-name">{{ station.name }}</div>
+                    <div class="station-status status-{{ station.status|lower }}">{{ station.status }}</div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between">
+                            <span>Current Orders</span>
+                            <strong>{{ station.current_orders }}</strong>
+                        </div>
+                        <div class="efficiency-meter">
+                            <div class="efficiency-fill" style="width: {{ station.current_orders_percentage }}%"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between">
+                            <span>Efficiency</span>
+                            <strong>{{ station.efficiency }}%</strong>
+                        </div>
+                        <div class="efficiency-meter">
+                            <div class="efficiency-fill" style="width: {{ station.efficiency }}%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-2">
+                    <div class="col-md-4">
+                        <small class="text-muted">Capacity: {{ station.capacity }}</small>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted">Staff: {{ station.staff_count }}</small>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted">Avg Time: {{ station.avg_time }}m</small>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Order Workflow -->
+    <div class="ghost-kitchen-card">
+        <h3>🔄 Order Workflow Process</h3>
+        
+        {% for step in workflow_steps %}
+            <div class="workflow-step">
+                <div class="step-number">{{ step.number }}</div>
+                <div class="step-content">
+                    <div class="step-title">{{ step.title }}</div>
+                    <div class="step-description">{{ step.description }}</div>
+                </div>
+                <div class="step-time">{{ step.avg_time }}m avg</div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Current Order Queue -->
+    <div class="ghost-kitchen-card">
+        <h3>📋 Current Order Queue</h3>
+        
+        <div class="order-queue">
+            {% for order in order_queue %}
+                <div class="order-item">
+                    <div class="order-number">#{{ order.number }}</div>
+                    <div class="order-details">
+                        <div>{{ order.items_count }} items • {{ order.brand }}</div>
+                        <div class="order-time">{{ order.time_ago }} ago</div>
+                    </div>
+                    <div class="order-status status-{{ order.status|lower }}">{{ order.status }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="ghost-kitchen-card">
+        <h3>📊 Performance Metrics</h3>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Today's Performance</h5>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>Orders Completed</span>
+                        <strong>{{ completed_orders }}</strong>
+                    </div>
+                    <div class="efficiency-meter">
+                        <div class="efficiency-fill" style="width: {{ completion_rate }}%"></div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>On-Time Delivery</span>
+                        <strong>{{ on_time_rate }}%</strong>
+                    </div>
+                    <div class="efficiency-meter">
+                        <div class="efficiency-fill" style="width: {{ on_time_rate }}%"></div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>Customer Satisfaction</span>
+                        <strong>{{ satisfaction_rate }}%</strong>
+                    </div>
+                    <div class="efficiency-meter">
+                        <div class="efficiency-fill" style="width: {{ satisfaction_rate }}%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <h5>Peak Hours Analysis</h5>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>🌅 Morning (6am-12pm)</span>
+                        <strong>{{ morning_orders }} orders</strong>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>☀️ Afternoon (12pm-6pm)</span>
+                        <strong>{{ afternoon_orders }} orders</strong>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>🌆 Evening (6pm-12am)</span>
+                        <strong>{{ evening_orders }} orders</strong>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>🌙 Late Night (12am-6am)</span>
+                        <strong>{{ night_orders }} orders</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff Management -->
+    <div class="ghost-kitchen-card">
+        <h3>👨‍🍳 Staff Management</h3>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <h6>Current Shift</h6>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Cooks</span>
+                        <strong>{{ staff.cooks }}</strong>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Prep Staff</span>
+                        <strong>{{ staff.prep_staff }}</strong>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Dishwashers</span>
+                        <strong>{{ staff.dishwashers }}</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <h6>Performance</h6>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Staff Efficiency</span>
+                        <strong>{{ staff.efficiency }}%</strong>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Overtime Hours</span>
+                        <strong>{{ staff.overtime_hours }}</strong>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Training Completed</span>
+                        <strong>{{ staff.training_completed }}</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <h6>Schedule</h6>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Next Shift</span>
+                        <strong>{{ staff.next_shift }}</strong>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Coverage</span>
+                        <strong>{{ staff.coverage }}%</strong>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Open Positions</span>
+                        <strong>{{ staff.open_positions }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <a href="{% url 'menu_management:multi_brand' %}" class="btn btn-secondary w-100">
+                ← Back to Multi-Brand
+            </a>
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-primary w-100" onclick="optimizeWorkflow()">
+                ⚡ Optimize Workflow
+            </button>
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-primary w-100" onclick="generateReport()">
+                📊 Generate Report
+            </button>
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-success w-100" onclick="manageStaff()">
+                👨‍🍳 Manage Staff
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function optimizeWorkflow() {
+    alert('⚡ Analyzing kitchen workflow for optimization opportunities...\n\nEvaluating:\n• Station efficiency\n• Order processing time\n• Staff allocation\n• Peak hour performance\n• Bottleneck identification\n\nThis may take 2-3 minutes...');
+    
+    setTimeout(() => {
+        alert('✅ Workflow Optimization Complete!\n\nRecommendations:\n• Reorganize prep station layout\n• Add 1 more cook during peak hours\n• Implement order batching system\n• Optimize ingredient placement\n• Update station equipment');
+    }, 2000);
+}
+
+function generateReport() {
+    alert('📊 Generating comprehensive kitchen performance report...\n\nReport includes:\n• Daily performance metrics\n• Station efficiency analysis\n• Staff productivity\n• Order completion times\n• Peak hour breakdown\n• Cost per order analysis\n\nFormat: PDF + Excel\nDelivery: Email + Download');
+}
+
+function manageStaff() {
+    alert('👨‍🍳 Opening staff management dashboard...\n\nFeatures:\n• Shift scheduling\n• Performance tracking\n• Training management\n• Time tracking\n• Payroll integration\n• Communication tools');
+}
+
+// Simulate real-time order updates
+setInterval(() => {
+    const orderQueue = document.querySelector('.order-queue');
+    if (orderQueue) {
+        // Add visual indicator of real-time updates
+        orderQueue.style.borderColor = '#667eea';
+        setTimeout(() => {
+            orderQueue.style.borderColor = '#e9ecef';
+        }, 1000);
+    }
+}, 15000); // Update every 15 seconds
+
+// Simulate station status updates
+setInterval(() => {
+    const stations = document.querySelectorAll('.station-status');
+    stations.forEach(station => {
+        if (Math.random() > 0.8) { // 20% chance of update
+            const currentStatus = station.textContent;
+            const statuses = ['Active', 'Busy', 'Idle'];
+            const newStatus = statuses[Math.floor(Math.random() * statuses.length)];
+            
+            if (currentStatus !== newStatus) {
+                station.textContent = newStatus;
+                station.className = `station-status status-${newStatus.toLowerCase()}`;
+                
+                // Flash animation
+                station.style.backgroundColor = '#667eea';
+                setTimeout(() => {
+                    station.style.backgroundColor = '';
+                }, 500);
+            }
+        }
+    });
+}, 10000); // Update every 10 seconds
+</script>
+{% endblock %}

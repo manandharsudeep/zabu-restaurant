@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test - Rebalance Orders</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .success {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        .error {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+        .loading {
+            border-color: #ffc107;
+            background: #fff3cd;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 CORS Test - Rebalance Orders</h1>
+    
+    <div>
+        <button class="test-button" onclick="testOptions()">Test OPTIONS Request</button>
+        <button class="test-button" onclick="testPost()">Test POST Request</button>
+        <button class="test-button" onclick="clearResults()">Clear Results</button>
+    </div>
+    
+    <div id="results"></div>
+
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function addResult(title, content, type = 'info') {
+            const results = document.getElementById('results');
+            const result = document.createElement('div');
+            result.className = `result ${type}`;
+            result.innerHTML = `
+                <h3>${title}</h3>
+                <pre>${content}</pre>
+            `;
+            results.appendChild(result);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testOptions() {
+            addResult('OPTIONS Request', 'Sending OPTIONS request...', 'loading');
+            
+            try {
+                const response = await fetch('/menu-management/rebalance-orders/', {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+                
+                const result = {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: headers,
+                    url: response.url
+                };
+                
+                addResult('OPTIONS Response', JSON.stringify(result, null, 2), 
+                          response.ok ? 'success' : 'error');
+                
+            } catch (error) {
+                addResult('OPTIONS Error', error.message, 'error');
+            }
+        }
+
+        async function testPost() {
+            addResult('POST Request', 'Sending POST request...', 'loading');
+            
+            try {
+                const response = await fetch('/menu-management/rebalance-orders/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+                
+                const data = await response.json();
+                
+                const result = {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: headers,
+                    url: response.url,
+                    data: data
+                };
+                
+                addResult('POST Response', JSON.stringify(result, null, 2), 
+                          response.ok ? 'success' : 'error');
+                
+            } catch (error) {
+                addResult('POST Error', error.message, 'error');
+            }
+        }
+
+        // Auto-test on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testOptions();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

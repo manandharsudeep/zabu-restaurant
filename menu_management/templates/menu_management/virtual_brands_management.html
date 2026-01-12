@@ -1,0 +1,308 @@
+{% extends 'base.html' %}
+
+{% block title %}Virtual Brands Management - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .brands-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .brands-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .brand-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border-left: 4px solid #48bb78;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .brand-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .brand-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .brand-name {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .brand-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    
+    .status-active {
+        background: #e8f5e8;
+        color: #388e3c;
+    }
+    
+    .status-inactive {
+        background: #ffebee;
+        color: #d32f2f;
+    }
+    
+    .brand-details {
+        margin-bottom: 1rem;
+    }
+    
+    .brand-detail {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .brand-label {
+        color: #666;
+    }
+    
+    .brand-value {
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .brand-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .btn-action {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        flex: 1;
+        text-align: center;
+    }
+    
+    .btn-primary {
+        background: #667eea;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #5a67d8;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-secondary {
+        background: #48bb78;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #38a169;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-danger {
+        background: #f56565;
+        color: white;
+    }
+    
+    .btn-danger:hover {
+        background: #e53e3e;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .back-button {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .back-button:hover {
+        background: #5a67d8;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .create-button {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: #48bb78;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .create-button:hover {
+        background: #38a169;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #48bb78;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+    }
+    
+    .empty-state h3 {
+        color: #333;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="brands-header">
+    <div class="container">
+        <h1 class="display-4">🏷️ Virtual Brands Management</h1>
+        <p class="lead">Manage your virtual restaurant brands and menus</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Back Button -->
+    <a href="{% url 'menu_management:cloud_kitchen_operations' %}" class="back-button">
+        ← Back to Cloud Kitchen
+    </a>
+    
+    <!-- Create Button -->
+    <a href="{% url 'menu_management:create_virtual_brand' %}" class="create-button">
+        + Create New Brand
+    </a>
+
+    <!-- Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_brands }}</div>
+            <div class="stat-label">Total Brands</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ active_brands }}</div>
+            <div class="stat-label">Active Brands</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ total_brands|add:"-1"|add:active_brands }}</div>
+            <div class="stat-label">Total Menu Items</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ total_brands|add:"2" }}</div>
+            <div class="stat-label">Platforms Connected</div>
+        </div>
+    </div>
+
+    <!-- Brands Grid -->
+    {% if virtual_brands %}
+    <div class="brands-grid">
+        {% for brand in virtual_brands %}
+        <div class="brand-card">
+            <div class="brand-header">
+                <div class="brand-name">{{ brand.name }}</div>
+                <div class="brand-status status-{{ brand.is_active|yesno:'active inactive' }}">
+                    {{ brand.is_active|yesno:"Active Inactive" }}
+                </div>
+            </div>
+            
+            <div class="brand-details">
+                <div class="brand-detail">
+                    <span class="brand-label">Cuisine Type:</span>
+                    <span class="brand-value">{{ brand.cuisine_type|default:"Not specified" }}</span>
+                </div>
+                <div class="brand-detail">
+                    <span class="brand-label">Menu Items:</span>
+                    <span class="brand-value">{{ brand.menu_items|default:0 }}</span>
+                </div>
+                <div class="brand-detail">
+                    <span class="brand-label">Created:</span>
+                    <span class="brand-value">{{ brand.created_at|date:"M d, Y" }}</span>
+                </div>
+            </div>
+            
+            {% if brand.description %}
+            <div style="margin-bottom: 1rem;">
+                <div class="brand-label">Description:</div>
+                <p style="margin: 0.5rem 0; color: #666; font-size: 0.9rem;">{{ brand.description|truncatewords:20 }}</p>
+            </div>
+            {% endif %}
+            
+            <div class="brand-actions">
+                <a href="#" class="btn-action btn-primary">View Details</a>
+                <a href="#" class="btn-action btn-secondary">Edit Brand</a>
+                <a href="#" class="btn-action btn-danger" onclick="return confirm('Are you sure you want to delete this brand?')">
+                    Delete
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h3>No virtual brands found</h3>
+        <p>Create your first virtual brand to get started with cloud kitchen operations.</p>
+        <a href="{% url 'menu_management:create_virtual_brand' %}" class="create-button">
+            Create Your First Brand
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

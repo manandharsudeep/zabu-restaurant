@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load order_filters %}
+
+{% block title %}Kitchen Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .order-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid #007bff;
+    }
+    .order-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .order-card.border-danger {
+        border-left-color: #dc3545;
+    }
+    .order-card.border-warning {
+        border-left-color: #ffc107;
+    }
+    .badge {
+        font-size: 0.75em;
+    }
+    .stats-card {
+        transition: transform 0.2s;
+    }
+    .stats-card:hover {
+        transform: translateY(-3px);
+    }
+    .display-4 {
+        font-size: 2.5rem;
+        font-weight: 300;
+    }
+    .text-muted {
+        font-size: 0.875rem;
+    }
+    .btn-group-sm .btn {
+        font-size: 0.875rem;
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="h3 mb-4">
+                <i class="fas fa-fire"></i> Kitchen Dashboard
+            </h1>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-warning text-white stats-card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Pending</h5>
+                    <h2 class="display-4">{{ active_orders|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white stats-card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">My Orders</h5>
+                    <h2 class="display-4">{{ my_orders|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white stats-card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Ready</h5>
+                    <h2 class="display-4">{{ ready_orders|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-secondary text-white stats-card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Completed Today</h5>
+                    <h2 class="display-4">{{ completed_today }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Orders -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Active Orders</h5>
+                </div>
+                <div class="card-body">
+                    {% for order in active_orders %}
+                    <div class="order-card mb-3 p-3 border rounded {% if order.priority == 'urgent' %}border-danger{% elif order.priority == 'high' %}border-warning{% endif %}">
+                        <div class="row align-items-center">
+                            <div class="col-md-3">
+                                <h6 class="mb-1">{{ order.order_number }}</h6>
+                                <small class="text-muted">{{ order.customer_name }}</small>
+                                {% if order.table_number %}
+                                <br><small class="text-muted">Table: {{ order.table_number }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <span class="badge badge-{{ order.status|status_color }}">
+                                    {{ order.get_status_display }}
+                                </span>
+                                <br>
+                                <span class="badge badge-{{ order.priority|priority_color }}">
+                                    {{ order.get_priority_display }}
+                                </span>
+                            </div>
+                            <div class="col-md-3">
+                                {% if order.time_elapsed > 0 %}
+                                <small class="text-muted">{{ order.time_elapsed }} min ago</small>
+                                {% endif %}
+                                {% if order.estimated_time %}
+                                <br><small class="text-muted">Est: {{ order.estimated_time|time:"H:i" }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'kitchen_order_detail' order.id %}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i> View Details
+                                    </a>
+                                    {% if order.status == 'pending' or order.status == 'confirmed' %}
+                                    <button class="btn btn-success btn-sm" onclick="startPreparation({{ order.id }})">
+                                        <i class="fas fa-play me-1"></i> Start Preparing
+                                    </button>
+                                    {% endif %}
+                                    {% if order.status == 'preparing' %}
+                                    <button class="btn btn-warning btn-sm" onclick="markReady({{ order.id }})">
+                                        <i class="fas fa-check me-1"></i> Mark Ready
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-check-circle fa-3x mb-3"></i>
+                        <h5>No active orders</h5>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Ready Orders -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Ready for Pickup</h5>
+                </div>
+                <div class="card-body">
+                    {% for order in ready_orders %}
+                    <div class="order-card mb-3 p-3 border rounded border-success">
+                        <div class="row align-items-center">
+                            <div class="col-8">
+                                <h6 class="mb-1">{{ order.order_number }}</h6>
+                                <small class="text-muted">{{ order.customer_name }}</small>
+                                {% if order.table_number %}
+                                <br><small class="text-muted">Table: {{ order.table_number }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="col-4 text-end">
+                                <button class="btn btn-success btn-sm" onclick="completeOrder({{ order.id }})">
+                                    <i class="fas fa-check"></i> Complete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-clock fa-2x mb-2"></i>
+                        <p>No ready orders</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function startPreparation(orderId) {
+    if (confirm('Start preparing this order?')) {
+        fetch('/orders/kitchen/start-preparation/' + orderId + '/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/x-www-form-urlencoded',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred');
+        });
+    }
+}
+
+function markReady(orderId) {
+    if (confirm('Mark this order as ready?')) {
+        fetch('/orders/kitchen/mark-ready/' + orderId + '/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/x-www-form-urlencoded',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred');
+        });
+    }
+}
+
+function completeOrder(orderId) {
+    if (confirm('Complete this order?')) {
+        fetch('/orders/kitchen/complete/' + orderId + '/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/x-www-form-urlencoded',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred');
+        });
+    }
+}
+
+// Auto-refresh dashboard every 30 seconds
+setTimeout(function() {
+    location.reload();
+}, 30000);
+
+// CSRF token helper
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

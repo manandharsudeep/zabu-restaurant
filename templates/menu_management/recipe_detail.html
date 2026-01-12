@@ -1,0 +1,573 @@
+{% extends 'menu_management/base.html' %}
+{% load static %}
+
+{% block title %}{{ recipe.name }} - Recipe Details{% endblock %}
+
+{% block extra_css %}
+<style>
+.recipe-detail {
+    padding: 20px;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.recipe-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 40px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+.recipe-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.recipe-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 20px;
+}
+
+.recipe-meta {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.meta-label {
+    font-weight: bold;
+    opacity: 0.8;
+}
+
+.meta-value {
+    font-size: 1.1rem;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e1e8ed;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.section-title {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+.description-text {
+    line-height: 1.6;
+    color: #555;
+}
+
+.instructions-text {
+    line-height: 1.6;
+    color: #555;
+    white-space: pre-wrap;
+}
+
+.ingredients-list {
+    list-style: none;
+    padding: 0;
+}
+
+.ingredient-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.ingredient-item:last-child {
+    border-bottom: none;
+}
+
+.ingredient-name {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.ingredient-quantity {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+.menu-item-card {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.menu-item-name {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.menu-item-category {
+    color: #7f8c8d;
+    font-size: 0.85rem;
+}
+
+.primary-badge {
+    background: #27ae60;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.cost-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.cost-item {
+    text-align: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.cost-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.cost-label {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    text-transform: uppercase;
+}
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.order-item:last-child {
+    border-bottom: none;
+}
+
+.order-info {
+    flex: 1;
+}
+
+.order-number {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.order-date {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+}
+
+.order-quantity {
+    background: #3498db;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.version-item {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.version-number {
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.version-date {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    margin-bottom: 8px;
+}
+
+.version-changes {
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-primary {
+    background: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+}
+
+.btn-success {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #229954;
+}
+
+.btn-warning {
+    background: #f39c12;
+    color: white;
+}
+
+.btn-warning:hover {
+    background: #e67e22;
+}
+
+.btn-danger {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+}
+
+@media (max-width: 768px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .recipe-meta {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .recipe-title {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="recipe-detail">
+    <!-- Recipe Header -->
+    <div class="recipe-header">
+        <h1 class="recipe-title">{{ recipe.name }}</h1>
+        <div class="recipe-subtitle">{{ recipe.description }}</div>
+        <div class="recipe-meta">
+            <div class="meta-item">
+                <span class="meta-label">Created by:</span>
+                <span class="meta-value">{{ recipe.created_by.username }}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Prep Time:</span>
+                <span class="meta-value">{{ recipe.prep_time }} min</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Cook Time:</span>
+                <span class="meta-value">{{ recipe.cook_time }} min</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Total Time:</span>
+                <span class="meta-value">{{ recipe.total_time }} min</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Portions:</span>
+                <span class="meta-value">{{ recipe.portions }}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Difficulty:</span>
+                <span class="meta-value">{{ recipe.get_difficulty_display }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-grid">
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Description -->
+            <div class="card">
+                <div class="card-header">Description</div>
+                <div class="card-body">
+                    <div class="description-text">
+                        {{ recipe.description|default:"No description available for this recipe." }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="card">
+                <div class="card-header">Instructions</div>
+                <div class="card-body">
+                    <div class="instructions-text">
+                        {{ recipe.instructions|default:"No instructions available for this recipe." }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ingredients -->
+            <div class="card">
+                <div class="card-header">Ingredients</div>
+                <div class="card-body">
+                    <ul class="ingredients-list">
+                        {% for recipe_ingredient in recipe.ingredients.all %}
+                        <li class="ingredient-item">
+                            <span class="ingredient-name">{{ recipe_ingredient.ingredient.name }}</span>
+                            <span class="ingredient-quantity">
+                                {{ recipe_ingredient.quantity }} {{ recipe_ingredient.unit }}
+                                {% if recipe_ingredient.optional %}(Optional){% endif %}
+                            </span>
+                        </li>
+                        {% empty %}
+                        <li style="text-align: center; color: #999; padding: 20px;">
+                            No ingredients added to this recipe yet.
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Order History -->
+            {% if order_items %}
+            <div class="card">
+                <div class="card-header">Recent Orders Using This Recipe</div>
+                <div class="card-body">
+                    {% for order_item in order_items %}
+                    <div class="order-item">
+                        <div class="order-info">
+                            <div class="order-number">{{ order_item.order.order_number }}</div>
+                            <div class="order-date">{{ order_item.order.created_at|date:"M d, Y H:i" }}</div>
+                        </div>
+                        <div class="order-quantity">{{ order_item.quantity }}x</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Menu Items -->
+            <div class="card">
+                <div class="card-header">Connected Menu Items</div>
+                <div class="card-body">
+                    {% for link in menu_items %}
+                    <div class="menu-item-card">
+                        <div>
+                            <div class="menu-item-name">{{ link.menu_item.name }}</div>
+                            <div class="menu-item-category">{{ link.menu_item.category.name }}</div>
+                        </div>
+                        {% if link.is_primary_recipe %}
+                        <span class="primary-badge">PRIMARY</span>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div style="text-align: center; color: #999; padding: 20px;">
+                        No menu items linked to this recipe.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Cost Analysis -->
+            <div class="card">
+                <div class="card-header">Cost Analysis</div>
+                <div class="card-body">
+                    <div class="cost-summary">
+                        <div class="cost-item">
+                            <div class="cost-value">${{ total_cost|floatformat:2 }}</div>
+                            <div class="cost-label">Total Cost</div>
+                        </div>
+                        <div class="cost-item">
+                            <div class="cost-value">${{ cost_per_portion|floatformat:2 }}</div>
+                            <div class="cost-label">Cost/Portion</div>
+                        </div>
+                    </div>
+                    {% if recipe.selling_price %}
+                    <div class="cost-summary" style="margin-top: 20px;">
+                        <div class="cost-item">
+                            <div class="cost-value">${{ recipe.selling_price|floatformat:2 }}</div>
+                            <div class="cost-label">Selling Price</div>
+                        </div>
+                        <div class="cost-item">
+                            <div class="cost-value">
+                                {% with profit=recipe.selling_price|add:cost_per_portion.negate %}
+                                {% if profit > 0 %}+{% endif %}{{ profit|floatformat:2 }}
+                                {% endwith %}
+                            </div>
+                            <div class="cost-label">Profit/Portion</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recipe Versions -->
+            {% if versions %}
+            <div class="card">
+                <div class="card-header">Recipe Versions</div>
+                <div class="card-body">
+                    {% for version in versions %}
+                    <div class="version-item">
+                        <div class="version-number">Version {{ version.version_number }}{% if version.is_current %} (Current){% endif %}</div>
+                        <div class="version-date">{{ version.created_at|date:"M d, Y" }}</div>
+                        <div class="version-changes">{{ version.changes_made|default:"No changes recorded." }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Additional Information -->
+            <div class="card">
+                <div class="card-header">Additional Information</div>
+                <div class="card-body">
+                    {% if recipe.chef_notes %}
+                    <div style="margin-bottom: 15px;">
+                        <strong>Chef's Notes:</strong>
+                        <p style="margin-top: 5px; color: #555;">{{ recipe.chef_notes }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if recipe.equipment_needed %}
+                    <div style="margin-bottom: 15px;">
+                        <strong>Equipment Needed:</strong>
+                        <p style="margin-top: 5px; color: #555;">{{ recipe.equipment_needed }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if recipe.temperature_specs %}
+                    <div style="margin-bottom: 15px;">
+                        <strong>Temperature Specifications:</strong>
+                        <p style="margin-top: 5px; color: #555;">{{ recipe.temperature_specs }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if recipe.allergen_info %}
+                    <div>
+                        <strong>Allergen Information:</strong>
+                        <p style="margin-top: 5px; color: #555;">{{ recipe.allergen_info }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if not recipe.chef_notes and not recipe.equipment_needed and not recipe.temperature_specs and not recipe.allergen_info %}
+                    <div style="text-align: center; color: #999; padding: 20px;">
+                        No additional information available.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="{% url 'recipe_management_dashboard' %}" class="btn btn-primary">
+            ← Back to Recipes
+        </a>
+        <button class="btn btn-success" onclick="linkToMenuItem()">
+            🔗 Link to Menu Item
+        </button>
+        <button class="btn btn-warning" onclick="editRecipe()">
+            ✏️ Edit Recipe
+        </button>
+        <button class="btn btn-danger" onclick="toggleRecipeStatus()">
+            {{ recipe.is_active|yesno:"Deactivate,Activate" }} Recipe
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function linkToMenuItem() {
+    // Redirect to link functionality or open modal
+    alert('Link to menu item functionality would be implemented here');
+}
+
+function editRecipe() {
+    // Redirect to edit form
+    alert('Edit recipe functionality would be implemented here');
+}
+
+function toggleRecipeStatus() {
+    const action = '{{ recipe.is_active|yesno:"deactivate,activate" }}';
+    if (confirm(`Are you sure you want to ${action} this recipe?`)) {
+        // Implement status toggle
+        alert(`${action.charAt(0).toUpperCase() + action.slice(1)} functionality would be implemented here`);
+    }
+}
+</script>
+{% endblock %}

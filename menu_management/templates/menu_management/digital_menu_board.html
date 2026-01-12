@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+
+{% block title %}Digital Menu Board - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .digital-menu-header {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .menu-board {
+        background: #1a1a1a;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        color: white;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .menu-title {
+        text-align: center;
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: #ff6b6b;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    
+    .menu-subtitle {
+        text-align: center;
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        color: #ffd93d;
+        opacity: 0.9;
+    }
+    
+    .menu-categories {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .category-tab {
+        background: #333;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+    
+    .category-tab:hover {
+        background: #ff6b6b;
+        transform: translateY(-2px);
+    }
+    
+    .category-tab.active {
+        background: #ff6b6b;
+        border-color: #ffd93d;
+    }
+    
+    .menu-items-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .menu-item {
+        background: #2a2a2a;
+        border-radius: 15px;
+        padding: 1.5rem;
+        border: 2px solid #444;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .menu-item:hover {
+        transform: translateY(-5px);
+        border-color: #ff6b6b;
+        box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+    }
+    
+    .menu-item-image {
+        width: 100%;
+        height: 200px;
+        background: linear-gradient(45deg, #333, #555);
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: #666;
+    }
+    
+    .menu-item-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #fff;
+    }
+    
+    .menu-item-description {
+        color: #ccc;
+        margin-bottom: 1rem;
+        line-height: 1.4;
+    }
+    
+    .menu-item-price {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #ffd93d;
+        margin-bottom: 1rem;
+    }
+    
+    .menu-item-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .prep-time {
+        background: #444;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        color: #ccc;
+    }
+    
+    .dietary-tags {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .dietary-tag {
+        background: #555;
+        padding: 0.25rem 0.5rem;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        color: #ccc;
+    }
+    
+    .dietary-tag.vegetarian {
+        background: #27ae60;
+        color: white;
+    }
+    
+    .dietary-tag.vegan {
+        background: #2ecc71;
+        color: white;
+    }
+    
+    .dietary-tag.gluten-free {
+        background: #3498db;
+        color: white;
+    }
+    
+    .available-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: #27ae60;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .unavailable-badge {
+        background: #e74c3c;
+    }
+    
+    .menu-footer {
+        text-align: center;
+        padding: 2rem;
+        background: #333;
+        border-radius: 15px;
+        margin-top: 2rem;
+    }
+    
+    .api-info {
+        color: #ccc;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    .refresh-btn {
+        background: #ff6b6b;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .refresh-btn:hover {
+        background: #ee5a24;
+        transform: translateY(-2px);
+    }
+    
+    .loading {
+        text-align: center;
+        padding: 4rem;
+        color: #ccc;
+    }
+    
+    .error {
+        text-align: center;
+        padding: 4rem;
+        color: #e74c3c;
+    }
+    
+    @media (max-width: 768px) {
+        .menu-title {
+            font-size: 2rem;
+        }
+        
+        .menu-items-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .menu-board {
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Digital Menu Header -->
+<div class="digital-menu-header">
+    <div class="container">
+        <h1 class="display-4">🍽️ Digital Menu Board</h1>
+        <p class="lead">Live restaurant menu display with real-time updates</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="menu-board">
+        <div class="menu-title">ZABU RESTAURANT</div>
+        <div class="menu-subtitle">Fresh Ingredients • Authentic Flavors</div>
+        
+        <div class="menu-categories">
+            <div class="category-tab active" onclick="filterByCategory('all')">All Items</div>
+            <div class="category-tab" onclick="filterByCategory('First Course')">First Course</div>
+            <div class="category-tab" onclick="filterByCategory('Main Course')">Main Course</div>
+            <div class="category-tab" onclick="filterByCategory('Desserts')">Desserts</div>
+            <div class="category-tab" onclick="filterByCategory('Beverages')">Beverages</div>
+        </div>
+        
+        <div id="menuContent" class="loading">
+            <div class="loading-spinner">🔄 Loading menu...</div>
+        </div>
+        
+        <div class="menu-footer">
+            <div class="api-info">
+                <strong>API Endpoint:</strong> <code>/menu-management/api/digital-menu/</code><br>
+                <strong>Last Updated:</strong> <span id="lastUpdated">-</span><br>
+                <strong>Total Items:</strong> <span id="totalItems">-</span>
+            </div>
+            <button class="refresh-btn" onclick="loadMenuData()">
+                🔄 Refresh Menu
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let menuData = [];
+let currentCategory = 'all';
+
+function loadMenuData() {
+    const contentDiv = document.getElementById('menuContent');
+    contentDiv.innerHTML = '<div class="loading"><div class="loading-spinner">🔄 Loading menu...</div></div>';
+    
+    fetch('/menu-management/api/digital-menu/')
+        .then(response => response.json())
+        .then(data => {
+            menuData = data.menu_items || [];
+            displayMenuItems();
+            updateFooterInfo(data);
+        })
+        .catch(error => {
+            console.error('Error loading menu:', error);
+            contentDiv.innerHTML = '<div class="error">❌ Error loading menu data</div>';
+        });
+}
+
+function displayMenuItems() {
+    const contentDiv = document.getElementById('menuContent');
+    
+    let filteredItems = menuData;
+    if (currentCategory !== 'all') {
+        filteredItems = menuData.filter(item => item.category === currentCategory);
+    }
+    
+    if (filteredItems.length === 0) {
+        contentDiv.innerHTML = '<div class="error">📭 No items available in this category</div>';
+        return;
+    }
+    
+    const itemsHtml = filteredItems.map(item => `
+        <div class="menu-item">
+            <div class="menu-item-image">
+                ${getItemEmoji(item.name)}
+            </div>
+            <div class="available-badge ${item.available ? '' : 'unavailable-badge'}">
+                ${item.available ? '✅ Available' : '❌ Unavailable'}
+            </div>
+            <div class="menu-item-name">${item.name}</div>
+            <div class="menu-item-description">${item.description}</div>
+            <div class="menu-item-price">$${item.price}</div>
+            <div class="menu-item-meta">
+                <div class="prep-time">⏱️ ${item.preparation_time} min</div>
+                <div class="dietary-tags">
+                    ${getDietaryTags(item.dietary)}
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    contentDiv.innerHTML = `<div class="menu-items-grid">${itemsHtml}</div>`;
+}
+
+function getItemEmoji(name) {
+    const emojis = {
+        'Burger': '🍔',
+        'Pizza': '🍕',
+        'Pasta': '🍝',
+        'Chicken': '🍗',
+        'Salad': '🥗',
+        'Steak': '🥩',
+        'Fish': '🐟',
+        'Soup': '🍲',
+        'Dessert': '🍰',
+        'Coffee': '☕',
+        'Juice': '🧃',
+        'Water': '💧'
+    };
+    
+    for (const [key, emoji] of Object.entries(emojis)) {
+        if (name.toLowerCase().includes(key.toLowerCase())) {
+            return emoji;
+        }
+    }
+    
+    return '🍽️';
+}
+
+function getDietaryTags(dietary) {
+    const tags = [];
+    
+    if (dietary.vegetarian) {
+        tags.push('<div class="dietary-tag vegetarian">🥬 Vegetarian</div>');
+    }
+    if (dietary.vegan) {
+        tags.push('<div class="dietary-tag vegan">🌱 Vegan</div>');
+    }
+    if (dietary.gluten_free) {
+        tags.push('<div class="dietary-tag gluten-free">🌾 Gluten-Free</div>');
+    }
+    
+    return tags.join('');
+}
+
+function filterByCategory(category) {
+    currentCategory = category;
+    
+    // Update active tab
+    document.querySelectorAll('.category-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    displayMenuItems();
+}
+
+function updateFooterInfo(data) {
+    document.getElementById('lastUpdated').textContent = new Date(data.timestamp).toLocaleString();
+    document.getElementById('totalItems').textContent = menuData.length;
+}
+
+// Auto-refresh every 30 seconds
+setInterval(loadMenuData, 30000);
+
+// Load menu on page load
+document.addEventListener('DOMContentLoaded', loadMenuData);
+</script>
+{% endblock %}

@@ -1,0 +1,690 @@
+{% extends 'base.html' %}
+
+{% block title %}Food Safety Management - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .safety-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        text-align: center;
+        border-left: 4px solid #28a745;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #28a745;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .stat-card.warning {
+        border-left-color: #ffc107;
+    }
+    
+    .stat-card.warning .stat-number {
+        color: #ffc107;
+    }
+    
+    .stat-card.danger {
+        border-left-color: #dc3545;
+    }
+    
+    .stat-card.danger .stat-number {
+        color: #dc3545;
+    }
+    
+    .log-section {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .log-item {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #28a745;
+    }
+    
+    .log-item.non-compliant {
+        border-left-color: #dc3545;
+        background: #f8d7da;
+    }
+    
+    .log-item.requires-action {
+        border-left-color: #ffc107;
+        background: #fff3cd;
+    }
+    
+    .log-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .log-type {
+        background: #28a745;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .log-priority {
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .priority-low { background: #d4edda; color: #155724; }
+    .priority-medium { background: #fff3cd; color: #856404; }
+    .priority-high { background: #f8d7da; color: #721c24; }
+    .priority-critical { background: #dc3545; color: white; }
+    
+    .temp-violation {
+        background: #f8d7da;
+        border-left-color: #dc3545;
+    }
+    
+    .temp-normal {
+        background: #d4edda;
+        border-left-color: #28a745;
+    }
+    
+    .haccp-compliant {
+        background: #d4edda;
+        border-left-color: #28a745;
+    }
+    
+    .haccp-non-compliant {
+        background: #f8d7da;
+        border-left-color: #dc3545;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .btn-success {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-warning {
+        background: #ffc107;
+        color: #212529;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 2rem;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 500px;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 1rem;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #28a745;
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+    }
+    
+    .progress-bar {
+        width: 100%;
+        height: 20px;
+        background: #e9ecef;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 0.5rem 0;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        transition: width 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Food Safety Header -->
+<div class="safety-header">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="display-5">🛡️ Food Safety Management</h1>
+            <p class="lead">HACCP compliance, temperature monitoring and safety logs</p>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Statistics Overview -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_logs }}</div>
+            <div class="stat-label">Total Logs</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ compliance_rate|floatformat:1 }}%</div>
+            <div class="stat-label">Compliance Rate</div>
+        </div>
+        <div class="stat-card {% if non_compliant_logs > 0 %}warning{% endif %}">
+            <div class="stat-number">{{ non_compliant_logs }}</div>
+            <div class="stat-label">Non-Compliant</div>
+        </div>
+        <div class="stat-card {% if temp_violations > 0 %}danger{% endif %}">
+            <div class="stat-number">{{ temp_violations }}</div>
+            <div class="stat-label">Temp Violations</div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <button class="btn-success" onclick="showSafetyLogModal()">
+            📝 Create Safety Log
+        </button>
+        <button class="btn-warning" onclick="showTempLogModal()">
+            🌡️ Log Temperature
+        </button>
+        <button class="btn-danger" onclick="showHACCPModal()">
+            🔬 HACCP Log
+        </button>
+    </div>
+
+    <!-- Recent Safety Logs -->
+    <div class="log-section">
+        <h3>📋 Recent Safety Logs</h3>
+        {% for log in recent_logs %}
+        <div class="log-item {% if log.status == 'non_compliant' %}non-compliant{% elif log.status == 'corrective_action' %}requires-action{% endif %}">
+            <div class="log-header">
+                <div>
+                    <span class="log-type">{{ log.get_log_type_display }}</span>
+                    <span class="log-priority priority-{{ log.priority }}">{{ log.get_priority_display }}</span>
+                    <small class="text-muted">{{ log.timestamp|timesince }} ago</small>
+                </div>
+                <div>
+                    <strong>{{ log.location }}</strong>
+                </div>
+            </div>
+            <div class="log-description">
+                {{ log.description }}
+            </div>
+            {% if log.notes %}
+            <div class="log-notes">
+                <small>{{ log.notes }}</small>
+            </div>
+            {% endif %}
+            <div class="log-meta">
+                <small>Logged by: {% if log.logged_by %}{{ log.logged_by.username }}{% else %}System{% endif %}</small>
+                {% if log.verified_by %}
+                <small>✅ Verified by {{ log.verified_by.username }}</small>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-4">
+            <p class="text-muted">No safety logs yet. Create your first log above!</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Temperature Logs -->
+    <div class="log-section">
+        <h3>🌡️ Temperature Logs</h3>
+        {% for temp in temp_logs %}
+        <div class="log-item {% if not temp.is_within_range %}temp-violation{% else %}temp-normal{% endif %}">
+            <div class="log-header">
+                <div>
+                    <span class="log-type">{{ temp.get_sensor_type_display }}</span>
+                    <span class="log-priority priority-{{ temp.alert_level }}">{{ temp.get_alert_level_display }}</span>
+                    <small class="text-muted">{{ temp.timestamp|timesince }} ago</small>
+                </div>
+                <div>
+                    <strong>{{ temp.location }}</strong>
+                </div>
+            </div>
+            <div class="temp-reading">
+                <strong>{{ temp.current_temp }}°C</strong> 
+                (Range: {{ temp.min_safe_temp }}°C - {{ temp.max_safe_temp }}°C)
+                {% if temp.food_item %} - {{ temp.food_item }}{% endif %}
+            </div>
+            {% if temp.measurement_context %}
+            <div class="log-notes">
+                <small>Context: {{ temp.measurement_context }}</small>
+            </div>
+            {% endif %}
+        </div>
+        {% empty %}
+        <div class="text-center py-4">
+            <p class="text-muted">No temperature logs yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- HACCP Logs -->
+    <div class="log-section">
+        <h3>🔬 HACCP Logs</h3>
+        {% for haccp in haccp_logs %}
+        <div class="log-item {% if not haccp.is_within_limit %}haccp-non-compliant{% else %}haccp-compliant{% endif %}">
+            <div class="log-header">
+                <div>
+                    <span class="log-type">{{ haccp.get_ccp_display }}</span>
+                    <small class="text-muted">{{ haccp.timestamp|timesince }} ago</small>
+                </div>
+                <div>
+                    <strong>{{ haccp.location }}</strong>
+                </div>
+            </div>
+            <div class="haccp-details">
+                <div><strong>Limit:</strong> {{ haccp.critical_limit }}</div>
+                <div><strong>Actual:</strong> {{ haccp.actual_value }}</div>
+                <div><strong>Status:</strong> 
+                    {% if haccp.is_within_limit %}
+                        <span style="color: #28a745;">✅ Compliant</span>
+                    {% else %}
+                        <span style="color: #dc3545;">❌ Non-Compliant</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="log-meta">
+                <small>Monitored by: {{ haccp.monitored_by.username }}</small>
+                {% if haccp.verified_by %}
+                <small>✅ Verified by {{ haccp.verified_by.username }}</small>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-4">
+            <p class="text-muted">No HACCP logs yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Safety Log Modal -->
+<div id="safetyLogModal" class="modal">
+    <div class="modal-content">
+        <h3>📝 Create Safety Log</h3>
+        <form id="safetyLogForm">
+            <div class="form-group">
+                <label for="logType">Log Type</label>
+                <select id="logType" name="log_type" class="form-control" required>
+                    <option value="temperature_check">Temperature Check</option>
+                    <option value="sanitation_check">Sanitation Check</option>
+                    <option value="equipment_check">Equipment Check</option>
+                    <option value="pest_control">Pest Control</option>
+                    <option value="food_preparation">Food Preparation</option>
+                    <option value="storage_check">Storage Check</option>
+                    <option value="delivery_inspection">Delivery Inspection</option>
+                    <option value="allergen_control">Allergen Control</option>
+                    <option value="staff_hygiene">Staff Hygiene</option>
+                    <option value="waste_disposal">Waste Disposal</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="priority">Priority</label>
+                <select id="priority" name="priority" class="form-control" required>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="station">Station (Optional)</label>
+                <input type="text" id="station" name="station" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="temperature">Temperature (°C)</label>
+                <input type="number" id="temperature" name="temperature" step="0.1" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" class="form-control" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="notes">Notes</label>
+                <textarea id="notes" name="notes" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="text-end">
+                <button type="button" class="btn-secondary" onclick="hideSafetyLogModal()">Cancel</button>
+                <button type="submit" class="btn-success">Create Log</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Temperature Log Modal -->
+<div id="tempLogModal" class="modal">
+    <div class="modal-content">
+        <h3>🌡️ Log Temperature</h3>
+        <form id="tempLogForm">
+            <div class="form-group">
+                <label for="sensorType">Sensor Type</label>
+                <select id="sensorType" name="sensor_type" class="form-control" required>
+                    <option value="probe">Probe Thermometer</option>
+                    <option value="infrared">Infrared Thermometer</option>
+                    <option value="ambient">Ambient Sensor</option>
+                    <option value="refrigeration">Refrigeration Sensor</option>
+                    <option value="freezer">Freezer Sensor</option>
+                    <option value="cooking">Cooking Sensor</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="sensorId">Sensor ID</label>
+                <input type="text" id="sensorId" name="sensor_id" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="tempLocation">Location</label>
+                <input type="text" id="tempLocation" name="location" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="currentTemp">Current Temperature (°C)</label>
+                <input type="number" id="currentTemp" name="current_temp" step="0.1" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="targetTemp">Target Temperature (°C)</label>
+                <input type="number" id="targetTemp" name="target_temp" step="0.1" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="minSafeTemp">Min Safe Temperature (°C)</label>
+                <input type="number" id="minSafeTemp" name="min_safe_temp" step="0.1" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="maxSafeTemp">Max Safe Temperature (°C)</label>
+                <input type="number" id="maxSafeTemp" name="max_safe_temp" step="0.1" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="foodItem">Food Item</label>
+                <input type="text" id="foodItem" name="food_item" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="measurementContext">Measurement Context</label>
+                <input type="text" id="measurementContext" name="measurement_context" class="form-control" placeholder="e.g., Cooking, Cooling, Holding">
+            </div>
+            <div class="text-end">
+                <button type="button" class="btn-secondary" onclick="hideTempLogModal()">Cancel</button>
+                <button type="submit" class="btn-warning">Log Temperature</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- HACCP Log Modal -->
+<div id="haccpModal" class="modal">
+    <div class="modal-content">
+        <h3>🔬 Create HACCP Log</h3>
+        <form id="haccpForm">
+            <div class="form-group">
+                <label for="ccp">Critical Control Point</label>
+                <select id="ccp" name="ccp" class="form-control" required>
+                    <option value="receiving">Receiving</option>
+                    <option value="storage">Storage</option>
+                    <option value="preparation">Preparation</option>
+                    <option value="cooking">Cooking</option>
+                    <option value="cooling">Cooling</option>
+                    <option value="reheating">Reheating</option>
+                    <option value="holding">Holding</option>
+                    <option value="serving">Serving</option>
+                    <option value="cleaning">Cleaning</option>
+                    <option value="pest_control">Pest Control</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="haccpLocation">Location</label>
+                <input type="text" id="haccpLocation" name="location" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="criticalLimit">Critical Limit</label>
+                <input type="text" id="criticalLimit" name="critical_limit" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="actualValue">Actual Value</label>
+                <input type="text" id="actualValue" name="actual_value" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="isWithinLimit">Within Limit</label>
+                <select id="isWithinLimit" name="is_within_limit" class="form-control" required>
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="haccpNotes">Notes</label>
+                <textarea id="haccpNotes" name="notes" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="text-end">
+                <button type="button" class="btn-secondary" onclick="hideHACCPModal()">Cancel</button>
+                <button type="submit" class="btn-danger">Create HACCP Log</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Modal functions
+function showSafetyLogModal() {
+    document.getElementById('safetyLogModal').style.display = 'block';
+}
+
+function hideSafetyLogModal() {
+    document.getElementById('safetyLogModal').style.display = 'none';
+}
+
+function showTempLogModal() {
+    document.getElementById('tempLogModal').style.display = 'block';
+}
+
+function hideTempLogModal() {
+    document.getElementById('tempLogModal').style.display = 'none';
+}
+
+function showHACCPModal() {
+    document.getElementById('haccpModal').style.display = 'block';
+}
+
+function hideHACCPModal() {
+    document.getElementById('haccpModal').style.display = 'none';
+}
+
+// Form submissions
+document.getElementById('safetyLogForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch('/menu-management/food-safety/create-log/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Safety log created successfully!');
+            hideSafetyLogModal();
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while creating the safety log.');
+    });
+});
+
+document.getElementById('tempLogForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch('/menu-management/food-safety/create-temp-log/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Temperature log created successfully!');
+            hideTempLogModal();
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while creating the temperature log.');
+    });
+});
+
+document.getElementById('haccpForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch('/menu-management/food-safety/create-haccp-log/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('HACCP log created successfully!');
+            hideHACCPModal();
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while creating the HACCP log.');
+    });
+});
+
+// Helper function to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Close modals when clicking outside
+window.onclick = function(event) {
+    if (event.target == document.getElementById('safetyLogModal')) {
+        hideSafetyLogModal();
+    }
+    if (event.target == document.getElementById('tempLogModal')) {
+        hideTempLogModal();
+    }
+    if (event.target == document.getElementById('haccpModal')) {
+        hideHACCPModal();
+    }
+}
+</script>
+{% endblock %}

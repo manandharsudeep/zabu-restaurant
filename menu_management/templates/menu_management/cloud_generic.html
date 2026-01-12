@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }} - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .content-container {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .back-button {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .back-button:hover {
+        background: #5a67d8;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .data-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .data-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-left: 4px solid #48bb78;
+    }
+    
+    .data-title {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .data-description {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    
+    .alert-info {
+        background: #e3f2fd;
+        color: #1976d2;
+        border: 1px solid #bbdefb;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="page-header">
+    <div class="container">
+        <h1 class="display-4">{{ page_icon }} {{ page_title }}</h1>
+        <p class="lead">{{ page_description }}</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Back Button -->
+    <a href="{% url 'menu_management:cloud_kitchen_operations' %}" class="back-button">
+        ← Back to Cloud Kitchen
+    </a>
+
+    {% if page_message %}
+    <div class="alert alert-info">
+        {{ page_message }}
+    </div>
+    {% endif %}
+
+    <!-- Statistics -->
+    <div class="stats-grid">
+        {% for stat in stats %}
+        <div class="stat-card">
+            <div class="stat-number">{{ stat.value }}</div>
+            <div class="stat-label">{{ stat.label }}</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Content -->
+    <div class="content-container">
+        {% if items %}
+        <div class="data-grid">
+            {% for item in items %}
+            <div class="data-card">
+                <div class="data-title">{{ item.name }}</div>
+                <div class="data-description">{{ item.description }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 3rem; color: #666;">
+            <h3>No data available</h3>
+            <p>{{ empty_message }}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

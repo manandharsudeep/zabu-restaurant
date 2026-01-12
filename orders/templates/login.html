@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Customer Login - Restaurant System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-center">Customer Login</h3>
+            </div>
+            <div class="card-body">
+                <p class="text-center text-muted mb-4">Login to place your order</p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label for="customer_username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="customer_username" name="username" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="customer_password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="customer_password" name="password" required autocomplete="off">
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-3">
+                    <p>Don't have an account? <a href="{% url 'customer_signup' %}">Sign up here</a></p>
+                    <p><a href="{% url 'gateway' %}">← Back to Home</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

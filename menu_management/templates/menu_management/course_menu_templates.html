@@ -1,0 +1,280 @@
+{% extends 'menu_management/base.html' %}
+{% load nepali_currency %}
+
+{% block title %}Course Menu Templates{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>🍽️ Course Menu Templates</h1>
+                <div>
+                    <a href="{% url 'menu_management:create_course_menu_template' %}" class="btn btn-success">
+                        📋 Create Template
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="menu_type" class="form-label">Menu Type</label>
+                            <select name="menu_type" id="menu_type" class="form-select">
+                                <option value="">All Types</option>
+                                {% for type_value, type_label in menu_types %}
+                                <option value="{{ type_value }}" {% if current_filters.menu_type == type_value %}selected{% endif %}>
+                                    {{ type_label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="dietary" class="form-label">Dietary Options</label>
+                            <select name="dietary" id="dietary" class="form-select">
+                                <option value="">All</option>
+                                <option value="vegetarian" {% if current_filters.dietary == 'vegetarian' %}selected{% endif %}>Vegetarian</option>
+                                <option value="vegan" {% if current_filters.dietary == 'vegan' %}selected{% endif %}>Vegan</option>
+                                <option value="gluten_free" {% if current_filters.dietary == 'gluten_free' %}selected{% endif %}>Gluten Free</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="min_price" class="form-label">Min Price</label>
+                            <input type="number" name="min_price" id="min_price" class="form-control" 
+                                   placeholder="Min price" step="100">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="max_price" class="form-label">Max Price</label>
+                            <input type="number" name="max_price" id="max_price" class="form-control" 
+                                   placeholder="Max price" step="100">
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-outline-primary">
+                                🔍 Filter Templates
+                            </button>
+                            <a href="{% url 'menu_management:course_menu_templates' %}" class="btn btn-outline-secondary">
+                                🔄 Reset
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Templates Grid -->
+    <div class="row">
+        {% for template in templates %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ template.name }}</h5>
+                    <span class="badge bg-primary">{{ template.get_menu_type_display }}</span>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">{{ template.description|truncatewords:20 }}</p>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <small class="text-muted">Courses:</small>
+                            <strong>{{ template.course_count }}</strong>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Price:</small>
+                            <strong>{{ template.price_per_person|nepali_currency }}</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <small class="text-muted">Party Size:</small>
+                            <strong>{{ template.min_party_size }}-{{ template.max_party_size }}</strong>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Advance:</small>
+                            <strong>{{ template.advance_booking_days }} days</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">Dietary Options:</small>
+                        <div>
+                            {% if template.vegetarian_available %}
+                            <span class="badge bg-success me-1">🥗 Vegetarian</span>
+                            {% endif %}
+                            {% if template.vegan_available %}
+                            <span class="badge bg-success me-1">🌱 Vegan</span>
+                            {% endif %}
+                            {% if template.gluten_free_available %}
+                            <span class="badge bg-success me-1">🌾 Gluten Free</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">Pairing Options:</small>
+                        <div>
+                            {% if template.wine_pairing_available %}
+                            <span class="badge bg-info me-1">🍷 Wine</span>
+                            {% endif %}
+                            {% if template.beverage_pairing_available %}
+                            <span class="badge bg-info me-1">🥤 Beverages</span>
+                            {% endif %}
+                            {% if template.sommelier_required %}
+                            <span class="badge bg-warning me-1">👨‍🍳 Sommelier</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if template.is_seasonal %}
+                    <div class="alert alert-info py-2">
+                        <small><strong>🍂 Seasonal:</strong> {{ template.season_months|join:", " }}</small>
+                    </div>
+                    {% endif %}
+                    
+                    {% if template.holiday_specific %}
+                    <div class="alert alert-warning py-2">
+                        <small><strong>🎄 Holiday:</strong> {{ template.holiday_name }}</small>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <div class="btn-group w-100" role="group">
+                        <a href="{% url 'menu_management:course_menu_template_detail' template.template_id %}" 
+                               class="btn btn-outline-secondary">
+                                👁️ View Details
+                            </a>
+                        <a href="{% url 'menu_management:edit_course_menu_template' template.template_id %}" 
+                               class="btn btn-outline-primary">
+                                ✏️ Edit
+                            </a>
+                        <button class="btn btn-outline-danger" onclick="deleteTemplate('{{ template.template_id }}')">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <h3>📋 No Course Menu Templates Found</h3>
+                    <p class="text-muted">Create your first course menu template to get started.</p>
+                </div>
+                <a href="{% url 'menu_management:course_menu_template_create' %}" class="btn btn-primary btn-lg">
+                    ➕ Create Your First Template
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if templates.has_other_pages %}
+    <nav aria-label="Course menu templates pagination">
+        <ul class="pagination justify-content-center">
+            {% if templates.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if request.GET.menu_type %}&menu_type={{ request.GET.menu_type }}{% endif %}{% if request.GET.dietary %}&dietary={{ request.GET.dietary }}{% endif %}">First</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ templates.previous_page_number }}{% if request.GET.menu_type %}&menu_type={{ request.GET.menu_type }}{% endif %}{% if request.GET.dietary %}&dietary={{ request.GET.dietary }}{% endif %}">Previous</a>
+            </li>
+            {% endif %}
+            
+            {% for num in templates.paginator.page_range %}
+            {% if templates.number == num %}
+            <li class="page-item active">
+                <span class="page-link">{{ num }}</span>
+            </li>
+            {% elif num > templates.number|add:'-3' and num < templates.number|add:'3' %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}{% if request.GET.menu_type %}&menu_type={{ request.GET.menu_type }}{% endif %}{% if request.GET.dietary %}&dietary={{ request.GET.dietary }}{% endif %}">{{ num }}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+            
+            {% if templates.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ templates.next_page_number }}{% if request.GET.menu_type %}&menu_type={{ request.GET.menu_type }}{% endif %}{% if request.GET.dietary %}&dietary={{ request.GET.dietary }}{% endif %}">Next</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ templates.paginator.num_pages }}{% if request.GET.menu_type %}&menu_type={{ request.GET.menu_type }}{% endif %}{% if request.GET.dietary %}&dietary={{ request.GET.dietary }}{% endif %}">Last</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<script>
+function deleteTemplate(templateId) {
+    if (confirm('Are you sure you want to delete this course menu template?')) {
+        fetch(`/menu-management/courses/templates/${templateId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while deleting the template.');
+        });
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+
+<style>
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+.pagination .page-link {
+    color: #007bff;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+</style>
+{% endblock %}

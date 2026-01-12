@@ -1,0 +1,379 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if user.is_authenticated and user.is_superuser %}Admin Dashboard{% else %}Staff Portal{% endif %} - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .staff-hero {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        padding: 80px 0;
+        text-align: center;
+    }
+    
+    .staff-title {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+    
+    .staff-subtitle {
+        font-size: 1.3rem;
+        opacity: 0.9;
+        margin-bottom: 2rem;
+    }
+    
+    .staff-options {
+        margin-top: 3rem;
+    }
+    
+    .staff-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        height: 100%;
+        border-left: 4px solid #3498db;
+    }
+    
+    .staff-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    
+    .staff-icon {
+        font-size: 3rem;
+        margin-bottom: 1.5rem;
+        display: block;
+    }
+    
+    .staff-card-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: #2c3e50;
+    }
+    
+    .staff-card-description {
+        color: #666;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+    
+    .btn-staff {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-staff:hover {
+        background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+        transform: scale(1.05);
+        color: white;
+    }
+    
+    .btn-admin {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-admin:hover {
+        background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+        transform: scale(1.05);
+        color: white;
+    }
+    
+    .login-form {
+        background: white;
+        border-radius: 15px;
+        padding: 2.5rem;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    
+    .form-control {
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+    
+    @media (max-width: 768px) {
+        .staff-title {
+            font-size: 2.2rem;
+        }
+        
+        .staff-subtitle {
+            font-size: 1.1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Staff Hero Section -->
+<section class="staff-hero">
+    <div class="container">
+        <div class="staff-content">
+            {% if user.is_authenticated and user.is_superuser %}
+                <h1 class="staff-title">👑 Admin Dashboard</h1>
+                <p class="staff-subtitle">Complete System Management</p>
+            {% else %}
+                <h1 class="staff-title">👨‍🍳 Staff Portal</h1>
+                <p class="staff-subtitle">Zabu Restaurant Management System</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Staff Options Section -->
+<section class="py-5">
+    <div class="container">
+        {% if user.is_authenticated and user.is_staff %}
+            {% if user.is_superuser %}
+                <!-- Admin Interface -->
+                <div class="text-center mb-5">
+                    <h2 class="text-white">👑 Admin Dashboard</h2>
+                    <p class="text-white-50">Complete System Management</p>
+                </div>
+                
+                <div class="row justify-content-center">
+                    <!-- Menu Management -->
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="staff-card">
+                            <span class="staff-icon">📋</span>
+                            <h3 class="staff-card-title">Menu Management</h3>
+                            <p class="staff-card-description">Complete recipe management, menu engineering, cost tracking, and analytics</p>
+                            <a href="{% url 'menu_management:dashboard' %}" class="btn btn-staff">
+                                Menu Management
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Order Management -->
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="staff-card">
+                            <span class="staff-icon">📊</span>
+                            <h3 class="staff-card-title">Order Management</h3>
+                            <p class="staff-card-description">Complete order tracking, fulfillment management, status updates, and analytics</p>
+                            <a href="{% url 'order_dashboard' %}" class="btn btn-staff">
+                                Order Dashboard
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Kitchen Dashboard -->
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="staff-card">
+                            <span class="staff-icon">🍳</span>
+                            <h3 class="staff-card-title">Kitchen Dashboard</h3>
+                            <p class="staff-card-description">Manage active orders, track preparation status, coordinate kitchen operations</p>
+                            <a href="{% url 'kitchen_dashboard' %}" class="btn btn-staff">
+                                Kitchen Dashboard
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Order List -->
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="staff-card">
+                            <span class="staff-icon">📋</span>
+                            <h3 class="staff-card-title">Order List</h3>
+                            <p class="staff-card-description">View all orders, filter by status and priority, manage order details</p>
+                            <a href="{% url 'order_list' %}" class="btn btn-staff">
+                                View All Orders
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Django Admin -->
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="staff-card">
+                            <span class="staff-icon">⚙️</span>
+                            <h3 class="staff-card-title">Django Admin</h3>
+                            <p class="staff-card-description">Complete system administration, database management, and settings</p>
+                            <a href="/admin/" class="btn btn-admin">
+                                Open Admin Panel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="row mt-5">
+                    <div class="col-md-12">
+                        <div class="card bg-dark text-white">
+                            <div class="card-body">
+                                <h4 class="card-title">📊 Quick Statistics</h4>
+                                <div class="row text-center">
+                                    <div class="col-md-3">
+                                        <h3 class="text-primary">Total Orders</h3>
+                                        <p class="h2 mb-0">12</p>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <h3 class="text-success">Revenue</h3>
+                                        <p class="h2 mb-0">$4,560</p>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <h3 class="text-info">Menu Items</h3>
+                                        <p class="h2 mb-0">8</p>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <h3 class="text-warning">Active Orders</h3>
+                                        <p class="h2 mb-0">3</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            {% else %}
+                <!-- Regular Staff Interface -->
+                <div class="text-center mb-5">
+                    <h2 class="text-white">👨‍🍳 Staff Dashboard</h2>
+                    <p class="text-white-50">Restaurant Operations Management</p>
+                </div>
+                
+                <div class="row justify-content-center">
+                    <!-- Kitchen Dashboard -->
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="staff-card">
+                            <span class="staff-icon">🍳</span>
+                            <h3 class="staff-card-title">Kitchen Dashboard</h3>
+                            <p class="staff-card-description">Manage active orders, track preparation status, coordinate kitchen operations</p>
+                            <a href="{% url 'kitchen_dashboard' %}" class="btn btn-staff">
+                                Kitchen Dashboard
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Order Status -->
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="staff-card">
+                            <span class="staff-icon">📊</span>
+                            <h3 class="staff-card-title">Order Status</h3>
+                            <p class="staff-card-description">View all orders, track status, and manage customer orders</p>
+                            <a href="{% url 'order_status' %}" class="btn btn-staff">
+                                View Orders
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Menu Management -->
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="staff-card">
+                            <span class="staff-icon">📋</span>
+                            <h3 class="staff-card-title">Menu Management</h3>
+                            <p class="staff-card-description">Manage recipes, menu items, and pricing</p>
+                            <a href="{% url 'menu_management:dashboard' %}" class="btn btn-staff">
+                                Menu Management
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Enhanced Course Menu -->
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="staff-card">
+                            <span class="staff-icon">🍽️</span>
+                            <h3 class="staff-card-title">Course Menu</h3>
+                            <p class="staff-card-description">Manage tasting menus, course coordination, and fine dining experiences</p>
+                            <a href="{% url 'menu_management:enhanced_course_menu_dashboard' %}" class="btn btn-staff">
+                                Course Menu
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Cloud Kitchen Operations -->
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="staff-card">
+                            <span class="staff-icon">☁️</span>
+                            <h3 class="staff-card-title">Cloud Kitchen</h3>
+                            <p class="staff-card-description">Virtual brands, platform integrations, and delivery operations</p>
+                            <a href="{% url 'menu_management:cloud_kitchen_operations' %}" class="btn btn-staff">
+                                Cloud Kitchen
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Kitchen Prep Management -->
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="staff-card">
+                            <span class="staff-icon">👨‍🍳</span>
+                            <h3 class="staff-card-title">Prep Management</h3>
+                            <p class="staff-card-description">Food preparation planning, inventory tracking, and station coordination</p>
+                            <a href="{% url 'menu_management:prep_management' %}" class="btn btn-staff">
+                                Prep Management
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Performance Analytics -->
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="staff-card">
+                            <span class="staff-icon">📈</span>
+                            <h3 class="staff-card-title">Analytics</h3>
+                            <p class="staff-card-description">Performance metrics, sales analytics, and operational insights</p>
+                            <a href="{% url 'menu_management:performance_analytics' %}" class="btn btn-staff">
+                                View Analytics
+                            </a>
+                        </div>
+                    </div>
+                    
+                    </div>
+            {% endif %}
+            
+            <div class="text-center mt-4">
+                <a href="{% url 'staff_logout' %}" class="btn btn-outline-light btn-lg">
+                    Logout
+                </a>
+            </div>
+        {% else %}
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="login-form">
+                        <h3 class="text-center mb-4">Staff Login</h3>
+                        <form method="post" action="{% url 'staff_login' %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="portal_username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="portal_username" name="username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="portal_password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="portal_password" name="password" required autocomplete="off">
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-staff btn-lg">Login</button>
+                            </div>
+                        </form>
+                        
+                        <div class="text-center mt-4">
+                            <small class="text-muted">
+                                <a href="{% url 'gateway' %}" class="text-decoration-none">← Back to Restaurant</a>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

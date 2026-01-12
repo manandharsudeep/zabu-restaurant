@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Virtual Brand - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .create-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .form-container {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    
+    .form-section h3 {
+        color: #333;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #667eea;
+    }
+    
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-label {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-input {
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-select {
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        background: white;
+        cursor: pointer;
+    }
+    
+    .form-textarea {
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    .back-button {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .back-button:hover {
+        background: #5a67d8;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .submit-button {
+        background: #48bb78;
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    
+    .submit-button:hover {
+        background: #38a169;
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    
+    .alert-info {
+        background: #e3f2fd;
+        color: #1976d2;
+        border: 1px solid #bbdefb;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="create-header">
+    <div class="container">
+        <h1 class="display-4">🏷️ Create Virtual Brand</h1>
+        <p class="lead">Create a new virtual restaurant brand for your cloud kitchen operations</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Debug Info -->
+    <div class="alert alert-info">
+        <strong>🔍 Debug Info:</strong> If you're seeing this message, the template is loading correctly!
+        <br><strong>Method:</strong> {{ request.method }}
+        <br><strong>URL:</strong> {{ request.get_full_path }}
+    </div>
+    
+    <!-- Back Button -->
+    <a href="{% url 'menu_management:virtual_brands_management' %}" class="back-button">
+        ← Back to Virtual Brands
+    </a>
+
+    <form method="post" id="brandForm">
+        {% csrf_token %}
+        
+        <!-- Basic Information -->
+        <div class="form-container">
+            <div class="form-section">
+                <h3>📋 Basic Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="name">Brand Name *</label>
+                        <input type="text" name="name" id="name" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="brand_type">Brand Type *</label>
+                        <select name="brand_type" id="brand_type" class="form-select" required>
+                            <option value="">Select brand type...</option>
+                            <option value="fast_casual">Fast Casual</option>
+                            <option value="fine_dining">Fine Dining</option>
+                            <option value="cafe">Cafe</option>
+                            <option value="bakery">Bakery</option>
+                            <option value="pizza">Pizza</option>
+                            <option value="asian">Asian Cuisine</option>
+                            <option value="healthy">Healthy</option>
+                            <option value="desserts">Desserts</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="target_market">Target Market</label>
+                        <select name="target_market" id="target_market" class="form-select">
+                            <option value="">Select target market...</option>
+                            <option value="urban">Urban</option>
+                            <option value="suburban">Suburban</option>
+                            <option value="office">Office</option>
+                            <option value="college">College</option>
+                            <option value="family">Family</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="brand_color">Brand Color</label>
+                        <input type="text" name="brand_color" id="brand_color" class="form-input" value="#667eea" placeholder="#667eea">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="description">Description</label>
+                    <textarea name="description" id="description" class="form-textarea" placeholder="Describe your virtual brand concept and target audience..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-container">
+            <button type="submit" class="submit-button">
+                ✨ Create Virtual Brand
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Prevent any JavaScript interference
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🔍 Create Brand page loaded');
+        
+        // Ensure form works normally
+        const form = document.getElementById('brandForm');
+        if (form) {
+            console.log('🔍 Form found:', form);
+            
+            // Remove any existing event listeners
+            const newForm = form.cloneNode(true);
+            form.parentNode.replaceChild(newForm, form);
+            
+            // Add normal submit handler
+            newForm.addEventListener('submit', function(e) {
+                console.log('🔍 Form submitted normally');
+                // Let the browser handle the form submission
+                // No preventDefault() here
+            });
+        }
+    });
+</script>
+{% endblock %}

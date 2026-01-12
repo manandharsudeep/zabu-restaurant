@@ -1,0 +1,462 @@
+{% extends 'base.html' %}
+
+{% block title %}Update {{ recipe.name }} - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .form-header {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .btn-danger {
+        background: #dc3545;
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-danger:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .help-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    
+    .current-info {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .current-info h5 {
+        color: #666;
+        margin-bottom: 0.5rem;
+    }
+    
+    .current-info p {
+        margin-bottom: 0;
+    }
+    
+    .time-inputs {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .time-inputs .form-group {
+        flex: 1;
+    }
+    
+    .ingredients-container {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        padding: 1rem;
+        background: #fafafa;
+    }
+    
+    .ingredient-item {
+        background: white;
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        border-left: 3px solid #667eea;
+        display: flex;
+        justify-content: between;
+        align-items: center;
+    }
+    
+    .ingredient-info {
+        flex: 1;
+    }
+    
+    .ingredient-name {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .ingredient-details {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .ingredient-price {
+        font-weight: bold;
+        color: #28a745;
+    }
+    
+    .difficulty-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .difficulty-easy { background: #d4edda; color: #155724; }
+    .difficulty-medium { background: #fff3cd; color: #856404; }
+    .difficulty-hard { background: #f8d7da; color: #721c24; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5">✏️ Update Recipe</h1>
+            <p class="text-muted">Edit recipe details and ingredients</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'menu_management:recipe_detail' recipe.id %}" class="btn btn-secondary btn-lg">
+                ← Back to Recipe
+            </a>
+        </div>
+    </div>
+
+    <!-- Current Info -->
+    <div class="form-section">
+        <div class="current-info">
+            <h5>📝 Current Recipe Information</h5>
+            <div class="row">
+                <div class="col-md-4">
+                    <strong>Name:</strong> {{ recipe.name }}
+                </div>
+                <div class="col-md-4">
+                    <strong>Difficulty:</strong> 
+                    <span class="difficulty-badge difficulty-{{ recipe.get_difficulty_display|lower }}">
+                        {{ recipe.get_difficulty_display }}
+                    </span>
+                </div>
+                <div class="col-md-4">
+                    <strong>Portions:</strong> {{ recipe.portions }}
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-4">
+                    <strong>Prep Time:</strong> {{ recipe.prep_time }} mins
+                </div>
+                <div class="col-md-4">
+                    <strong>Cook Time:</strong> {{ recipe.cook_time }} mins
+                </div>
+                <div class="col-md-4">
+                    <strong>Total Time:</strong> {{ recipe.total_time }} mins
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-6">
+                    <strong>Created:</strong> {{ recipe.created_at|date:"F j, Y" }}
+                </div>
+                <div class="col-md-6">
+                    <strong>Created by:</strong> {{ recipe.created_by.username }}
+                </div>
+            </div>
+            {% if recipe.cost_per_portion %}
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <strong>Current Cost:</strong> ${{ recipe.cost_per_portion|floatformat:2 }} per portion
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="form-section">
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- Basic Information -->
+            <div class="form-header">
+                <h3>📝 Basic Information</h3>
+            </div>
+            
+            <div class="form-group">
+                <label for="name" class="form-label">Recipe Name *</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ recipe.name }}" required
+                       placeholder="e.g., Grilled Salmon with Lemon Butter">
+                <small class="help-text">Update the recipe name</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="description" class="form-label">Description *</label>
+                <textarea class="form-control" id="description" name="description" rows="3" required
+                          placeholder="Describe the recipe, cooking style, and key features...">{{ recipe.description }}</textarea>
+                <small class="help-text">Update the recipe description</small>
+            </div>
+            
+            <!-- Time Information -->
+            <div class="form-header">
+                <h3>⏱️ Time Information</h3>
+            </div>
+            
+            <div class="time-inputs">
+                <div class="form-group">
+                    <label for="prep_time" class="form-label">Prep Time (minutes) *</label>
+                    <input type="number" class="form-control" id="prep_time" name="prep_time" min="0" required
+                           value="{{ recipe.prep_time }}" placeholder="e.g., 15">
+                    <small class="help-text">Time to prepare ingredients</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cook_time" class="form-label">Cook Time (minutes) *</label>
+                    <input type="number" class="form-control" id="cook_time" name="cook_time" min="0" required
+                           value="{{ recipe.cook_time }}" placeholder="e.g., 20">
+                    <small class="help-text">Time to cook the dish</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="total_time" class="form-label">Total Time (minutes) *</label>
+                    <input type="number" class="form-control" id="total_time" name="total_time" min="0" required
+                           value="{{ recipe.total_time }}" placeholder="e.g., 35">
+                    <small class="help-text">Total time from start to finish</small>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="difficulty" class="form-label">Difficulty Level *</label>
+                        <select class="form-select" id="difficulty" name="difficulty" required>
+                            <option value="1" {% if recipe.difficulty == 1 %}selected{% endif %}>🟢 Easy</option>
+                            <option value="2" {% if recipe.difficulty == 2 %}selected{% endif %}>🟡 Medium</option>
+                            <option value="3" {% if recipe.difficulty == 3 %}selected{% endif %}>🔴 Hard</option>
+                        </select>
+                        <small class="help-text">Select the difficulty level</small>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="portions" class="form-label">Portions *</label>
+                        <input type="number" class="form-control" id="portions" name="portions" min="1" required
+                               value="{{ recipe.portions }}" placeholder="e.g., 4">
+                        <small class="help-text">Number of servings this recipe makes</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Instructions -->
+            <div class="form-header">
+                <h3>👨‍🍳 Instructions</h3>
+            </div>
+            
+            <div class="form-group">
+                <label for="instructions" class="form-label">Preparation Instructions *</label>
+                <textarea class="form-control" id="instructions" name="instructions" rows="6" required
+                          placeholder="Step-by-step instructions for preparing this recipe...">{{ recipe.instructions }}</textarea>
+                <small class="help-text">Update preparation and cooking instructions</small>
+            </div>
+            
+            <!-- Additional Details -->
+            <div class="form-header">
+                <h3>⚙️ Additional Details</h3>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="equipment_needed" class="form-label">Equipment Needed</label>
+                        <textarea class="form-control" id="equipment_needed" name="equipment_needed" rows="3"
+                                  placeholder="e.g., Large skillet, mixing bowls, whisk, oven...">{{ recipe.equipment_needed }}</textarea>
+                        <small class="help-text">Update required kitchen equipment</small>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="chef_notes" class="form-label">Chef's Notes</label>
+                        <textarea class="form-control" id="chef_notes" name="chef_notes" rows="3"
+                                  placeholder="e.g., Don't overcook the salmon, use fresh herbs...">{{ recipe.chef_notes }}</textarea>
+                        <small class="help-text">Update tips and tricks for best results</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="temperature_specs" class="form-label">Temperature Specifications</label>
+                <textarea class="form-control" id="temperature_specs" name="temperature_specs" rows="2"
+                          placeholder="e.g., Preheat oven to 375°F, Cook at medium-high heat...">{{ recipe.temperature_specs }}</textarea>
+                <small class="help-text">Update temperature requirements and cooking methods</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="allergen_info" class="form-label">Allergen Information</label>
+                <textarea class="form-control" id="allergen_info" name="allergen_info" rows="2"
+                          placeholder="e.g., Contains nuts, dairy, gluten...">{{ recipe.allergen_info }}</textarea>
+                <small class="help-text">Update potential allergens</small>
+            </div>
+            
+            <!-- Ingredients -->
+            <div class="form-header">
+                <h3>🥘 Ingredients</h3>
+            </div>
+            
+            <div class="ingredients-container">
+                {% for ingredient in ingredients %}
+                    <div class="ingredient-item">
+                        <div class="ingredient-info">
+                            <div class="ingredient-name">{{ ingredient.name }}</div>
+                            <div class="ingredient-details">
+                                {{ ingredient.description }} • {{ ingredient.unit }} • ${{ ingredient.current_price }}/{{ ingredient.unit }}
+                            </div>
+                        </div>
+                        <div class="ingredient-price">
+                            ${{ ingredient.current_price }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div class="alert alert-info mt-3">
+                <h6>📋 How to Update Ingredients:</h6>
+                <ol>
+                    <li>Review the current ingredients list above</li>
+                    <li>Update quantities and units as needed</li>
+                    <li>The system will automatically recalculate the recipe cost</li>
+                    <li>You can add or remove ingredients as needed</li>
+                </ol>
+                <p class="mb-0"><strong>Note:</strong> For now, ingredients are managed through the Django admin. You can add more ingredients there if needed.</p>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">
+                        ✅ Update Recipe
+                    </button>
+                </div>
+                <div class="col-md-4">
+                    <a href="{% url 'menu_management:recipe_detail' recipe.id %}" class="btn btn-secondary w-100">
+                        ❌ Cancel
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="#" class="btn btn-danger w-100" onclick="return confirm('Are you sure you want to delete this recipe? This action cannot be undone.')">
+                        🗑️ Delete Recipe
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const prepTimeInput = document.getElementById('prep_time');
+    const cookTimeInput = document.getElementById('cook_time');
+    const totalTimeInput = document.getElementById('total_time');
+    
+    // Auto-calculate total time
+    function calculateTotalTime() {
+        const prepTime = parseInt(prepTimeInput.value) || 0;
+        const cookTime = parseInt(cookTimeInput.value) || 0;
+        totalTimeInput.value = prepTime + cookTime;
+    }
+    
+    prepTimeInput.addEventListener('input', calculateTotalTime);
+    cookTimeInput.addEventListener('input', calculateTotalTime);
+    
+    // Validate form before submission
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const prepTime = parseInt(prepTimeInput.value);
+        const cookTime = parseInt(cookTimeInput.value);
+        const totalTime = parseInt(totalTimeInput.value);
+        const portions = parseInt(document.getElementById('portions').value);
+        
+        if (prepTime < 0 || cookTime < 0 || totalTime < 0) {
+            e.preventDefault();
+            alert('Time values cannot be negative');
+            return false;
+        }
+        
+        if (portions < 1) {
+            e.preventDefault();
+            alert('Portions must be at least 1');
+            return false;
+        }
+        
+        if (totalTime < prepTime + cookTime) {
+            e.preventDefault();
+            alert('Total time should be at least the sum of prep time and cook time');
+            return false;
+        }
+        
+        return true;
+    });
+});
+</script>
+{% endblock %}

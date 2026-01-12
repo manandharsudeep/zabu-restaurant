@@ -1,0 +1,642 @@
+{% extends 'base.html' %}
+
+{% block title %}Inventory Reports - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .reports-header {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .filter-section {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .filter-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr auto;
+        gap: 1rem;
+        align-items: end;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #495057;
+    }
+    
+    .form-control {
+        padding: 0.75rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #17a2b8;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(23, 162, 184, 0.1);
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+    
+    .btn-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        color: #212529;
+    }
+    
+    .reports-grid {
+        display: grid;
+        gap: 2rem;
+    }
+    
+    .report-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-left: 4px solid #17a2b8;
+        transition: transform 0.3s ease;
+    }
+    
+    .report-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .report-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .report-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .report-period {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .chart-container {
+        height: 300px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border: 2px dashed #dee2e6;
+    }
+    
+    .chart-placeholder {
+        text-align: center;
+        color: #6c757d;
+    }
+    
+    .chart-placeholder-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .summary-item {
+        text-align: center;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+    
+    .summary-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #17a2b8;
+        margin-bottom: 0.5rem;
+    }
+    
+    .summary-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .table-container {
+        margin-top: 1.5rem;
+        overflow-x: auto;
+    }
+    
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+    
+    .table th {
+        background: #f8f9fa;
+        padding: 0.75rem;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #dee2e6;
+    }
+    
+    .table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .table tbody tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .trend-indicator {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.5rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .trend-up {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .trend-down {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .trend-neutral {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+    
+    .export-buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .export-buttons .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    @media (max-width: 768px) {
+        .filter-form {
+            grid-template-columns: 1fr;
+        }
+        
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .report-header {
+            flex-direction: column;
+            align-items: start;
+            gap: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reports-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-4">📊 Inventory Reports</h1>
+                <p class="lead">Comprehensive analytics and reporting for inventory management</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'menu_management:inventory_dashboard' %}" class="btn btn-light btn-lg">
+                    ← Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <form method="GET" class="filter-form">
+            <div class="form-group">
+                <label for="report_type">Report Type</label>
+                <select name="report_type" id="report_type" class="form-control">
+                    <option value="">All Reports</option>
+                    <option value="stock_levels">Stock Levels</option>
+                    <option value="waste_analysis">Waste Analysis</option>
+                    <option value="transaction_summary">Transaction Summary</option>
+                    <option value="cost_analysis">Cost Analysis</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="date_from">From Date</label>
+                <input type="date" name="date_from" id="date_from" class="form-control" 
+                       value="{{ date_from }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="date_to">To Date</label>
+                <input type="date" name="date_to" id="date_to" class="form-control" 
+                       value="{{ date_to }}">
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">
+                    🔍 Generate Report
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Reports Grid -->
+    <div class="reports-grid">
+        <!-- Stock Levels Report -->
+        <div class="report-card">
+            <div class="report-header">
+                <div>
+                    <div class="report-title">📦 Stock Levels Report</div>
+                    <div class="report-period">Current inventory status across all locations</div>
+                </div>
+                <div class="export-buttons">
+                    <a href="#" class="btn btn-success">📥 Excel</a>
+                    <a href="#" class="btn btn-warning">📄 PDF</a>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-placeholder">
+                    <div class="chart-placeholder-icon">📊</div>
+                    <div>Stock Levels Chart</div>
+                    <small>Visual representation of current stock levels</small>
+                </div>
+            </div>
+            
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-value">{{ total_items }}</div>
+                    <div class="summary-label">Total Items</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ low_stock_items }}</div>
+                    <div class="summary-label">Low Stock</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ out_of_stock_items }}</div>
+                    <div class="summary-label">Out of Stock</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">${{ total_inventory_value|floatformat:0 }}</div>
+                    <div class="summary-label">Total Value</div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Current Stock</th>
+                            <th>Reorder Point</th>
+                            <th>Status</th>
+                            <th>Trend</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in top_stock_items %}
+                        <tr>
+                            <td>
+                                <strong>{{ item.name }}</strong><br>
+                                <small class="text-muted">{{ item.sku }}</small>
+                            </td>
+                            <td>{{ item.current_stock|floatformat:2 }} {{ item.unit }}</td>
+                            <td>{{ item.reorder_point|floatformat:2 }} {{ item.unit }}</td>
+                            <td>
+                                {% if item.is_critical %}
+                                    <span style="color: #dc3545;">🚨 Critical</span>
+                                {% elif item.is_low_stock %}
+                                    <span style="color: #ffc107;">⚠️ Low</span>
+                                {% else %}
+                                    <span style="color: #28a745;">✅ Normal</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="trend-indicator {{ item.trend }}">
+                                    {% if item.trend == 'up' %}
+                                        ↑ {{ item.trend_percent }}%
+                                    {% elif item.trend == 'down' %}
+                                        ↓ {{ item.trend_percent }}%
+                                    {% else %}
+                                        → {{ item.trend_percent }}%
+                                    {% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Waste Analysis Report -->
+        <div class="report-card">
+            <div class="report-header">
+                <div>
+                    <div class="report-title">🗑️ Waste Analysis Report</div>
+                    <div class="report-period">Waste tracking and cost analysis</div>
+                </div>
+                <div class="export-buttons">
+                    <a href="#" class="btn btn-success">📥 Excel</a>
+                    <a href="#" class="btn btn-warning">📄 PDF</a>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-placeholder">
+                    <div class="chart-placeholder-icon">📈</div>
+                    <div>Waste Trend Chart</div>
+                    <small>Monthly waste cost trends</small>
+                </div>
+            </div>
+            
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-value">{{ total_waste_records }}</div>
+                    <div class="summary-label">Total Records</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">${{ total_waste_cost|floatformat:0 }}</div>
+                    <div class="summary-label">Total Cost</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ waste_this_month }}</div>
+                    <div class="summary-label">This Month</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ top_waste_type }}</div>
+                    <div class="summary-label">Top Type</div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Waste Type</th>
+                            <th>Count</th>
+                            <th>Total Cost</th>
+                            <th>Avg Cost</th>
+                            <th>Trend</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for waste_type in waste_by_type %}
+                        <tr>
+                            <td>
+                                <strong>{{ waste_type.type_display }}</strong>
+                            </td>
+                            <td>{{ waste_type.count }}</td>
+                            <td>${{ waste_type.total_cost|floatformat:2 }}</td>
+                            <td>${{ waste_type.avg_cost|floatformat:2 }}</td>
+                            <td>
+                                <span class="trend-indicator {{ waste_type.trend }}">
+                                    {% if waste_type.trend == 'up' %}
+                                        ↑ {{ waste_type.trend_percent }}%
+                                    {% elif waste_type.trend == 'down' %}
+                                        ↓ {{ waste_type.trend_percent }}%
+                                    {% else %}
+                                        → {{ waste_type.trend_percent }}%
+                                    {% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Transaction Summary Report -->
+        <div class="report-card">
+            <div class="report-header">
+                <div>
+                    <div class="report-title">📋 Transaction Summary</div>
+                    <div class="report-period">Inventory movements and transactions</div>
+                </div>
+                <div class="export-buttons">
+                    <a href="#" class="btn btn-success">📥 Excel</a>
+                    <a href="#" class="btn btn-warning">📄 PDF</a>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-placeholder">
+                    <div class="chart-placeholder-icon">📉</div>
+                    <div>Transaction Volume Chart</div>
+                    <small>Daily transaction volumes</small>
+                </div>
+            </div>
+            
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-value">{{ total_transactions }}</div>
+                    <div class="summary-label">Total Transactions</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ transactions_today }}</div>
+                    <div class="summary-label">Today</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ top_transaction_type }}</div>
+                    <div class="summary-label">Top Type</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">${{ total_transaction_value|floatformat:0 }}</div>
+                    <div class="summary-label">Total Value</div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Transaction Type</th>
+                            <th>Count</th>
+                            <th>Total Quantity</th>
+                            <th>Total Value</th>
+                            <th>Trend</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for trans_type in transactions_by_type %}
+                        <tr>
+                            <td>
+                                <strong>{{ trans_type.type_display }}</strong>
+                            </td>
+                            <td>{{ trans_type.count }}</td>
+                            <td>{{ trans_type.total_quantity|floatformat:2 }}</td>
+                            <td>${{ trans_type.total_value|floatformat:2 }}</td>
+                            <td>
+                                <span class="trend-indicator {{ trans_type.trend }}">
+                                    {% if trans_type.trend == 'up' %}
+                                        ↑ {{ trans_type.trend_percent }}%
+                                    {% elif trans_type.trend == 'down' %}
+                                        ↓ {{ trans_type.trend_percent }}%
+                                    {% else %}
+                                        → {{ trans_type.trend_percent }}%
+                                    {% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Cost Analysis Report -->
+        <div class="report-card">
+            <div class="report-header">
+                <div>
+                    <div class="report-title">💰 Cost Analysis</div>
+                    <div class="report-period">Inventory cost analysis and optimization</div>
+                </div>
+                <div class="export-buttons">
+                    <a href="#" class="btn btn-success">📥 Excel</a>
+                    <a href="#" class="btn btn-warning">📄 PDF</a>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-placeholder">
+                    <div class="chart-placeholder-icon">💹</div>
+                    <div>Cost Trend Chart</div>
+                    <small>Inventory cost trends over time</small>
+                </div>
+            </div>
+            
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-value">${{ total_inventory_cost|floatformat:0 }}</div>
+                    <div class="summary-label">Total Cost</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">${{ avg_item_cost|floatformat:2 }}</div>
+                    <div class="summary-label">Avg Item Cost</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ cost_variance }}%</div>
+                    <div class="summary-label">Cost Variance</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ optimization_opportunities }}</div>
+                    <div class="summary-label">Opportunities</div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Items</th>
+                            <th>Total Cost</th>
+                            <th>Avg Cost</th>
+                            <th>Trend</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category in cost_by_category %}
+                        <tr>
+                            <td>
+                                <strong>{{ category.name }}</strong>
+                            </td>
+                            <td>{{ category.item_count }}</td>
+                            <td>${{ category.total_cost|floatformat:2 }}</td>
+                            <td>${{ category.avg_cost|floatformat:2 }}</td>
+                            <td>
+                                <span class="trend-indicator {{ category.trend }}">
+                                    {% if category.trend == 'up' %}
+                                        ↑ {{ category.trend_percent }}%
+                                    {% elif category.trend == 'down' %}
+                                        ↓ {{ category.trend_percent }}%
+                                    {% else %}
+                                        → {{ category.trend_percent }}%
+                                    {% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

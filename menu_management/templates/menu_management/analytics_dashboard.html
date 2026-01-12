@@ -1,0 +1,395 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics Dashboard - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analytics-container {
+        padding: 2rem;
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+    
+    .analytics-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .metric-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-left: 4px solid #667eea;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+    
+    .metric-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+    
+    .metric-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .metric-change {
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+    
+    .metric-change.positive {
+        color: #28a745;
+    }
+    
+    .metric-change.negative {
+        color: #dc3545;
+    }
+    
+    .chart-container {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #667eea;
+    }
+    
+    .table-responsive {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+    
+    .analytics-table {
+        margin: 0;
+    }
+    
+    .analytics-table th {
+        background: #667eea;
+        color: white;
+        font-weight: 600;
+        border: none;
+        padding: 1rem;
+    }
+    
+    .analytics-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #dee2e6;
+        vertical-align: middle;
+    }
+    
+    .analytics-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .date-range {
+        background: white;
+        padding: 1rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        text-align: center;
+        color: #333;  /* Add dark text color */
+    }
+    
+    .date-range strong {
+        color: #667eea;
+    }
+    
+    .progress-bar {
+        background: #e9ecef;
+        border-radius: 10px;
+        height: 8px;
+        overflow: hidden;
+        margin-top: 0.5rem;
+    }
+    
+    .progress-fill {
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        height: 100%;
+        transition: width 0.3s ease;
+    }
+    
+    .badge-analytics {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .badge-revenue {
+        background: #28a745;
+        color: white;
+    }
+    
+    .badge-orders {
+        background: #007bff;
+        color: white;
+    }
+    
+    .badge-views {
+        background: #ffc107;
+        color: #212529;
+    }
+    
+    .badge-conversion {
+        background: #17a2b8;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analytics-container">
+    <!-- Analytics Header -->
+    <div class="analytics-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-4 fw-bold mb-0">
+                    📊 Analytics Dashboard
+                </h1>
+                <p class="lead mb-0">
+                    Real-time restaurant performance metrics and insights
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="date-range">
+                    <strong>📅 Date Range:</strong><br>
+                    {{ date_range.start_date }} to {{ date_range.end_date }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overview Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="metric-card">
+                <div class="metric-value">
+                    ${{ analytics_data.overview.total_revenue|floatformat:2 }}
+                </div>
+                <div class="metric-label">Total Revenue</div>
+                <div class="metric-change positive">
+                    ↑ {{ analytics_data.overview.revenue_growth|floatformat:1 }}% growth
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="metric-card">
+                <div class="metric-value">
+                    {{ analytics_data.overview.total_orders }}
+                </div>
+                <div class="metric-label">Total Orders</div>
+                <div class="metric-change positive">
+                    ↑ {{ analytics_data.overview.order_growth|floatformat:1 }}% growth
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="metric-card">
+                <div class="metric-value">
+                    {{ analytics_data.overview.total_views }}
+                </div>
+                <div class="metric-label">Page Views</div>
+                <div class="metric-change">
+                    {{ analytics_data.overview.active_menu_items }} active items
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="metric-card">
+                <div class="metric-value">
+                    {{ analytics_data.overview.avg_conversion_rate|floatformat:1 }}%
+                </div>
+                <div class="metric-label">Conversion Rate</div>
+                <div class="metric-change">
+                    {{ analytics_data.overview.total_menu_items }} total items
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales Performance -->
+    <div class="chart-container">
+        <h2 class="section-title">💰 Sales Performance</h2>
+        
+        <!-- Top Items Table -->
+        <div class="table-responsive">
+            <table class="table analytics-table">
+                <thead>
+                    <tr>
+                        <th>Menu Item</th>
+                        <th>Revenue</th>
+                        <th>Orders</th>
+                        <th>Avg. Price</th>
+                        <th>Performance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in analytics_data.sales_performance.top_items %}
+                    <tr>
+                        <td>
+                            <strong>{{ item.menu_item__name }}</strong>
+                        </td>
+                        <td>
+                            <span class="badge badge-analytics badge-revenue">
+                                ${{ item.total_revenue|floatformat:2 }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge badge-analytics badge-orders">
+                                {{ item.total_orders }}
+                            </span>
+                        </td>
+                        <td>
+                            ${{ item.total_revenue|floatformat:2 }}
+                        </td>
+                        <td>
+                            Performance Data
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Menu Performance -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="chart-container">
+                <h2 class="section-title">🍽️ Menu Item Performance</h2>
+                
+                <div class="table-responsive">
+                    <table class="table analytics-table">
+                        <thead>
+                            <tr>
+                                <th>Menu Item</th>
+                                <th>Revenue</th>
+                                <th>Orders</th>
+                                <th>Views</th>
+                                <th>Conversion</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in analytics_data.menu_performance.menu_items %}
+                            <tr>
+                                <td>
+                                    <strong>{{ item.menu_item__name }}</strong>
+                                </td>
+                                <td>
+                                    <span class="badge badge-analytics badge-revenue">
+                                        ${{ item.total_revenue|floatformat:2 }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-analytics badge-orders">
+                                        {{ item.total_orders }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-analytics badge-views">
+                                        {{ item.total_views }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-analytics badge-conversion">
+                                        {{ item.avg_conversion_rate|floatformat:1 }}%
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="chart-container">
+                <h2 class="section-title">📋 Category Performance</h2>
+                
+                {% for category in analytics_data.menu_performance.categories %}
+                <div class="mb-3">
+                    <h6>{{ category.category }}</h6>
+                    <div class="d-flex justify-content-between mb-2">
+                        <small>Revenue: ${{ category.revenue|floatformat:2 }}</small>
+                        <small>Orders: {{ category.orders }}</small>
+                    </div>
+                    <div class="progress-bar">
+                        Category Performance
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="chart-container">
+                <h2 class="section-title">📈 Summary Statistics</h2>
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        <h4 class="text-primary">{{ analytics_data.menu_performance.total_items }}</h4>
+                        <p class="text-muted">Total Menu Items</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h4 class="text-success">${{ analytics_data.sales_performance.total_revenue|floatformat:2 }}</h4>
+                        <p class="text-muted">Total Revenue</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h4 class="text-info">{{ analytics_data.sales_performance.total_orders }}</h4>
+                        <p class="text-muted">Total Orders</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h4 class="text-warning">{{ analytics_data.menu_performance.categories|length }}</h4>
+                        <p class="text-muted">Menu Categories</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Access Info -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="alert alert-info">
+                <h5>🔗 API Access</h5>
+                <p class="mb-0">
+                    <strong>JSON Data Available at:</strong> 
+                    <code>/menu-management/analytics/data/?type=overview|sales|menu</code>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

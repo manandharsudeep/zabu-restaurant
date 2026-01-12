@@ -1,0 +1,542 @@
+{% extends 'base.html' %}
+
+{% block title %}Intelligent Search - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .search-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+    
+    .search-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    
+    .search-header h1 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        font-size: 2.5rem;
+    }
+    
+    .search-header p {
+        color: #6c757d;
+        font-size: 1.1rem;
+    }
+    
+    .search-box-container {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 1rem 3rem 1rem 1rem;
+        font-size: 1.2rem;
+        border: 3px solid #e9ecef;
+        border-radius: 50px;
+        outline: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .search-input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 4px rgba(0,123,255,0.1), 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .search-icon {
+        position: absolute;
+        right: 1.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-size: 1.2rem;
+    }
+    
+    .suggestions-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        margin-top: 0.5rem;
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+    }
+    
+    .suggestion-item {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #f8f9fa;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    
+    .suggestion-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .suggestion-item:last-child {
+        border-bottom: none;
+    }
+    
+    .suggestion-title {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+    }
+    
+    .suggestion-desc {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .search-results {
+        margin-top: 2rem;
+    }
+    
+    .result-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-left: 4px solid #007bff;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .result-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .result-category {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: #007bff;
+        color: white;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .result-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .result-description {
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+    
+    .result-similarity {
+        color: #28a745;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    
+    .no-results {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+    
+    .no-results i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .quick-action-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .quick-action-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .quick-action-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: #007bff;
+    }
+    
+    .quick-action-title {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .quick-action-desc {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .search-tips {
+        background: #e3f2fd;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .search-tips h3 {
+        color: #1976d2;
+        margin-bottom: 1rem;
+    }
+    
+    .search-tips ul {
+        color: #424242;
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+    
+    .search-tips li {
+        margin-bottom: 0.5rem;
+    }
+    
+    .loading {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+    }
+    
+    .spinner {
+        display: inline-block;
+        width: 2rem;
+        height: 2rem;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #007bff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 1rem;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="search-container">
+    <div class="search-header">
+        <h1>🔍 Intelligent Search</h1>
+        <p>Ask anything in natural language - "new vendor", "create purchase order", "staff schedule", etc.</p>
+    </div>
+    
+    <div class="search-box-container">
+        <form id="searchForm">
+            <input 
+                type="text" 
+                id="searchInput" 
+                class="search-input" 
+                placeholder="Try: 'new vendor', 'purchase order', 'staff tasks', 'inventory reports'..."
+                autocomplete="off"
+            >
+            <span class="search-icon">🔍</span>
+        </form>
+        
+        <div id="suggestionsDropdown" class="suggestions-dropdown"></div>
+    </div>
+    
+    <div id="searchResults" class="search-results">
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="/menu-management/inventory/purchase-orders/create/" class="quick-action-card">
+                <div class="quick-action-icon">📋</div>
+                <div class="quick-action-title">New Purchase Order</div>
+                <div class="quick-action-desc">Create purchase order for vendor</div>
+            </a>
+            
+            <a href="/menu-management/inventory/items/" class="quick-action-card">
+                <div class="quick-action-icon">📦</div>
+                <div class="quick-action-title">Inventory Items</div>
+                <div class="quick-action-desc">Manage inventory stock</div>
+            </a>
+            
+            <a href="/menu-management/staff/tasks/create/" class="quick-action-card">
+                <div class="quick-action-icon">✅</div>
+                <div class="quick-action-title">Create Task</div>
+                <div class="quick-action-desc">Assign task to staff</div>
+            </a>
+            
+            <a href="/menu-management/recipes/create/" class="quick-action-card">
+                <div class="quick-action-icon">👨‍🍳</div>
+                <div class="quick-action-title">New Recipe</div>
+                <div class="quick-action-desc">Add new recipe</div>
+            </a>
+            
+            <a href="/menu-management/staff/scheduling/" class="quick-action-card">
+                <div class="quick-action-icon">📅</div>
+                <div class="quick-action-title">Staff Schedule</div>
+                <div class="quick-action-desc">Manage staff shifts</div>
+            </a>
+            
+            <a href="/menu-management/analytics/" class="quick-action-card">
+                <div class="quick-action-icon">📊</div>
+                <div class="quick-action-title">Analytics</div>
+                <div class="quick-action-desc">View reports & insights</div>
+            </a>
+        </div>
+        
+        <!-- Search Tips -->
+        <div class="search-tips">
+            <h3>💡 Search Tips</h3>
+            <ul>
+                <li><strong>Natural Language:</strong> Type "new vendor" instead of searching for exact function names</li>
+                <li><strong>Partial Matches:</strong> "purch" will find "purchase order", "vendor", etc.</li>
+                <li><strong>Common Terms:</strong> Try "inventory", "staff", "menu", "reports", "analytics"</li>
+                <li><strong>Action Words:</strong> "create", "add", "new", "manage", "view", "track"</li>
+                <li><strong>Examples:</strong> "input purchases", "vendor management", "staff scheduling", "waste tracking"</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let searchTimeout;
+let currentSuggestions = [];
+
+// Search functionality
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    const query = e.target.value.trim();
+    
+    // Clear previous timeout
+    clearTimeout(searchTimeout);
+    
+    if (query.length < 2) {
+        hideSuggestions();
+        return;
+    }
+    
+    // Show loading state
+    searchTimeout = setTimeout(() => {
+        fetchSuggestions(query);
+    }, 300);
+});
+
+// Form submission
+document.getElementById('searchForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const query = document.getElementById('searchInput').value.trim();
+    
+    if (query.length >= 2) {
+        performSearch(query);
+    }
+});
+
+// Click outside to hide suggestions
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.search-box-container')) {
+        hideSuggestions();
+    }
+});
+
+function fetchSuggestions(query) {
+    fetch(`/menu-management/public-search/suggestions/?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            currentSuggestions = data.suggestions;
+            showSuggestions(data.suggestions);
+        })
+        .catch(error => {
+            console.error('Error fetching suggestions:', error);
+        });
+}
+
+function showSuggestions(suggestions) {
+    const dropdown = document.getElementById('suggestionsDropdown');
+    
+    if (suggestions.length === 0) {
+        hideSuggestions();
+        return;
+    }
+    
+    dropdown.innerHTML = suggestions.map(suggestion => `
+        <div class="suggestion-item" onclick="selectSuggestion('${suggestion.text}', '${suggestion.url}')">
+            <div class="suggestion-title">${suggestion.text}</div>
+            <div class="suggestion-desc">${suggestion.description}</div>
+        </div>
+    `).join('');
+    
+    dropdown.style.display = 'block';
+}
+
+function hideSuggestions() {
+    document.getElementById('suggestionsDropdown').style.display = 'none';
+}
+
+function selectSuggestion(text, url) {
+    document.getElementById('searchInput').value = text;
+    hideSuggestions();
+    window.location.href = url;
+}
+
+function performSearch(query) {
+    const resultsContainer = document.getElementById('searchResults');
+    
+    // Show loading state
+    resultsContainer.innerHTML = `
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Searching...</p>
+        </div>
+    `;
+    
+    fetch('/menu-management/public-search/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: `query=${encodeURIComponent(query)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        displayResults(data.results, data.query);
+    })
+    .catch(error => {
+        console.error('Error performing search:', error);
+        resultsContainer.innerHTML = `
+            <div class="no-results">
+                <i>❌</i>
+                <h3>Error performing search</h3>
+                <p>Please try again later.</p>
+            </div>
+        `;
+    });
+}
+
+function displayResults(results, query) {
+    const resultsContainer = document.getElementById('searchResults');
+    
+    if (results.length === 0) {
+        resultsContainer.innerHTML = `
+            <div class="no-results">
+                <i>🔍</i>
+                <h3>No results found</h3>
+                <p>Try different keywords like: "purchase order", "inventory", "staff", "menu"</p>
+                <div class="quick-actions">
+                    <a href="/menu-management/inventory/purchase-orders/create/" class="quick-action-card">
+                        <div class="quick-action-icon">📋</div>
+                        <div class="quick-action-title">New Purchase Order</div>
+                        <div class="quick-action-desc">Create purchase order for vendor</div>
+                    </a>
+                    <a href="/menu-management/inventory/items/" class="quick-action-card">
+                        <div class="quick-action-icon">📦</div>
+                        <div class="quick-action-title">Inventory Items</div>
+                        <div class="quick-action-desc">Manage inventory stock</div>
+                    </a>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    const resultsHTML = `
+        <div style="margin-bottom: 2rem;">
+            <h3>Results for "${query}"</h3>
+            <p style="color: #6c757d;">Found ${results.length} matching functions</p>
+        </div>
+        <div class="search-results">
+            ${results.map(result => `
+                <div class="result-card" onclick="window.location.href='${result.url}'">
+                    <div class="result-category">${result.category}</div>
+                    <div class="result-title">${result.title}</div>
+                    <div class="result-description">${result.description}</div>
+                    <div class="result-similarity">Match: ${Math.round(result.similarity * 100)}%</div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+    
+    resultsContainer.innerHTML = resultsHTML;
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Keyboard navigation
+document.getElementById('searchInput').addEventListener('keydown', function(e) {
+    const dropdown = document.getElementById('suggestionsDropdown');
+    const suggestions = dropdown.querySelectorAll('.suggestion-item');
+    
+    if (e.key === 'ArrowDown' && suggestions.length > 0) {
+        e.preventDefault();
+        // Focus first suggestion if none focused
+        if (!dropdown.querySelector('.suggestion-item.focused')) {
+            suggestions[0].classList.add('focused');
+        } else {
+            // Move to next suggestion
+            const focused = dropdown.querySelector('.suggestion-item.focused');
+            const nextIndex = Array.from(suggestions).indexOf(focused) + 1;
+            focused.classList.remove('focused');
+            if (nextIndex < suggestions.length) {
+                suggestions[nextIndex].classList.add('focused');
+            }
+        }
+    } else if (e.key === 'ArrowUp' && suggestions.length > 0) {
+        e.preventDefault();
+        const focused = dropdown.querySelector('.suggestion-item.focused');
+        if (focused) {
+            const prevIndex = Array.from(suggestions).indexOf(focused) - 1;
+            focused.classList.remove('focused');
+            if (prevIndex >= 0) {
+                suggestions[prevIndex].classList.add('focused');
+            }
+        }
+    } else if (e.key === 'Enter' && dropdown.querySelector('.suggestion-item.focused')) {
+        e.preventDefault();
+        const focused = dropdown.querySelector('.suggestion-item.focused');
+        focused.click();
+    } else if (e.key === 'Escape') {
+        hideSuggestions();
+    }
+});
+</script>
+{% endblock %}

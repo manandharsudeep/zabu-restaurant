@@ -1,0 +1,377 @@
+{% extends 'base.html' %}
+
+{% block title %}Comprehensive Management Dashboard - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .phase-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .phase-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border-left: 4px solid #667eea;
+    }
+    
+    .phase-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .phase-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .phase-icon {
+        font-size: 2rem;
+        margin-right: 1rem;
+    }
+    
+    .phase-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .phase-number {
+        background: #667eea;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        margin-left: auto;
+    }
+    
+    .phase-description {
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+    
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .metric-item {
+        text-align: center;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+    
+    .metric-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .metric-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .recent-activity {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .activity-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .activity-text {
+        font-size: 0.9rem;
+        color: #333;
+    }
+    
+    .activity-time {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .phase-status {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .phase-active {
+        background: #28a745;
+        color: white;
+    }
+    
+    .phase-pending {
+        background: #ffc107;
+        color: #333;
+    }
+    
+    .phase-inactive {
+        background: #6c757d;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="display-5">🚀 Comprehensive Management Dashboard</h1>
+            <p class="lead">Complete control center for all restaurant operations phases</p>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Phase 1: POS and Delivery Platform Integration -->
+    <div class="phase-grid">
+        <div class="phase-card">
+            <div class="phase-header">
+                <span class="phase-icon">🔄</span>
+                <h3 class="phase-title">Phase 1: Platform Integration</h3>
+                <span class="phase-number">1</span>
+            </div>
+            <p class="phase-description">POS systems and delivery platform integration with real-time synchronization</p>
+            
+            <div class="metrics-grid">
+                <div class="metric-item">
+                    <div class="metric-number">{{ pos_integrations }}</div>
+                    <div class="metric-label">POS Integrations</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-number">{{ delivery_platforms }}</div>
+                    <div class="metric-label">Delivery Platforms</div>
+                </div>
+            </div>
+            
+            <div class="recent-activity">
+                <h4>Recent Activity</h4>
+                {% for sync in recent_syncs %}
+                <div class="activity-item">
+                    <span class="activity-text">{{ sync.pos_integration.get_pos_system_display }} sync</span>
+                    <span class="activity-time">{{ sync.sync_time|timesince }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Phase 2: Real-time Order Management -->
+    <div class="phase-grid">
+        <div class="phase-card">
+            <div class="phase-header">
+                <span class="phase-icon">📊</span>
+                <h3 class="phase-title">Phase 2: Order Management</h3>
+                <span class="phase-number">2</span>
+            </div>
+            <p class="phase-description">Unified order queue with real-time tracking and intelligent batching</p>
+            
+            <div class="metrics-grid">
+                <div class="metric-item">
+                    <div class="metric-number">{{ active_orders }}</div>
+                    <div class="metric-label">Active Orders</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-number">{{ completed_orders }}</div>
+                    <div class="metric-label">Completed Today</div>
+                </div>
+            </div>
+            
+            <div class="recent-activity">
+                <h4>Recent Orders</h4>
+                {% for order in recent_orders %}
+                <div class="activity-item">
+                    <span class="activity-text">{{ order.brand.name }} - {{ order.get_status_display }}</span>
+                    <span class="activity-time">{{ order.order_time|timesince }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Phase 3: Advanced Scheduling and Kitchen Optimization -->
+    <div class="phase-grid">
+        <div class="phase-card">
+            <div class="phase-header">
+                <span class="phase-icon">⚡</span>
+                <h3 class="phase-title">Phase 3: Optimization</h3>
+                <span class="phase-number">3</span>
+            </div>
+            <p class="phase-description">Advanced scheduling algorithms and kitchen layout optimization</p>
+            
+            <div class="metrics-grid">
+                <div class="metric-item">
+                    <div class="metric-number">{{ schedule_optimizations }}</div>
+                    <div class="metric-label">Schedule Optimizations</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-number">{{ kitchen_layouts }}</div>
+                    <div class="metric-label">Kitchen Layouts</div>
+                </div>
+            </div>
+            
+            <div class="recent-activity">
+                <h4>Recent Optimizations</h4>
+                {% for optimization in schedule_optimizations %}
+                <div class="activity-item">
+                    <span class="activity-text">{{ optimization.brand.name }} - {{ optimization.get_optimization_type_display }}</span>
+                    <span class="activity-time">{{ optimization.created_at|timesince }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Phase 4: Multi-Location Cloud Kitchen Network -->
+    <div class="phase-grid">
+        <div class="phase-card">
+            <div class="phase-header">
+                <span class="phase-icon">🌐</span>
+                <h3 class="phase-title">Phase 4: Multi-Location</h3>
+                <span class="phase-number">4</span>
+            </div>
+            <p class="phase-description">Cloud kitchen network with hub-and-spoke operations</p>
+            
+            <div class="metrics-grid">
+                <div class="metric-item">
+                    <div class="metric-number">{{ cloud_kitchens }}</div>
+                    <div class="metric-label">Active Kitchens</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-number">{{ central_kitchens }}</div>
+                    <div class="metric-label">Central Kitchens</div>
+                </div>
+            </div>
+            
+            <div class="recent-activity">
+                <h4>Location Status</h4>
+                {% for location in cloud_kitchens %}
+                <div class="activity-item">
+                    <span class="activity-text">{{ location.name }} - {{ location.get_status_display }}</span>
+                    <span class="activity-time">{{ location.created_at|timesince }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>⚡ Quick Actions</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'menu_management:pos_integration_dashboard' %}" class="btn btn-primary btn-block">
+                                🔄 POS Integration
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'menu_management:delivery_platform_dashboard' %}" class="btn btn-success btn-block">
+                                📱 Delivery Platforms
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'menu_management:unified_order_queue' %}" class="btn btn-info btn-block">
+                                📊 Order Queue
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'menu_management:advanced_scheduling_dashboard' %}" class="btn btn-warning btn-block">
+                                ⚡ Scheduling
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'menu_management:kitchen_layout_designer' %}" class="btn btn-secondary btn-block">
+                                🏗️ Kitchen Layout
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'menu_management:packaging_management_dashboard' %}" class="btn btn-outline-primary btn-block">
+                                📦 Packaging
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'menu_management:multi_location_dashboard' %}" class="btn btn-outline-success btn-block">
+                                🌐 Multi-Location
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'menu_management:hub_and_spoke_operations' %}" class="btn btn-outline-info btn-block">
+                                🏭 Hub-and-Spoke
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Real-time Updates -->
+<script>
+// Real-time metrics updates
+setInterval(() => {
+    fetch('/menu_management/api/real-time/metrics/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update metrics
+                document.querySelector('.metric-number').forEach((element, index) => {
+                    if (index === 0) element.textContent = data.metrics.active_orders;
+                    if (index === 1) element.textContent = data.metrics.completed_today;
+                    if (index === 2) element.textContent = data.metrics.today_revenue;
+                    if (index === 3) element.textContent = data.metrics.active_platforms;
+                    if (index === 4) element.textContent = data.metrics.active_kitchens;
+                });
+            }
+        })
+        .catch(error => console.error('Error fetching metrics:', error));
+}, 30000); // Update every 30 seconds
+
+// Order queue updates
+setInterval(() => {
+    fetch('/menu_management/api/real-time/order-queue/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update order queue display
+                console.log('Order queue updated:', data.orders);
+            }
+        })
+        .catch(error => console.error('Error fetching order queue:', error));
+}, 15000); // Update every 15 seconds
+</script>
+{% endblock %}

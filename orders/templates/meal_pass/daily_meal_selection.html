@@ -1,0 +1,2280 @@
+{% extends 'base.html' %}
+
+{% block title %}Daily Meal Selection - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .selection-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 0;
+        text-align: center;
+        border-radius: 0 0 30px 30px;
+    }
+    
+    .selection-section {
+        padding: 60px 0;
+        background: white;
+    }
+    
+    .date-selector {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        text-align: center;
+    }
+    
+    .date-display {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 1rem;
+    }
+    
+    .date-nav {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .date-nav button {
+        background: #667eea;
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .date-nav button:hover {
+        background: #5a32a3;
+        color: white;
+    }
+    
+    .meal-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+    
+    .meal-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border-left: 4px solid #667eea;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .meal-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    
+    .meal-card.selected {
+        border-left-color: #28a745;
+        background: #f8fff8;
+    }
+    
+    .meal-card.selected::before {
+        content: "✓ SELECTED";
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #28a745;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .meal-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 1rem;
+    }
+    
+    .meal-description {
+        color: #666;
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+    
+    .meal-price {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+    
+    .meal-pricing {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .regular-price {
+        font-size: 1.1rem;
+        color: #999;
+        text-decoration: line-through;
+    }
+    
+    .meal-pass-price {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #28a745;
+    }
+    
+    .savings-badge {
+        background: #ffc107;
+        color: #333;
+        padding: 0.25rem 0.5rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-align: center;
+    }
+    
+    .meal-includes {
+        background: #e9ecef;
+        padding: 0.75rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 1rem;
+    }
+    
+    .bulk-selection-options {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 2px dashed #667eea;
+    }
+    
+    .bulk-selection-options h4 {
+        color: #667eea;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+    
+    .bulk-option-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .bulk-option-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+    }
+    
+    .bulk-option-card h5 {
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .bulk-option-card p {
+        color: #666;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .btn-bulk-select {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    
+    .btn-bulk-select:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        color: white;
+    }
+    
+    .meal-navigation {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e9ecef;
+    }
+    
+    .btn-nav {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-nav:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+        color: white;
+    }
+    
+    .btn-select-all {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        border: none;
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        box-shadow: 0 4px 15px rgba(238, 88, 88, 0.2);
+    }
+    
+    .btn-select-all:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(238, 88, 88, 0.3);
+        color: white;
+    }
+    
+    .meal-assignments {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .assignments-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .assignment-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        padding: 1.5rem;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .assignment-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .assignment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .assignment-header h4 {
+        color: #667eea;
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    
+    .assignment-date {
+        background: #667eea;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    
+    .assignment-meal h5 {
+        color: #333;
+        margin: 0 0 1rem 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    
+    .assignment-pricing {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .assignment-status {
+        text-align: center;
+    }
+    
+    .status-processing {
+        background: #ffc107;
+        color: #856404;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        display: inline-block;
+    }
+    
+    .status-success {
+        background: #28a745;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        display: inline-block;
+    }
+    
+    .status-error {
+        background: #dc3545;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        display: inline-block;
+    }
+    
+    .assignments-summary {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e9ecef;
+    }
+    
+    .summary-card h4 {
+        color: #333;
+        margin: 0 0 1rem 0;
+        font-size: 1.2rem;
+    }
+    
+    .summary-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .summary-item:last-child {
+        border-bottom: none;
+    }
+    
+    .summary-item.savings {
+        background: #d4edda;
+        padding: 0.75rem;
+        border-radius: 10px;
+        border: none;
+        color: #155724;
+        font-weight: bold;
+    }
+    
+    .assignments-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .btn-back {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-back:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+        color: white;
+    }
+    
+    .auto-restore-notice {
+        margin-bottom: 2rem;
+    }
+    
+    .auto-restore-notice .alert {
+        border-radius: 15px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 0;
+    }
+    
+    .auto-restore-notice .alert strong {
+        font-size: 1.1rem;
+    }
+    
+    #countdown {
+        font-weight: bold;
+        color: #667eea;
+        font-size: 1.2rem;
+    }
+    
+    .confirmed-selections {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .success-message {
+        margin-bottom: 2rem;
+    }
+    
+    .success-message .alert {
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 0;
+    }
+    
+    .assignment-card.confirmed {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        border: 2px solid #28a745;
+    }
+    
+    .assignment-card.confirmed:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.2);
+    }
+    
+    .weekly-meal-plan {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .plan-navigation {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .btn-nav-plan {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 0.9rem;
+    }
+    
+    .btn-nav-plan:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        color: white;
+    }
+    
+    .days-container {
+        max-height: 600px;
+        overflow-y: auto;
+        padding: 1rem;
+        border: 1px solid #e9ecef;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+    }
+    
+    .day-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .day-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .day-card.highlighted {
+        border-color: #667eea;
+        box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .day-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .day-header h4 {
+        color: #667eea;
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    
+    .day-date {
+        background: #667eea;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    
+    .day-meal h5 {
+        color: #333;
+        margin: 0 0 1rem 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    
+    .day-pricing {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .day-actions {
+        text-align: center;
+    }
+    
+    .btn-change-meal {
+        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-change-meal:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+        color: white;
+    }
+    
+    .btn-confirm-plan {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+    }
+    
+    .btn-confirm-plan:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+        color: white;
+    }
+    
+    .meal-selection-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10001;
+    }
+    
+    .modal-content {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .modal-header h4 {
+        color: #333;
+        margin: 0;
+        font-size: 1.3rem;
+    }
+    
+    .btn-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #666;
+        padding: 0.5rem;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .btn-close:hover {
+        background: #f8f9fa;
+        color: #333;
+    }
+    
+    .modal-body {
+        margin-bottom: 1.5rem;
+    }
+    
+    .meal-options-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .meal-option-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        padding: 1rem;
+        border: 2px solid #e9ecef;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .meal-option-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .meal-option-card.selected {
+        border-color: #28a745;
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    }
+    
+    .meal-option-card h5 {
+        color: #333;
+        margin: 0 0 0.5rem 0;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+    
+    .meal-option-pricing {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .modal-footer {
+        text-align: right;
+        padding-top: 1rem;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    /* Meal Details Modal Styles */
+    .meal-details-content {
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+    
+    .meal-details-pricing {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .pricing-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .pricing-row:last-child {
+        margin-bottom: 0;
+    }
+    
+    .price-label {
+        font-weight: 600;
+        color: #666;
+    }
+    
+    .price-value {
+        font-weight: 700;
+    }
+    
+    .meal-details-description,
+    .meal-details-includes,
+    .meal-details-nutrition,
+    .meal-details-allergens {
+        margin-bottom: 1.5rem;
+    }
+    
+    .meal-details-description h5,
+    .meal-details-includes h5,
+    .meal-details-nutrition h5,
+    .meal-details-allergens h5 {
+        color: #333;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+    }
+    
+    .nutrition-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+    
+    .nutrition-item {
+        background: #f8f9fa;
+        padding: 0.75rem;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .nutrition-label {
+        display: block;
+        font-size: 0.85rem;
+        color: #666;
+        margin-bottom: 0.25rem;
+    }
+    
+    .nutrition-value {
+        display: block;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .meal-header {
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+    
+    .meal-header:hover {
+        transform: translateY(-2px);
+    }
+    
+    .meal-header:hover h4 {
+        color: #667eea;
+    }
+    
+    .meal-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+    
+    .meal-image-placeholder {
+        width: 100%;
+        height: 200px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+    
+    .btn-select {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        width: 100%;
+        text-align: center;
+    }
+    
+    .btn-select:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        color: white;
+    }
+    
+    .btn-select:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+    }
+    
+    .btn-select:disabled:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .btn-back {
+        background: #6c757d;
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        margin-right: 1rem;
+    }
+    
+    .btn-back:hover {
+        background: #5a6268;
+        color: white;
+    }
+    
+    .subscription-info {
+        background: #e9ecef;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .subscription-name {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .meals-remaining {
+        color: #667eea;
+        font-weight: 600;
+    }
+    
+    .alert {
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .alert-success {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+    
+    .alert-warning {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        color: #856404;
+    }
+    
+    .alert-danger {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+    
+    .existing-selection {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .existing-selection h4 {
+        color: #155724;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Selection Hero -->
+<section class="selection-hero">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3">🍽️ Daily Meal Selection</h1>
+        <p class="lead">Choose your meal for today from our delicious options</p>
+        {% if selected_subscription %}
+        <div class="alert alert-light mt-3">
+            <strong>🎫 Using:</strong> {{ selected_subscription.meal_pass.name }} 
+            <span class="badge bg-primary ms-2">{{ selected_subscription.meals_remaining }} meals remaining</span>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Selection Section -->
+<section class="selection-section">
+    <div class="container">
+        <!-- Date Selector -->
+        <div class="date-selector">
+            <div class="date-display">
+                📅 {{ target_date|date:"l, F j, Y" }}
+            </div>
+            <div class="date-nav">
+                <a href="{% url 'daily_meal_selection' previous_date|date:'Y-m-d' %}" class="btn">← Previous Day</a>
+                {% if target_date == today %}
+                    <button class="btn" disabled>Today</button>
+                {% else %}
+                    <a href="{% url 'daily_meal_selection_today' %}" class="btn">Today</a>
+                {% endif %}
+                <a href="{% url 'daily_meal_selection' next_date|date:'Y-m-d' %}" class="btn">Next Day →</a>
+            </div>
+        </div>
+        
+        <!-- Active Subscription Info -->
+        {% for subscription in active_subscriptions %}
+        <div class="subscription-info">
+            <div class="subscription-name">{{ subscription.meal_pass.name }}</div>
+            <div class="meals-remaining">Meals remaining: {{ subscription.meals_remaining }}</div>
+        </div>
+        {% endfor %}
+        
+        <!-- Existing Selection -->
+        {% if existing_selection %}
+        <div class="existing-selection">
+            <h4>✅ Already Selected</h4>
+            <p>You have already selected <strong>{{ existing_selection.selected_meal.name }}</strong> for today.</p>
+            <p class="mb-0">You can change your selection if needed.</p>
+        </div>
+        {% endif %}
+        
+        <!-- Alert Messages -->
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+        
+        <!-- Meal Selection Cards -->
+        <div class="meal-selection">
+            <h3>🍽️ Select Your Meals</h3>
+            <p class="text-muted mb-4">Choose your meals according to your meal pass plan. Select for multiple days at once!</p>
+            
+            <!-- Quick Actions -->
+            {% if bulk_options %}
+            <div class="meal-navigation mb-4">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <button class="btn-select-all" onclick="selectAllMeals()">
+                            ⚡ Select All 7 Days
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="row">
+                {% for meal in available_meals %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="meal-card" id="meal-{{ meal.id }}" data-meal-id="{{ meal.id }}">
+                        <div class="meal-header" onclick="showMealDetails({{ meal.id }})">
+                            <h4>{{ meal.name }}</h4>
+                            <div class="meal-pricing">
+                                <span class="regular-price">Nrs {{ meal.price }}</span>
+                                <span class="meal-pass-price">Nrs 300</span>
+                                <span class="savings-badge">Save Nrs {{ meal.savings }}</span>
+                            </div>
+                        </div>
+                        <div class="meal-body">
+                            <p class="meal-description">{{ meal.description }}</p>
+                            <div class="meal-includes">
+                                <strong>Includes:</strong> Complete meal with multiple dishes, sides, and dessert
+                            </div>
+                            {% if existing_selection and existing_selection.selected_meal.id == meal.id %}
+                            <div class="selected-badge">
+                                ✅ Already Selected
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="meal-footer">
+                            <button class="btn-select-meal {% if existing_selection and existing_selection.selected_meal.id == meal.id %}disabled{% endif %}" 
+                                    id="btn-{{ meal.id }}"
+                                    onclick="selectMeal({{ meal.id }})"
+                                    {% if existing_selection and existing_selection.selected_meal.id == meal.id %}disabled{% endif %}>
+                                {% if existing_selection and existing_selection.selected_meal.id == meal.id %}
+                                    Already Selected
+                                {% else %}
+                                    Select This Full Meal
+                                {% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="text-center">
+            <a href="{% url 'meal_pass_dashboard' %}" class="btn-back">← Back to Dashboard</a>
+            <button type="button" class="btn-select" id="confirm-selection" disabled>Confirm Selection</button>
+        </div>
+    </div>
+</section>
+
+<script>
+// Pass existing selections data from Django to JavaScript
+window.existingSelections = {{ existing_selections|safe }};
+window.remainingDays = {{ remaining_days }};
+
+let selectedMealId = null;
+let selectedMealName = null;
+let bulkSelectionDays = null;
+let storedMealData = []; // Store meal data for confirmed selections
+
+function selectMeal(mealId) {
+    // Remove previous selection
+    document.querySelectorAll('.meal-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    // Add selection to clicked card
+    const card = document.getElementById(`meal-${mealId}`);
+    card.classList.add('selected');
+    
+    // Update selected meal info
+    selectedMealId = mealId;
+    selectedMealName = card.querySelector('h4').textContent;
+    
+    // Enable confirm button
+    document.getElementById('confirm-selection').disabled = false;
+    
+    // Update all select buttons
+    document.querySelectorAll('.btn-select-meal').forEach(btn => {
+        if (btn.id === `btn-${mealId}`) {
+            btn.textContent = '✓ Selected';
+            btn.disabled = true;
+        } else {
+            btn.textContent = 'Select This Full Meal';
+            btn.disabled = false;
+        }
+    });
+}
+
+function debugMealCards() {
+    console.log('=== DEBUG: Meal Cards Debug ===');
+    const mealCards = document.querySelectorAll('.meal-card');
+    console.log('Found meal cards:', mealCards.length);
+    
+    if (mealCards.length === 0) {
+        console.log('❌ No meal cards found');
+        console.log('Available elements with class "meal-card":');
+        const allElements = document.querySelectorAll('*');
+        const mealCardElements = Array.from(allElements).filter(el => el.classList && el.classList.contains('meal-card'));
+        console.log('Elements with meal-card class:', mealCardElements.length);
+        
+        // Check if meal cards are in a specific container
+        const mealSelection = document.querySelector('.meal-selection');
+        if (mealSelection) {
+            console.log('Found meal-selection container');
+            const cardsInContainer = mealSelection.querySelectorAll('.meal-card');
+            console.log('Meal cards in container:', cardsInContainer.length);
+        }
+    } else {
+        console.log('✅ Found meal cards:', mealCards.length);
+        mealCards.forEach((card, index) => {
+            console.log(`Card ${index}:`, {
+                id: card.id,
+                mealId: card.dataset.mealId,
+                name: card.querySelector('h4')?.textContent || 'No h4 found',
+                price: card.querySelector('.regular-price')?.textContent || 'No price found',
+                savings: card.querySelector('.savings-badge')?.textContent || 'No savings found'
+            });
+        });
+    }
+}
+
+function selectAllMeals() {
+    // Clear any background auto-restore processes
+    clearAutoRestore();
+    
+    // Debug first
+    debugMealCards();
+    
+    // Get existing selections from window variables
+    const existingSelections = window.existingSelections || {};
+    const remainingDays = window.remainingDays || 7;
+    
+    if (remainingDays === 0) {
+        alert('You have already selected meals for all 7 days!');
+        return;
+    }
+    
+    // Select meals for remaining days using weekly recipes
+    if (confirm(`This will select different weekly recipes for the remaining ${remainingDays} days. Continue?`)) {
+        // Weekly recipes organized by day
+        const weeklyRecipes = {
+            'Sunday': [
+                'Butter Chicken', 'Paneer Butter Masala', 'Garlic Chicken Sauce', 'Veg Manchurian',
+                'Red Curry (Chicken)', 'Red Curry (Vegetarian)', 'White Sauce Spaghetti (Chicken)', 'White Sauce Spaghetti (Vegetarian)'
+            ],
+            'Monday': [
+                'Chicken Lababdar', 'Mutter Paneer', 'Hot & Sour Chicken', 'Tempura Tofu',
+                'Green Curry (Chicken)', 'Green Curry (Vegetarian)', 'Mac & Cheese (Chicken)', 'Mac & Cheese (Vegetarian)'
+            ],
+            'Tuesday': [
+                'Korma Curry (Paneer)', 'Korma Curry (Chicken)', 'Mayo Tofu Chilly', 'Potato Tofu Fry',
+                'Korean Veg Fried Rice', 'Pad Thai (Chicken)', 'Pad Thai (Vegetarian)'
+            ],
+            'Wednesday': [
+                'Chicken Kathi Roll', 'Veg Kathi Roll', 'Teriyaki Chicken', 'Teriyaki Vegetables',
+                'Creamy Garlic Chicken Butter Rice', 'Creamy Spinach Mushroom Sauce'
+            ],
+            'Thursday': [
+                'Chicken Rogan Josh', 'Chana Masala', 'Chicken Chowmein', 'Vegetable Chowmein',
+                'Red Curry (Chicken) - Thursday', 'Red Curry (Vegetarian) - Thursday'
+            ],
+            'Friday': [
+                'Chicken Biryani', 'Vegetable Biryani', 'Honey Glazed Chicken', 'Honey Glazed Tofu',
+                'Red Sauce Spaghetti (Chicken)', 'Red Sauce Spaghetti (Vegetarian)'
+            ]
+        };
+        
+        // Get current day and map to weekly recipes
+        const today = new Date();
+        const currentDayIndex = today.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        
+        // Create meal plan for remaining days only
+        const weeklyPlan = [];
+        let dayCounter = 1;
+        
+        for (let i = 0; i < 7; i++) {
+            const date = new Date();
+            date.setDate(date.getDate() + i);
+            const dateStr = date.toISOString().split('T')[0];
+            
+            // Skip if already selected
+            if (existingSelections[dateStr]) {
+                console.log(`Skipping ${dateStr} - already selected: ${existingSelections[dateStr]}`);
+                continue;
+            }
+            
+            const dayIndex = (currentDayIndex + i) % 7;
+            const dayName = dayNames[dayIndex];
+            
+            // Get recipes for this day (use Sunday's recipes for Saturday)
+            const availableMeals = weeklyRecipes[dayName] || weeklyRecipes['Sunday'];
+            const recipeIndex = (dayCounter - 1) % availableMeals.length;
+            const recipeName = availableMeals[recipeIndex];
+            
+            weeklyPlan.push({
+                day: dayCounter,
+                date: dateStr,
+                dateDisplay: formatDate(dateStr),
+                mealName: recipeName,
+                mealPrice: getRecipePrice(recipeName),
+                mealSavings: calculateSavings(getRecipePrice(recipeName))
+            });
+            
+            dayCounter++;
+        }
+        
+        // Show the meal plan with confirmation
+        showWeeklyMealPlan(weeklyPlan);
+    }
+}
+
+// Helper function to get recipe price
+function getRecipePrice(recipeName) {
+    const recipePrices = {
+        'Butter Chicken': 66,
+        'Paneer Butter Masala': 70,
+        'Garlic Chicken Sauce': 56,
+        'Veg Manchurian': 28,
+        'Red Curry (Chicken)': 61,
+        'Red Curry (Vegetarian)': 29,
+        'White Sauce Spaghetti (Chicken)': 65,
+        'White Sauce Spaghetti (Vegetarian)': 60,
+        'Chicken Lababdar': 64,
+        'Mutter Paneer': 62,
+        'Hot & Sour Chicken': 58,
+        'Tempura Tofu': 45,
+        'Green Curry (Chicken)': 62,
+        'Green Curry (Vegetarian)': 42,
+        'Mac & Cheese (Chicken)': 63,
+        'Mac & Cheese (Vegetarian)': 52,
+        'Korma Curry (Paneer)': 64,
+        'Korma Curry (Chicken)': 63,
+        'Mayo Tofu Chilly': 52,
+        'Potato Tofu Fry': 36,
+        'Korean Veg Fried Rice': 45,
+        'Pad Thai (Chicken)': 63,
+        'Pad Thai (Vegetarian)': 48,
+        'Chicken Kathi Roll': 62,
+        'Veg Kathi Roll': 42,
+        'Teriyaki Chicken': 64,
+        'Teriyaki Vegetables': 44,
+        'Creamy Garlic Chicken Butter Rice': 63,
+        'Creamy Spinach Mushroom Sauce': 54,
+        'Chicken Rogan Josh': 64,
+        'Chana Masala': 34,
+        'Chicken Chowmein': 62,
+        'Vegetable Chowmein': 48,
+        'Red Curry (Chicken) - Thursday': 61,
+        'Red Curry (Vegetarian) - Thursday': 29,
+        'Chicken Biryani': 64,
+        'Vegetable Biryani': 40,
+        'Honey Glazed Chicken': 64,
+        'Honey Glazed Tofu': 42,
+        'Red Sauce Spaghetti (Chicken)': 63,
+        'Red Sauce Spaghetti (Vegetarian)': 48
+    };
+    
+    return recipePrices[recipeName] || 50; // Default price if not found
+}
+
+// Helper function to calculate savings
+function calculateSavings(price) {
+    const mealPassPrice = 300;
+    return Math.max(0, price - mealPassPrice);
+}
+
+function showWeeklyMealPlan(weeklyPlan) {
+    // Get the main section that contains all meal selection elements
+    const mainSection = document.querySelector('section.selection-section');
+    
+    // Store original content for restoration
+    mainSection.dataset.originalContent = mainSection.innerHTML;
+    
+    // Replace the entire section content with weekly meal plan
+    const weeklyPlanHTML = `
+        <div class="weekly-meal-plan">
+            <h3>📅 Your 7-Day Meal Plan Preview</h3>
+            <p class="text-muted mb-4">Review your meal assignments for the next 7 days. You can scroll through each day's meal and confirm or make changes.</p>
+            
+            <div class="plan-navigation">
+                <button class="btn-nav-plan" onclick="scrollToDay(1)">
+                    Day 1
+                </button>
+                <button class="btn-nav-plan" onclick="scrollToDay(2)">
+                    Day 2
+                </button>
+                <button class="btn-nav-plan" onclick="scrollToDay(3)">
+                    Day 3
+                </button>
+                <button class="btn-nav-plan" onclick="scrollToDay(4)">
+                    Day 4
+                </button>
+                <button class="btn-nav-plan" onclick="scrollToDay(5)">
+                    Day 5
+                </button>
+                <button class="btn-nav-plan" onclick="scrollToDay(6)">
+                    Day 6
+                </button>
+                <button class="btn-nav-plan" onclick="scrollToDay(7)">
+                    Day 7
+                </button>
+            </div>
+            
+            <div class="days-container">
+                ${weeklyPlan.map((day, index) => `
+                    <div class="day-card" id="day-${day.day}">
+                        <div class="day-header">
+                            <h4>Day ${day.day}</h4>
+                            <span class="day-date">${day.dateDisplay}</span>
+                        </div>
+                        <div class="day-meal">
+                            <h5>${day.mealName}</h5>
+                            <div class="day-pricing">
+                                <span class="regular-price">Nrs ${day.mealPrice}</span>
+                                <span class="meal-pass-price">Nrs 300</span>
+                                <span class="savings-badge">Save Nrs ${day.mealSavings}</span>
+                            </div>
+                        </div>
+                        <div class="day-actions">
+                            <button class="btn-change-meal" onclick="changeMealForDay(${day.day})">
+                                🔄 Change Meal
+                            </button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div class="plan-summary">
+                <div class="summary-card">
+                    <h4>📊 Weekly Plan Summary</h4>
+                    <div class="summary-details">
+                        <div class="summary-item">
+                            <span>Total Meals:</span>
+                            <span><strong>7 meals</strong></span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Total Cost:</span>
+                            <span><strong>Nrs 2,100</strong></span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Regular Price:</span>
+                            <span><strong>Nrs ${weeklyPlan.reduce((sum, day) => sum + (day.mealPrice || 0), 0)}</strong></span>
+                        </div>
+                        <div class="summary-item savings">
+                            <span>Total Savings:</span>
+                            <span><strong>Nrs ${weeklyPlan.reduce((sum, day) => sum + (day.mealSavings || 0), 0)}</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="plan-actions">
+                <button class="btn-back" onclick="goBackToSelection()">
+                    ← Back to Selection
+                </button>
+                <button class="btn-confirm-plan" onclick="confirmWeeklyPlan()">
+                    ✅ Confirm 7-Day Plan
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Replace the entire section content
+    mainSection.innerHTML = weeklyPlanHTML;
+    
+    // Store the weekly plan globally for later use
+    window.currentWeeklyPlan = weeklyPlan;
+}
+
+function goBackToSelection() {
+    const mainSection = document.querySelector('section.selection-section');
+    
+    // Restore original content
+    if (mainSection && mainSection.dataset.originalContent) {
+        mainSection.innerHTML = mainSection.dataset.originalContent;
+        delete mainSection.dataset.originalContent;
+    }
+    
+    // Clear any existing weekly plan
+    window.currentWeeklyPlan = null;
+    
+    // Clear any auto-restore timer
+    clearAutoRestore();
+}
+
+function scrollToDay(dayNumber) {
+    const dayElement = document.getElementById(`day-${dayNumber}`);
+    if (dayElement) {
+        dayElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Highlight the selected day
+        document.querySelectorAll('.day-card').forEach(card => {
+            card.classList.remove('highlighted');
+        });
+        dayElement.classList.add('highlighted');
+    }
+}
+
+function changeMealForDay(dayNumber) {
+    // Get weekly recipes for selection
+    const weeklyRecipes = {
+        'Sunday': [
+            {name: 'Butter Chicken', price: 66, savings: 36},
+            {name: 'Paneer Butter Masala', price: 70, savings: 40},
+            {name: 'Garlic Chicken Sauce', price: 56, savings: 26},
+            {name: 'Veg Manchurian', price: 28, savings: 4},
+            {name: 'Red Curry (Chicken)', price: 61, savings: 31},
+            {name: 'Red Curry (Vegetarian)', price: 29, savings: 7},
+            {name: 'White Sauce Spaghetti (Chicken)', price: 65, savings: 35},
+            {name: 'White Sauce Spaghetti (Vegetarian)', price: 60, savings: 30}
+        ],
+        'Monday': [
+            {name: 'Chicken Lababdar', price: 64, savings: 34},
+            {name: 'Mutter Paneer', price: 62, savings: 32},
+            {name: 'Hot & Sour Chicken', price: 58, savings: 28},
+            {name: 'Tempura Tofu', price: 45, savings: 15},
+            {name: 'Green Curry (Chicken)', price: 62, savings: 32},
+            {name: 'Green Curry (Vegetarian)', price: 42, savings: 12},
+            {name: 'Mac & Cheese (Chicken)', price: 63, savings: 33},
+            {name: 'Mac & Cheese (Vegetarian)', price: 52, savings: 22}
+        ],
+        'Tuesday': [
+            {name: 'Korma Curry (Paneer)', price: 64, savings: 34},
+            {name: 'Korma Curry (Chicken)', price: 63, savings: 33},
+            {name: 'Mayo Tofu Chilly', price: 52, savings: 22},
+            {name: 'Potato Tofu Fry', price: 36, savings: 6},
+            {name: 'Korean Veg Fried Rice', price: 45, savings: 15},
+            {name: 'Pad Thai (Chicken)', price: 63, savings: 33},
+            {name: 'Pad Thai (Vegetarian)', price: 48, savings: 18}
+        ],
+        'Wednesday': [
+            {name: 'Chicken Kathi Roll', price: 62, savings: 32},
+            {name: 'Veg Kathi Roll', price: 42, savings: 12},
+            {name: 'Teriyaki Chicken', price: 64, savings: 34},
+            {name: 'Teriyaki Vegetables', price: 44, savings: 14},
+            {name: 'Creamy Garlic Chicken Butter Rice', price: 63, savings: 33},
+            {name: 'Creamy Spinach Mushroom Sauce', price: 54, savings: 24}
+        ],
+        'Thursday': [
+            {name: 'Chicken Rogan Josh', price: 64, savings: 34},
+            {name: 'Chana Masala', price: 34, savings: 4},
+            {name: 'Chicken Chowmein', price: 62, savings: 32},
+            {name: 'Vegetable Chowmein', price: 48, savings: 18},
+            {name: 'Red Curry (Chicken) - Thursday', price: 61, savings: 31},
+            {name: 'Red Curry (Vegetarian) - Thursday', price: 29, savings: 7}
+        ],
+        'Friday': [
+            {name: 'Chicken Biryani', price: 64, savings: 34},
+            {name: 'Vegetable Biryani', price: 40, savings: 10},
+            {name: 'Honey Glazed Chicken', price: 64, savings: 34},
+            {name: 'Honey Glazed Tofu', price: 42, savings: 12},
+            {name: 'Red Sauce Spaghetti (Chicken)', price: 63, savings: 33},
+            {name: 'Red Sauce Spaghetti (Vegetarian)', price: 48, savings: 18}
+        ]
+    };
+    
+    const currentPlan = window.currentWeeklyPlan;
+    const currentDay = currentPlan.find(day => day.day === dayNumber);
+    
+    if (!currentDay) return;
+    
+    // Get the day of the week for this day
+    const dayDate = new Date(currentDay.date);
+    const dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][dayDate.getDay()];
+    
+    // Get recipes for this day (use Sunday's recipes for Saturday)
+    const availableMeals = weeklyRecipes[dayOfWeek] || weeklyRecipes['Sunday'];
+    
+    // Create meal selection modal
+    const modalHTML = `
+        <div class="meal-selection-modal" id="meal-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>🍽️ Change Meal for Day ${dayNumber}</h4>
+                    <button class="btn-close" onclick="closeMealModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Current meal: <strong>${currentDay.mealName}</strong></p>
+                    <p class="text-muted">Select a different meal:</p>
+                    <div class="meal-options-grid">
+                        ${availableMeals.map((meal, index) => `
+                            <div class="meal-option-card ${meal.name === currentDay.mealName ? 'selected' : ''}" 
+                                 onclick="selectNewMeal(${dayNumber}, '${meal.name}', ${meal.price}, ${meal.savings})">
+                                <h5>${meal.name}</h5>
+                                <div class="meal-option-pricing">
+                                    <span class="regular-price">Nrs ${meal.price}</span>
+                                    <span class="meal-pass-price">Nrs 300</span>
+                                    <span class="savings-badge">Save Nrs ${meal.savings}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-back" onclick="closeMealModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+function selectNewMeal(dayNumber, mealName, mealPrice, mealSavings) {
+    // Update the weekly plan
+    const currentPlan = window.currentWeeklyPlan;
+    const dayIndex = currentPlan.findIndex(day => day.day === dayNumber);
+    
+    if (dayIndex !== -1) {
+        currentPlan[dayIndex] = {
+            ...currentPlan[dayIndex],
+            mealName: mealName,
+            mealPrice: mealPrice,
+            mealSavings: mealSavings
+        };
+        
+        // Update the display
+        updateDayDisplay(dayNumber);
+        
+        // Close modal
+        closeMealModal();
+        
+        // Show success message
+        showNotification(`Day ${dayNumber} meal changed to ${mealName}`, 'success');
+    }
+}
+
+function updateDayDisplay(dayNumber) {
+    const dayElement = document.getElementById(`day-${dayNumber}`);
+    const currentPlan = window.currentWeeklyPlan;
+    const dayData = currentPlan.find(day => day.day === dayNumber);
+    
+    if (dayElement && dayData) {
+        dayElement.querySelector('.day-meal h5').textContent = dayData.mealName;
+        dayElement.querySelector('.regular-price').textContent = `Nrs ${dayData.mealPrice}`;
+        dayElement.querySelector('.savings-badge').textContent = `Save Nrs ${dayData.mealSavings}`;
+    }
+}
+
+function closeMealModal() {
+    const modal = document.getElementById('meal-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function showMealDetails(mealId) {
+    // Get meal card data
+    const mealCard = document.getElementById(`meal-${mealId}`);
+    if (!mealCard) return;
+    
+    const mealName = mealCard.querySelector('h4').textContent;
+    const mealDescription = mealCard.querySelector('.meal-description').textContent;
+    const mealIncludes = mealCard.querySelector('.meal-includes').textContent;
+    const regularPrice = mealCard.querySelector('.regular-price').textContent;
+    const mealPassPrice = mealCard.querySelector('.meal-pass-price').textContent;
+    const savings = mealCard.querySelector('.savings-badge').textContent;
+    
+    // Create meal details modal
+    const modalHTML = `
+        <div class="meal-selection-modal" id="meal-details-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>🍽️ ${mealName}</h4>
+                    <button class="btn-close" onclick="closeMealDetailsModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="meal-details-content">
+                        <div class="meal-details-pricing">
+                            <div class="pricing-row">
+                                <span class="price-label">Regular Price:</span>
+                                <span class="price-value regular-price">${regularPrice}</span>
+                            </div>
+                            <div class="pricing-row">
+                                <span class="price-label">Meal Pass Price:</span>
+                                <span class="price-value meal-pass-price">${mealPassPrice}</span>
+                            </div>
+                            <div class="pricing-row">
+                                <span class="price-label">Your Savings:</span>
+                                <span class="price-value savings-badge">${savings}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="meal-details-description">
+                            <h5>Description</h5>
+                            <p>${mealDescription}</p>
+                        </div>
+                        
+                        <div class="meal-details-includes">
+                            <h5>What's Included</h5>
+                            <p>${mealIncludes}</p>
+                        </div>
+                        
+                        <div class="meal-details-nutrition">
+                            <h5>Nutritional Information</h5>
+                            <div class="nutrition-grid">
+                                <div class="nutrition-item">
+                                    <span class="nutrition-label">Calories</span>
+                                    <span class="nutrition-value">450-650</span>
+                                </div>
+                                <div class="nutrition-item">
+                                    <span class="nutrition-label">Protein</span>
+                                    <span class="nutrition-value">25-35g</span>
+                                </div>
+                                <div class="nutrition-item">
+                                    <span class="nutrition-label">Carbs</span>
+                                    <span class="nutrition-value">45-65g</span>
+                                </div>
+                                <div class="nutrition-item">
+                                    <span class="nutrition-label">Fat</span>
+                                    <span class="nutrition-value">15-25g</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="meal-details-allergens">
+                            <h5>Allergen Information</h5>
+                            <p>Contains: Gluten, Dairy, Nuts. May contain traces of soy and eggs.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-back" onclick="closeMealDetailsModal()">Close</button>
+                    <button class="btn-select-meal" onclick="selectMealAndClose(${mealId})">
+                        Select This Meal
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+function closeMealDetailsModal() {
+    const modal = document.getElementById('meal-details-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function selectMealAndClose(mealId) {
+    // Close the details modal
+    closeMealDetailsModal();
+    
+    // Select the meal
+    selectMeal(mealId);
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} notification`;
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        border-radius: 8px;
+        padding: 12px 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+function confirmWeeklyPlan() {
+    const weeklyPlan = window.currentWeeklyPlan;
+    
+    // Show confirmation dialog with higher z-index
+    const mealList = weeklyPlan.map(day => `Day ${day.day} (${day.dateDisplay}): ${day.mealName}`).join('\n');
+    
+    // Create a custom confirmation dialog with proper z-index
+    const confirmDialog = document.createElement('div');
+    confirmDialog.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        border: 2px solid #28a745;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        z-index: 10000;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+    `;
+    
+    confirmDialog.innerHTML = `
+        <div style="text-align: center;">
+            <h3 style="color: #28a745; margin-bottom: 1rem;">🎉 Confirm Your 7-Day Meal Plan</h3>
+            <p style="margin-bottom: 1rem;">Please review your meal selections:</p>
+            <div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap;">${mealList}</div>
+            <p style="margin-bottom: 1.5rem; color: #666;">This will use 7 meals from your meal pass.</p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button id="confirm-cancel" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer;">Cancel</button>
+                <button id="confirm-ok" style="background: #28a745; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer;">Confirm 7-Day Plan</button>
+            </div>
+        </div>
+    `;
+    
+    // Add to page
+    document.body.appendChild(confirmDialog);
+    
+    // Add event listeners
+    document.getElementById('confirm-cancel').addEventListener('click', () => {
+        document.body.removeChild(confirmDialog);
+        // Don't restore anything - stay in weekly plan view
+    });
+    
+    document.getElementById('confirm-ok').addEventListener('click', () => {
+        document.body.removeChild(confirmDialog);
+        // Send to server
+        submitWeeklyPlan(weeklyPlan);
+    });
+}
+
+// Test function to verify endpoint is working
+function testEndpoint() {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    console.log('TEST: Testing endpoint connectivity');
+    
+    fetch('{% url "select_daily_meal" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken,
+        },
+        body: new URLSearchParams({
+            'test_request': 'true'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('TEST: Endpoint response:', data);
+    })
+    .catch(error => {
+        console.error('TEST: Endpoint error:', error);
+    });
+}
+
+function submitWeeklyPlan(weeklyPlan) {
+    // Get CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    // Prepare data for server - use recipe names instead of meal IDs
+    const dates = weeklyPlan.map(day => day.date);
+    const selections = weeklyPlan.map(day => ({
+        date: day.date,
+        mealName: day.mealName,
+        mealPrice: day.mealPrice,
+        mealSavings: day.mealSavings
+    }));
+    
+    // Frontend debugging
+    console.log('FRONTEND DEBUG: Submitting weekly plan with weekly recipes');
+    console.log('FRONTEND DEBUG: weeklyPlan:', weeklyPlan);
+    console.log('FRONTEND DEBUG: selections:', selections);
+    console.log('FRONTEND DEBUG: dates:', dates);
+    console.log('FRONTEND DEBUG: meal_selections JSON:', JSON.stringify(selections));
+    
+    // Verify CSRF token
+    console.log('FRONTEND DEBUG: CSRF token:', csrfToken);
+    
+    // Create the URLSearchParams object
+    const params = new URLSearchParams({
+        'bulk_selection': 'true',
+        'bulk_days': 7,
+        'bulk_dates': dates.join(','),
+        'selection_date': '{{ target_date|date:"Y-m-d" }}',
+        'meal_selections': JSON.stringify(selections)
+    });
+    
+    console.log('FRONTEND DEBUG: Request parameters:', params.toString());
+    
+    // Create the fetch URL
+    const fetchUrl = '{% url "select_daily_meal" %}';
+    console.log('FRONTEND DEBUG: Fetch URL:', fetchUrl);
+    
+    // Send to server
+    console.log('FRONTEND DEBUG: About to send fetch request');
+    fetch(fetchUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken,
+        },
+        body: params
+    })
+    .then(response => {
+        console.log('FRONTEND DEBUG: Fetch response received:', response);
+        console.log('FRONTEND DEBUG: Response status:', response.status);
+        console.log('FRONTEND DEBUG: Response statusText:', response.statusText);
+        console.log('FRONTEND DEBUG: Response headers:', response.headers);
+        console.log('FRONTEND DEBUG: Response ok:', response.ok);
+        console.log('FRONTEND DEBUG: Response type:', response.type);
+        console.log('FRONTEND DEBUG: Response url:', response.url);
+        
+        if (!response.ok) {
+            console.log('FRONTEND DEBUG: Response not OK, status:', response.status);
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        return response.json();
+    })
+    .then(data => {
+        console.log('FRONTEND DEBUG: Server response:', data);
+        console.log('FRONTEND DEBUG: Response data type:', typeof data);
+        console.log('FRONTEND DEBUG: Response data keys:', Object.keys(data));
+        
+        if (data.success) {
+            showNotification('✅ 7-day meal plan confirmed successfully!', 'success');
+            // Switch to confirmed selections interface
+            showConfirmedSelections();
+            // Removed automatic redirect - user can manually navigate when ready
+        } else {
+            showNotification(`❌ Error: ${data.message}`, 'error');
+            // Go back to weekly plan view
+            showWeeklyMealPlan(weeklyPlan);
+        }
+    })
+    .catch(error => {
+        console.error('FRONTEND DEBUG: Fetch error:', error);
+        showNotification('❌ An error occurred while confirming your meal plan', 'error');
+        // Go back to weekly plan view
+        showWeeklyMealPlan(weeklyPlan);
+    });
+}
+
+function showConfirmedSelections() {
+    const mealSelection = document.querySelector('.meal-selection');
+    
+    // Check if meal selection element exists
+    if (!mealSelection) {
+        console.error('FRONTEND DEBUG: .meal-selection element not found');
+        // Try to find an alternative container or create one
+        const mainSection = document.querySelector('section.selection-section');
+        if (mainSection) {
+            mainSection.innerHTML = `
+                <div class="meal-selection">
+                    <div class="confirmed-selections">
+                        <h3>✅ Your 7-Day Meal Plan - Confirmed!</h3>
+                        <div class="success-message">
+                            <div class="alert alert-success">
+                                <strong>🎉 Selection Complete!</strong>
+                                <br><small>Your 7-day meal plan has been confirmed and saved.</small>
+                            </div>
+                        </div>
+                        <div class="assignments-grid">
+                            ${getConfirmedSelectionsHTML()}
+                        </div>
+                        <div class="plan-actions">
+                            <button class="btn-back" onclick="window.location.href='{% url "meal_pass_dashboard" %}'">
+                                View Dashboard →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return;
+        } else {
+            console.error('FRONTEND DEBUG: No suitable container found for confirmed selections');
+            return;
+        }
+    }
+    
+    // Create confirmed selections display
+    const confirmedHTML = `
+        <div class="confirmed-selections">
+            <h3>✅ Your 7-Day Meal Plan - Confirmed!</h3>
+            <div class="success-message">
+                <div class="alert alert-success">
+                    <strong>🎉 Selection Complete!</strong>
+                    <br><small>Your 7-day meal plan has been confirmed and saved.</small>
+                </div>
+            </div>
+            <div class="assignments-grid">
+                ${getConfirmedSelectionsHTML()}
+            </div>
+            <div class="plan-actions">
+                <button class="btn-back" onclick="window.location.href='{% url "meal_pass_dashboard" %}'">
+                    View Dashboard →
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Update the interface
+    mealSelection.innerHTML = confirmedHTML;
+}
+
+function showMealAssignments(selections) {
+    // Hide the meal selection interface
+    const mealSelection = document.querySelector('.meal-selection');
+    const navigation = document.querySelector('.meal-navigation');
+    
+    // Check if required elements exist
+    if (!mealSelection || !navigation) {
+        console.error('Required meal selection elements not found');
+        return;
+    }
+    
+    // Store original content
+    mealSelection.dataset.originalContent = mealSelection.innerHTML;
+    navigation.dataset.originalContent = navigation.innerHTML;
+    
+    // Create meal assignments display
+    const assignmentsHTML = `
+        <div class="meal-assignments">
+            <h3>📅 Your 7-Day Meal Plan</h3>
+            <p class="text-muted mb-4">Your meals have been automatically assigned for the next 7 days:</p>
+            
+            <div class="auto-restore-notice">
+                <div class="alert alert-info">
+                    <strong>⏱️ Auto-restore in <span id="countdown">5</span> seconds</strong>
+                    <br><small>This view will automatically return to meal selection. You can also manually return using the button below.</small>
+                </div>
+            </div>
+            
+            <div class="assignments-grid">
+                ${selections.map((selection, index) => `
+                    <div class="assignment-card">
+                        <div class="assignment-header">
+                            <h4>Day ${index + 1}</h4>
+                            <span class="assignment-date">${formatDate(selection.date)}</span>
+                        </div>
+                        <div class="assignment-meal">
+                            <h5>${selection.mealName}</h5>
+                            <div class="assignment-pricing">
+                                <span class="regular-price">${selection.mealPrice}</span>
+                                <span class="meal-pass-price">Nrs 300</span>
+                                <span class="savings-badge">${selection.mealSavings}</span>
+                            </div>
+                        </div>
+                        <div class="assignment-status">
+                            <span class="status-processing">⏳ Processing...</span>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div class="assignments-summary">
+                <div class="summary-card">
+                    <h4>📊 Selection Summary</h4>
+                    <div class="summary-details">
+                        <div class="summary-item">
+                            <span>Total Meals:</span>
+                            <span><strong>7 meals</strong></span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Total Cost:</span>
+                            <span><strong>Nrs 2,100</strong></span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Regular Price:</span>
+                            <span><strong>Nrs ${selections.reduce((sum, s) => sum + (s.mealPrice || 0), 0)}</strong></span>
+                        </div>
+                        <div class="summary-item savings">
+                            <span>Total Savings:</span>
+                            <span><strong>Nrs ${selections.reduce((sum, s) => sum + (s.mealSavings || 0), 0)}</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="assignments-actions">
+                <button class="btn-back" onclick="clearAutoRestore(); restoreSelectionInterface();">
+                    ← Back to Selection
+                </button>
+                <button class="btn-confirm" onclick="clearAutoRestore(); window.location.href='{% url "meal_pass_dashboard" %}'">
+                    View Dashboard →
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Update the interface
+    mealSelection.innerHTML = assignmentsHTML;
+    navigation.style.display = 'none';
+    
+    // Start countdown timer
+    startCountdown();
+}
+
+let countdownTimer;
+
+function startCountdown() {
+    let seconds = 5;
+    const countdownElement = document.getElementById('countdown');
+    
+    window.countdownTimer = setInterval(() => {
+        seconds--;
+        if (countdownElement) {
+            countdownElement.textContent = seconds;
+        }
+        
+        if (seconds <= 0) {
+            clearInterval(window.countdownTimer);
+            window.countdownTimer = null;
+            restoreSelectionInterface();
+        }
+    }, 1000);
+}
+
+function clearAutoRestore() {
+    // Clear the countdown timer when user manually navigates
+    if (window.countdownTimer) {
+        clearInterval(window.countdownTimer);
+        window.countdownTimer = null;
+    }
+    
+    // Clear any other potential timeouts
+    if (window.autoRestoreTimeout) {
+        clearTimeout(window.autoRestoreTimeout);
+        window.autoRestoreTimeout = null;
+    }
+    
+    // Remove any pending animation frames
+    if (window.pendingAnimationFrame) {
+        cancelAnimationFrame(window.pendingAnimationFrame);
+        window.pendingAnimationFrame = null;
+    }
+    
+    // Update the notice to show manual action
+    const noticeElement = document.querySelector('.auto-restore-notice .alert');
+    if (noticeElement) {
+        noticeElement.innerHTML = '<strong>✅ Selection completed!</strong><br><small>Returning to meal selection...</small>';
+        noticeElement.className = 'alert alert-success';
+    }
+    
+    console.log('FRONTEND DEBUG: All background processes cleared');
+}
+
+function formatDate(dateStr) {
+    const date = new Date(dateStr + 'T00:00:00');
+    return date.toLocaleDateString('en-US', { 
+        weekday: 'short', 
+        month: 'short', 
+        day: 'numeric' 
+    });
+}
+
+function updateAssignmentDisplay(success, message) {
+    const statusElements = document.querySelectorAll('.assignment-status');
+    statusElements.forEach(el => {
+        if (success) {
+            el.innerHTML = '<span class="status-success">✅ Confirmed</span>';
+        } else {
+            el.innerHTML = '<span class="status-error">❌ Error</span>';
+        }
+    });
+    
+    // Add message at the top
+    const assignmentsDiv = document.querySelector('.meal-assignments');
+    const alertClass = success ? 'alert-success' : 'alert-danger';
+    const alertHTML = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    assignmentsDiv.insertAdjacentHTML('afterbegin', alertHTML);
+}
+
+function restoreSelectionInterface() {
+    const mealSelection = document.querySelector('.meal-selection');
+    const navigation = document.querySelector('.meal-navigation');
+    
+    // Restore original content
+    if (mealSelection && mealSelection.dataset.originalContent) {
+        mealSelection.innerHTML = mealSelection.dataset.originalContent;
+        delete mealSelection.dataset.originalContent;
+    }
+    
+    if (navigation && navigation.dataset.originalContent) {
+        navigation.innerHTML = navigation.dataset.originalContent;
+        delete navigation.dataset.originalContent;
+    }
+    
+    // Restore the confirmation section visibility
+    const confirmationSection = mealSelection.querySelector('.confirmation-section');
+    if (confirmationSection) {
+        confirmationSection.style.display = 'block';
+    }
+    
+    // Clear any existing weekly plan
+    window.currentWeeklyPlan = null;
+    
+    // Clear any auto-restore timer
+    clearAutoRestore();
+}
+
+function getConfirmedSelectionsHTML() {
+    if (!window.currentWeeklyPlan) return '';
+    
+    return window.currentWeeklyPlan.map(day => `
+        <div class="assignment-card confirmed">
+            <div class="assignment-header">
+                <h5>Day ${day.day}</h5>
+                <span class="assignment-date">${day.dateDisplay}</span>
+            </div>
+            <div class="assignment-meal">
+                <strong>${day.mealName}</strong>
+                <div class="assignment-pricing">
+                    <span class="regular-price">${day.mealPrice}</span>
+                    <span class="meal-pass-price">Nrs 300</span>
+                    <span class="savings-badge">${day.mealSavings}</span>
+                </div>
+            </div>
+            <div class="assignment-status confirmed">
+                ✅ Confirmed
+            </div>
+        </div>
+    `).join('');
+}
+
+function getTotalRegularPrice() {
+    if (!window.currentWeeklyPlan) return '0';
+    return window.currentWeeklyPlan.reduce((sum, day) => 
+        sum + (day.mealPrice || 0), 0
+    );
+}
+
+function getTotalSavings() {
+    if (!window.currentWeeklyPlan) return '0';
+    return window.currentWeeklyPlan.reduce((sum, day) => 
+        sum + (day.mealSavings || 0), 0
+    );
+}
+
+function initializeMealSelection() {
+    // Re-add event listeners if needed
+    // This function can be expanded to re-initialize any JavaScript functionality
+}
+
+function selectBulkMeals(days) {
+    bulkSelectionDays = days;
+    
+    // Show bulk selection modal or interface
+    if (confirm(`You are about to select meals for ${days} days. This will use ${days} meals from your meal pass. Continue?`)) {
+        // Enable confirm button for bulk selection
+        document.getElementById('confirm-selection').disabled = false;
+        
+        // Update button text to show bulk selection
+        document.getElementById('confirm-selection').textContent = `Confirm ${days} Days Selection`;
+        
+        // Scroll to meal selection area (if it exists)
+        const mealSelectionElement = document.querySelector('.meal-selection');
+        if (mealSelectionElement) {
+            mealSelectionElement.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Show message about bulk selection
+        alert(`Please select your preferred meal. This meal will be selected for all ${days} days starting from today.`);
+        
+        // Show bulk selection indicator
+        const bulkIndicator = document.createElement('div');
+        bulkIndicator.className = 'bulk-selection-indicator';
+        bulkIndicator.innerHTML = `
+            <div class="alert alert-info">
+                <strong>Bulk Selection Mode:</strong> Selecting meals for ${days} days
+                <br><small>Your selection will apply to: ${getBulkDates(days).join(', ')}</small>
+            </div>
+        `;
+        
+        // Insert after the bulk selection options
+        const bulkOptions = document.querySelector('.bulk-selection-options');
+        bulkOptions.parentNode.insertBefore(bulkIndicator, bulkOptions.nextSibling);
+    }
+}
+
+function getBulkDates(days) {
+    const dates = [];
+    for (let i = 0; i < days; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() + i);
+        dates.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+    }
+    return dates;
+}
+
+document.getElementById('confirm-selection').addEventListener('click', function() {
+    if (!selectedMealId) {
+        alert('Please select a meal first');
+        return;
+    }
+    
+    // Get CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    if (bulkSelectionDays) {
+        // Handle bulk selection
+        const dates = [];
+        for (let i = 0; i < bulkSelectionDays; i++) {
+            const date = new Date();
+            date.setDate(date.getDate() + i);
+            dates.push(date.toISOString().split('T')[0]);
+        }
+        
+        // Send bulk selection to server
+        fetch('{% url "select_daily_meal" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken,
+            },
+            body: new URLSearchParams({
+                'meal_id': selectedMealId,
+                'selection_date': '{{ target_date|date:"Y-m-d" }}',
+                'bulk_selection': 'true',
+                'bulk_days': bulkSelectionDays,
+                'bulk_dates': dates.join(',')
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                // Removed automatic redirect - user can manually navigate when ready
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while selecting your meals. Please try again.');
+        });
+    } else {
+        // Handle single day selection
+        fetch('{% url "select_daily_meal" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken,
+            },
+            body: new URLSearchParams({
+                'meal_id': selectedMealId,
+                'selection_date': '{{ target_date|date:"Y-m-d" }}'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                // Removed automatic redirect - user can manually navigate when ready
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while selecting your meal. Please try again.');
+        });
+    }
+});
+</script>
+{% endblock %}

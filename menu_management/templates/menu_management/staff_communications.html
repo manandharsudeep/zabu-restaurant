@@ -1,0 +1,516 @@
+{% extends 'base.html' %}
+
+{% block title %}Staff Communications - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .communications-header {
+        background: linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .compose-section {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .compose-form {
+        display: grid;
+        gap: 1rem;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #495057;
+    }
+    
+    .form-control {
+        padding: 0.75rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #6f42c1;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+        color: white;
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+    
+    .btn-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        color: #212529;
+    }
+    
+    .btn-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+    }
+    
+    .filter-section {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .filter-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr auto;
+        gap: 1rem;
+        align-items: end;
+    }
+    
+    .messages-grid {
+        display: grid;
+        gap: 1.5rem;
+    }
+    
+    .message-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-left: 4px solid #6f42c1;
+        transition: transform 0.3s ease;
+    }
+    
+    .message-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .message-card.announcement {
+        border-left-color: #28a745;
+    }
+    
+    .message-card.alert {
+        border-left-color: #dc3545;
+    }
+    
+    .message-card.reminder {
+        border-left-color: #ffc107;
+    }
+    
+    .message-card.general {
+        border-left-color: #17a2b8;
+    }
+    
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1rem;
+    }
+    
+    .message-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .message-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .message-type {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .message-type.announcement {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .message-type.alert {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .message-type.reminder {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .message-type.general {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .message-priority {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .message-priority.high {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .message-priority.medium {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .message-priority.low {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .message-content {
+        margin-bottom: 1rem;
+        line-height: 1.6;
+        color: #495057;
+    }
+    
+    .message-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .message-stats {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .action-buttons .btn {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .pagination a {
+        padding: 0.5rem 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        text-decoration: none;
+        color: #495057;
+        transition: all 0.3s ease;
+    }
+    
+    .pagination a:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+    }
+    
+    .pagination .current {
+        background: #6f42c1;
+        color: white;
+        border-color: #6f42c1;
+    }
+    
+    @media (max-width: 768px) {
+        .filter-form {
+            grid-template-columns: 1fr;
+        }
+        
+        .message-header {
+            flex-direction: column;
+            align-items: start;
+            gap: 0.5rem;
+        }
+        
+        .message-footer {
+            flex-direction: column;
+            align-items: start;
+            gap: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="communications-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-4">💬 Staff Communications</h1>
+                <p class="lead">Send and manage staff messages and announcements</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'menu_management:staff_dashboard' %}" class="btn btn-light btn-lg">
+                    ← Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Compose Message Section -->
+    <div class="compose-section">
+        <h3>📝 Compose New Message</h3>
+        <form method="POST" class="compose-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="message_type">Message Type</label>
+                <select name="message_type" id="message_type" class="form-control" required>
+                    <option value="">Select Type</option>
+                    <option value="announcement">📢 Announcement</option>
+                    <option value="alert">🚨 Alert</option>
+                    <option value="reminder">⏰ Reminder</option>
+                    <option value="general">💬 General Message</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="priority">Priority</label>
+                <select name="priority" id="priority" class="form-control" required>
+                    <option value="">Select Priority</option>
+                    <option value="high">🔴 High</option>
+                    <option value="medium">🟡 Medium</option>
+                    <option value="low">🟢 Low</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="recipients">Recipients</label>
+                <select name="recipients" id="recipients" class="form-control" required>
+                    <option value="">Select Recipients</option>
+                    <option value="all">👥 All Staff</option>
+                    <option value="kitchen">👨‍🍳 Kitchen Staff</option>
+                    <option value="service">👩‍🍼 Service Staff</option>
+                    <option value="management">👔 Management</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="subject">Subject</label>
+                <input type="text" name="subject" id="subject" class="form-control" 
+                       placeholder="Enter message subject" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea name="message" id="message" class="form-control" rows="4" 
+                          placeholder="Type your message here..." required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">
+                    📤 Send Message
+                </button>
+                <button type="reset" class="btn btn-secondary">
+                    🔄 Clear
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <form method="GET" class="filter-form">
+            <div class="form-group">
+                <label for="message_type_filter">Message Type</label>
+                <select name="type" id="message_type_filter" class="form-control">
+                    <option value="">All Types</option>
+                    <option value="announcement">📢 Announcement</option>
+                    <option value="alert">🚨 Alert</option>
+                    <option value="reminder">⏰ Reminder</option>
+                    <option value="general">💬 General</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="priority_filter">Priority</label>
+                <select name="priority" id="priority_filter" class="form-control">
+                    <option value="">All Priorities</option>
+                    <option value="high">🔴 High</option>
+                    <option value="medium">🟡 Medium</option>
+                    <option value="low">🟢 Low</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="date_from">From Date</label>
+                <input type="date" name="date_from" id="date_from" class="form-control" 
+                       value="{{ date_from }}">
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">
+                    🔍 Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Messages Grid -->
+    <div class="messages-grid">
+        {% for message in messages %}
+            <div class="message-card {{ message.message_type }}">
+                <div class="message-header">
+                    <div>
+                        <div class="message-title">{{ message.subject }}</div>
+                        <div class="message-meta">
+                            <span class="message-type {{ message.message_type }}">
+                                {{ message.get_message_type_display }}
+                            </span>
+                            <span class="message-priority {{ message.priority }}">
+                                {{ message.get_priority_display }}
+                            </span>
+                            <span class="text-muted">
+                                📅 {{ message.created_at|date:"M d, Y H:i" }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="message-content">
+                    {{ message.message }}
+                </div>
+                
+                <div class="message-footer">
+                    <div class="message-stats">
+                        <div class="stat-item">
+                            👁️ {{ message.read_count }} read
+                        </div>
+                        <div class="stat-item">
+                            📤 {{ message.recipients_count }} recipients
+                        </div>
+                        <div class="stat-item">
+                            👤 {{ message.sender.get_full_name|default:message.sender.username }}
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <a href="#" class="btn btn-primary btn-sm">
+                            👁️ View Details
+                        </a>
+                        {% if message.can_edit %}
+                            <a href="#" class="btn btn-warning btn-sm">
+                                ✏️ Edit
+                            </a>
+                        {% endif %}
+                        {% if message.can_delete %}
+                            <a href="#" class="btn btn-danger btn-sm">
+                                🗑️ Delete
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="empty-state">
+                <div class="empty-state-icon">💬</div>
+                <h3>No Messages Found</h3>
+                <p>No staff communications match your current filters.</p>
+                <a href="{% url 'menu_management:staff_communications' %}" class="btn btn-primary">
+                    Clear Filters
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if messages.has_other_pages %}
+        <div class="pagination">
+            {% if messages.has_previous %}
+                <a href="?page={{ messages.previous_page_number }}{% if selected_type %}&type={{ selected_type }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}">
+                    ← Previous
+                </a>
+            {% endif %}
+            
+            <span class="current">
+                Page {{ messages.number }} of {{ messages.paginator.num_pages }}
+            </span>
+            
+            {% if messages.has_next %}
+                <a href="?page={{ messages.next_page_number }}{% if selected_type %}&type={{ selected_type }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}">
+                    Next →
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

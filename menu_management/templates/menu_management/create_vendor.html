@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Vendor - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .vendor-form-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+    
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .form-header h1 {
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-header p {
+        color: #6c757d;
+    }
+    
+    .vendor-form {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-input {
+        padding: 0.75rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+    }
+    
+    .form-textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    .form-checkbox {
+        display: flex;
+        align-items: center;
+        margin-top: 0.5rem;
+    }
+    
+    .form-checkbox input {
+        margin-right: 0.5rem;
+    }
+    
+    .btn-container {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-secondary:hover {
+        background: #545b62;
+        text-decoration: none;
+        color: white;
+    }
+    
+    .required {
+        color: #dc3545;
+    }
+    
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="vendor-form-container">
+    <div class="form-header">
+        <h1>🏢 Create New Vendor</h1>
+        <p>Add a new supplier to your vendor database</p>
+    </div>
+    
+    <form method="POST" class="vendor-form">
+        {% csrf_token %}
+        
+        <!-- Basic Information -->
+        <div class="form-section">
+            <div class="section-title">📋 Basic Information</div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Vendor Name <span class="required">*</span></label>
+                    <input type="text" name="name" class="form-input" value="{{ form_data.name|default:'' }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Vendor Code <span class="required">*</span></label>
+                    <input type="text" name="vendor_code" class="form-input" value="{{ form_data.vendor_code|default:'' }}" required placeholder="e.g., VENDOR001">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Contact Person <span class="required">*</span></label>
+                    <input type="text" name="contact_person" class="form-input" value="{{ form_data.contact_person|default:'' }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Email <span class="required">*</span></label>
+                    <input type="email" name="email" class="form-input" value="{{ form_data.email|default:'' }}" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Phone <span class="required">*</span></label>
+                    <input type="tel" name="phone" class="form-input" value="{{ form_data.phone|default:'' }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Lead Time (days)</label>
+                    <input type="number" name="lead_time_days" class="form-input" value="{{ form_data.lead_time_days|default:2 }}" min="1" max="30">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Address Information -->
+        <div class="form-section">
+            <div class="section-title">📍 Address Information</div>
+            
+            <div class="form-group full-width">
+                <label class="form-label">Address <span class="required">*</span></label>
+                <textarea name="address" class="form-input form-textarea" required>{{ form_data.address|default:'' }}</textarea>
+            </div>
+        </div>
+        
+        <!-- Business Terms -->
+        <div class="form-section">
+            <div class="section-title">💼 Business Terms</div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Payment Terms</label>
+                    <input type="text" name="payment_terms" class="form-input" value="{{ form_data.payment_terms|default:'Net 30' }}" placeholder="e.g., Net 30, Net 15, COD">
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-checkbox">
+                        <input type="checkbox" name="is_preferred" {% if form_data.is_preferred %}checked{% endif %}>
+                        <label for="is_preferred">Preferred Vendor</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group full-width">
+                <label class="form-label">Notes</label>
+                <textarea name="notes" class="form-input form-textarea" placeholder="Any additional notes about this vendor...">{{ form_data.notes|default:'' }}</textarea>
+            </div>
+        </div>
+        
+        <!-- Buttons -->
+        <div class="btn-container">
+            <button type="submit" class="btn-primary">✅ Create Vendor</button>
+            <a href="{% url 'menu_management:inventory_dashboard' %}" class="btn-secondary">❌ Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,478 @@
+{% extends 'base.html' %}
+
+{% block title %}Enhanced Course Menu Management - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .course-menu-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        text-align: center;
+        border-left: 4px solid #667eea;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .menu-type-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .menu-type-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .menu-type-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .menu-type-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    .menu-type-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .menu-type-description {
+        color: #666;
+        margin-bottom: 1rem;
+    }
+    
+    .menu-type-stats {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+    }
+    
+    .dietary-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .dietary-vegetarian {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .dietary-vegan {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .dietary-gluten-free {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+        background: #667eea;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #5a67d8;
+        color: white;
+    }
+    
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+    
+    .btn-success:hover {
+        background: #218838;
+        color: white;
+    }
+    
+    .btn-info {
+        background: #17a2b8;
+        color: white;
+    }
+    
+    .btn-info:hover {
+        background: #138496;
+        color: white;
+    }
+    
+    .btn-outline-primary {
+        background: transparent;
+        color: #667eea;
+        border: 2px solid #667eea;
+    }
+    
+    .btn-outline-primary:hover {
+        background: #667eea;
+        color: white;
+    }
+    
+    .filter-section {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    .filter-controls {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    
+    .filter-control {
+        display: flex;
+        flex-direction: column;
+        min-width: 150px;
+    }
+    
+    .filter-control label {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+    
+    .filter-control select,
+    .filter-control input {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 0.9rem;
+    }
+    
+    .recent-instances {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .instance-item {
+        padding: 1rem 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .instance-item:last-child {
+        border-bottom: none;
+    }
+    
+    .instance-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .instance-name {
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .instance-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .status-booked {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-confirmed {
+        background: #cce5ff;
+        color: #004085;
+    }
+    
+    .status-in_progress {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .status-completed {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .instance-details {
+        display: flex;
+        gap: 2rem;
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .instance-detail {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .instance-detail-icon {
+        color: #667eea;
+    }
+    
+    .pricing-info {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 0.5rem;
+        font-weight: bold;
+        color: #333;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="course-menu-header">
+    <div class="container">
+        <h1 class="display-4">🍽️ Enhanced Course Menu Management</h1>
+        <p class="lead">Create and manage sophisticated multi-course tasting menus with pairings and dietary accommodations</p>
+    </div>
+</div>
+
+<!-- Statistics -->
+<div class="container">
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_templates }}</div>
+            <div class="stat-label">Active Templates</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ active_instances }}</div>
+            <div class="stat-label">In Progress</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ total_instances }}</div>
+            <div class="stat-label">Total Instances</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ dietary_stats.vegetarian }}</div>
+            <div class="stat-label">Vegetarian Options</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ dietary_stats.vegan }}</div>
+            <div class="stat-label">Vegan Options</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ dietary_stats.gluten_free }}</div>
+            <div class="stat-label">Gluten-Free Options</div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="{% url 'menu_management:create_course_menu_template' %}" class="btn btn-primary">
+            ➕ Create Template
+        </a>
+        <a href="{% url 'menu_management:create_course_menu_instance' %}" class="btn btn-success">
+            📋 Create Instance
+        </a>
+        <a href="{% url 'menu_management:course_menu_analytics' %}" class="btn btn-info">
+            📊 View Analytics
+        </a>
+        <a href="{% url 'menu_management:course_menu_instances' %}" class="btn btn-outline-primary">
+            📋 Manage Instances
+        </a>
+    </div>
+
+    <!-- Menu Types -->
+    <h2>🍽️ Menu Types</h2>
+    <div class="menu-type-grid">
+        <a href="{% url 'menu_management:course_menu_templates' %}?menu_type=tasting" class="menu-type-card">
+            <span class="menu-type-icon">🍷️</span>
+            <div class="menu-type-title">Tasting Menus</div>
+            <div class="menu-type-description">Multi-course tasting experiences with chef-curated selections</div>
+            <div class="menu-type-stats">
+                <span>3, 5, 7+ courses</span>
+                <span>Premium pricing</span>
+            </div>
+        </a>
+
+        <a href="{% url 'menu_management:course_menu_templates' %}?menu_type=prix_fixe" class="menu-type-card">
+            <span class="menu-type-icon">🎫</span>
+            <div class="menu-type-title">Prix Fixe Menus</div>
+            <div class="menu-type-description">Fixed-price multi-course menus with set offerings</div>
+            <div class="menu-type-stats">
+                <span>Fixed pricing</span>
+                <span>Value focused</span>
+            </div>
+        </a>
+
+        <a href="{% url 'menu_management:course_menu_templates' %}?menu_type=chef_table" class="menu-type-card">
+            <span class="menu-type-icon">👨‍🍳</span>
+            <div class="menu-type-title">Chef's Table</div>
+            <div class="menu-type-description">Exclusive chef's table experiences with personalized service</div>
+            <div class="menu-type-stats">
+                <span>Exclusive</span>
+                <span>Premium</span>
+            </div>
+        </a>
+
+        <a href="{% url 'menu_management:course_menu_templates' %}?menu_type=seasonal" class="menu-type-card">
+            <span class="menu-type-icon">🌸</span>
+            <div class="menu-type-title">Seasonal Menus</div>
+            <div class="menu-type-description">Rotating seasonal menus featuring fresh ingredients</div>
+            <div class="menu-type-stats">
+                <span>Seasonal</span>
+                <span>Rotating</span>
+            </div>
+        </a>
+
+        <a href="{% url 'menu_management:course_menu_templates' %}?menu_type=holiday" class="menu-type-card">
+            <span class="menu-type-icon">🎄</span>
+            <div class="menu-type-title">Holiday Menus</div>
+            <div class="menu-type-description">Special holiday-themed menus and celebrations</div>
+            <div class="menu-type-stats">
+                <span>Holiday</span>
+                <span>Special</span>
+            </div>
+        </a>
+
+        <a href="{% url 'menu_management:course_menu_templates' %}?menu_type=vegetarian" class="menu-type-card">
+            <span class="menu-type-icon">🥬</span>
+            <div class="menu-type-title">Vegetarian</div>
+            <div class="menu-type-description">Plant-based multi-course menus with creative options</div>
+            <div class="menu-type-stats">
+                <span>Vegetarian</span>
+                <span>Creative</span>
+            </div>
+        </a>
+
+        <a href="{% url 'menu_management:course_menu_templates' %}?menu_type=vegan" class="menu-type-card">
+            <span class="menu-type-icon">🌱</span>
+            <div class="menu-type-title">Vegan</div>
+            <div class="menu-type-description">Completely plant-based menus without animal products</div>
+            <div class="menu-type-stats">
+                <span>Vegan</span>
+                <span>Ethical</span>
+            </div>
+        </a>
+
+        <a href="{% url 'menu_management:course_menu_templates' %}?menu_type=gluten_free" class="menu-type-card">
+            <span class="menu-type-icon">🌾</span>
+            <div class="menu-type-title">Gluten-Free</div>
+            <div class="menu-type-description">Safe multi-course menus for gluten-sensitive guests</div>
+            <div class="menu-type-stats">
+                <span>Gluten-Free</span>
+                <span>Safe</span>
+            </div>
+        </a>
+    </div>
+
+    <!-- Recent Instances -->
+    <h2>📋 Recent Course Menu Instances</h2>
+    <div class="recent-instances">
+        {% for instance in recent_instances %}
+        <div class="instance-item">
+            <div class="instance-header">
+                <div class="instance-name">{{ instance.name }}</div>
+                <div class="instance-status status-{{ instance.status|slugify }}">
+                    {{ instance.get_status_display }}
+                </div>
+            </div>
+            <div class="instance-details">
+                <div class="instance-detail">
+                    <span class="instance-detail-icon">📅</span>
+                    {{ instance.booking_date }}
+                </div>
+                <div class="instance-detail">
+                    <span class="instance-detail-icon">⏰</span>
+                    {{ instance.booking_time }}
+                </div>
+                <div class="instance-detail">
+                    <span class="instance-detail-icon">👥</span>
+                    {{ instance.customer_count }} guests
+                </div>
+                <div class="instance-detail">
+                    <span class="instance-detail-icon">🪑</span>
+                    Table {{ instance.table_number }}
+                </div>
+                <div class="instance-detail">
+                    <span class="instance-detail-icon">👨‍🍳</span>
+                    {{ instance.template.name }}
+                </div>
+            </div>
+            <div class="pricing-info">
+                <span>${{ instance.final_price_per_person }}/person</span>
+                <span>Total: ${{ instance.total_price }}</span>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center text-muted">No recent course menu instances found.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

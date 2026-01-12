@@ -1,0 +1,365 @@
+{% extends 'menu_management/base.html' %}
+{% load nepali_currency %}
+
+{% block title %}Create User{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>➕ Create New User</h1>
+                <div>
+                    <a href="{% url 'menu_management:user_management_dashboard' %}" class="btn btn-outline-secondary">
+                        ← Back to Users
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">👤 Create New User Account</h5>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <!-- User Creation Form -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="username" class="form-label">Username *</label>
+                                <input type="text" class="form-control" id="username" name="username" 
+                                       placeholder="Enter username" required>
+                                <div class="form-text">
+                                    Username must be unique and contain only letters, numbers, and underscores.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       placeholder="Enter email address">
+                                <div class="form-text">
+                                    Optional but recommended for password recovery.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="password1" class="form-label">Password *</label>
+                                <input type="password" class="form-control" id="password1" name="password1" 
+                                       placeholder="Enter password" required minlength="8">
+                                <div class="form-text">
+                                    Minimum 8 characters required.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="password2" class="form-label">Confirm Password *</label>
+                                <input type="password" class="form-control" id="password2" name="password2" 
+                                       placeholder="Confirm password" required minlength="8">
+                                <div class="form-text">
+                                    Re-enter password to confirm.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Personal Information -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" 
+                                       placeholder="Enter first name">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" 
+                                       placeholder="Enter last name">
+                            </div>
+                        </div>
+                        
+                        <!-- Account Permissions -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" checked>
+                                    <label class="form-check-label" for="is_active">
+                                        Active Account
+                                    </label>
+                                </div>
+                                <div class="form-text">
+                                    User can log in and access the system.
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="is_staff" name="is_staff">
+                                    <label class="form-check-label" for="is_staff">
+                                        Staff Member
+                                    </label>
+                                </div>
+                                <div class="form-text">
+                                    Can access admin dashboard and management features.
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="is_superuser" name="is_superuser">
+                                    <label class="form-check-label" for="is_superuser">
+                                        Superuser
+                                    </label>
+                                </div>
+                                <div class="form-text">
+                                    Full system access including user management.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Permission Information -->
+                        <div class="alert alert-info">
+                            <h6>📋 Permission Levels:</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>Regular User:</strong>
+                                    <ul class="mb-0">
+                                        <li>Can access customer features</li>
+                                        <li>Can place orders</li>
+                                        <li>Can manage profile</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Staff Member:</strong>
+                                    <ul class="mb-0">
+                                        <li>All regular user features</li>
+                                        <li>Can access admin dashboard</li>
+                                        <li>Can manage menu items</li>
+                                        <li>Can view reports</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Superuser:</strong>
+                                    <ul class="mb-0">
+                                        <li>All staff member features</li>
+                                        <li>Can manage users</li>
+                                        <li>Can manage system settings</li>
+                                        <li>Full system control</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Password Requirements -->
+                        <div class="alert alert-warning">
+                            <h6>🔐 Password Requirements:</h6>
+                            <ul class="mb-0">
+                                <li>At least 8 characters long</li>
+                                <li>Cannot be too common (password, 123456, etc.)</li>
+                                <li>Cannot be similar to username or other personal info</li>
+                                <li>Cannot be a commonly used password</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'menu_management:user_management_dashboard' %}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                ➕ Create User
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Guide -->
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📋 Quick Guide</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>👤 User Information</h6>
+                            <ul>
+                                <li><strong>Username:</strong> Unique identifier for login</li>
+                                <li><strong>Email:</strong> Optional but recommended</li>
+                                <li><strong>Name:</strong> First and last name for display</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>⚙️ Account Setup</h6>
+                            <ul>
+                                <li><strong>Active:</strong> Enable/disable account access</li>
+                                <li><strong>Staff:</strong> Give admin dashboard access</li>
+                                <li><strong>Superuser:</strong> Give full system control</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const usernameInput = document.getElementById('username');
+    const password1Input = document.getElementById('password1');
+    const password2Input = document.getElementById('password2');
+    const emailInput = document.getElementById('email');
+    
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        const username = usernameInput.value.trim();
+        const password1 = password1Input.value;
+        const password2 = password2Input.value;
+        const email = emailInput.value.trim();
+        
+        // Username validation
+        if (!username) {
+            e.preventDefault();
+            alert('Username is required.');
+            usernameInput.focus();
+            return;
+        }
+        
+        if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+            e.preventDefault();
+            alert('Username can only contain letters, numbers, and underscores.');
+            usernameInput.focus();
+            return;
+        }
+        
+        // Password validation
+        if (password1 !== password2) {
+            e.preventDefault();
+            alert('Passwords do not match. Please try again.');
+            password2Input.focus();
+            return;
+        }
+        
+        if (password1.length < 8) {
+            e.preventDefault();
+            alert('Password must be at least 8 characters long.');
+            password1Input.focus();
+            return;
+        }
+        
+        // Email validation (if provided)
+        if (email && !validateEmail(email)) {
+            e.preventDefault();
+            alert('Please enter a valid email address.');
+            emailInput.focus();
+            return;
+        }
+        
+        // Confirmation
+        if (!confirm('Are you sure you want to create this user?')) {
+            e.preventDefault();
+        }
+    });
+    
+    // Real-time validation feedback
+    usernameInput.addEventListener('input', function() {
+        const username = this.value.trim();
+        if (username && !/^[a-zA-Z0-9_]+$/.test(username)) {
+            this.setCustomValidity('Username can only contain letters, numbers, and underscores.');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+    
+    password2Input.addEventListener('input', function() {
+        const password1 = password1Input.value;
+        const password2 = this.value;
+        
+        if (password2 && password1 !== password2) {
+            this.setCustomValidity('Passwords do not match.');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+    
+    emailInput.addEventListener('input', function() {
+        const email = this.value.trim();
+        if (email && !validateEmail(email)) {
+            this.setCustomValidity('Please enter a valid email address.');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+});
+
+function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+}
+</script>
+
+<style>
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.form-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.alert {
+    border-radius: 0.5rem;
+}
+
+.btn {
+    border-radius: 0.375rem;
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-control:invalid {
+    border-color: #dc3545;
+}
+
+.form-control:invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+ul {
+    padding-left: 20px;
+}
+
+ul li {
+    margin-bottom: 0.5rem;
+}
+</style>
+{% endblock %}

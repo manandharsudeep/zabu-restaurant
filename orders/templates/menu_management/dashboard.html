@@ -1,0 +1,324 @@
+{% extends 'base.html' %}
+
+{% block title %}Menu Management Dashboard - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border-left: 4px solid #667eea;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .quick-action-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .quick-action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .quick-action-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    .recent-item {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .recent-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+    }
+    
+    .feature-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: all 0.3s ease;
+        border-left: 4px solid #667eea;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #667eea;
+    }
+    
+    .feature-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+    
+    .feature-description {
+        color: #666;
+        line-height: 1.6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-4">🍽️ Menu Management</h1>
+                <p class="lead">Complete Recipe & Menu Engineering System</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="text-white">
+                    <h3>👑 Admin Dashboard</h3>
+                    <p class="mb-0">Welcome back, {{ user.username }}!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Section -->
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_recipes }}</div>
+                <div class="stat-label">Total Recipes</div>
+                <small class="text-muted">Active recipes in system</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_ingredients }}</div>
+                <div class="stat-label">Ingredients</div>
+                <small class="text-muted">Available ingredients</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">{{ active_menus }}</div>
+                <div class="stat-label">Active Menus</div>
+                <small class="text-muted">Currently running menus</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_menu_items }}</div>
+                <div class="stat-label">Menu Items</div>
+                <small class="text-muted">Items across all menus</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="quick-action-card">
+                <a href="{% url 'menu_management:recipe_create' %}" class="text-decoration-none text-dark">
+                    <span class="quick-action-icon">📝</span>
+                    <h5>Create Recipe</h5>
+                    <p class="text-muted">Add new recipe with ingredients</p>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="quick-action-card">
+                <a href="{% url 'menu_management:menu_create' %}" class="text-decoration-none text-dark">
+                    <span class="quick-action-icon">📋</span>
+                    <h5>Create Menu</h5>
+                    <p class="text-muted">Design new menu structure</p>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="quick-action-card">
+                <a href="{% url 'menu_management:performance_analytics' %}" class="text-decoration-none text-dark">
+                    <span class="quick-action-icon">📊</span>
+                    <h5>Analytics</h5>
+                    <p class="text-muted">View performance metrics</p>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="quick-action-card">
+                <a href="/admin/" class="text-decoration-none text-dark">
+                    <span class="quick-action-icon">⚙️</span>
+                    <h5>Django Admin</h5>
+                    <p class="text-muted">System administration</p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📝 Recent Recipes</h5>
+                </div>
+                <div class="card-body">
+                    {% for recipe in recent_recipes %}
+                        <div class="recent-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ recipe.name }}</strong>
+                                    <br>
+                                    <small class="text-muted">By {{ recipe.created_by.username }} • {{ recipe.created_at|date:"M d, Y" }}</small>
+                                </div>
+                                <a href="{% url 'menu_management:recipe_detail' recipe.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted">No recent recipes</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🍽️ Recent Menu Items</h5>
+                </div>
+                <div class="card-body">
+                    {% for item in recent_menu_items %}
+                        <div class="recent-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ item.name }}</strong>
+                                    <br>
+                                    <small class="text-muted">${{ item.price }} • {{ item.created_at|date:"M d, Y" }}</small>
+                                </div>
+                                <span class="badge {% if item.is_available %}bg-success{% else %}bg-danger{% endif %}">
+                                    {% if item.is_available %}Available{% else %}86'd{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted">No recent menu items</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature Overview -->
+    <div class="feature-grid">
+        <div class="feature-card">
+            <span class="feature-icon">📚</span>
+            <h3 class="feature-title">Recipe Management</h3>
+            <p class="feature-description">
+                Create detailed recipes with ingredients, quantities, preparation steps, and nutritional information. 
+                Track recipe costs, versions, and chef notes for quality control.
+            </p>
+            <a href="{% url 'menu_management:recipe_list' %}" class="btn btn-primary mt-3">Manage Recipes</a>
+        </div>
+        
+        <div class="feature-card">
+            <span class="feature-icon">🎯</span>
+            <h3 class="feature-title">Menu Engineering</h3>
+            <p class="feature-description">
+                Design multiple menus (breakfast, lunch, dinner, seasonal) with pricing strategies, 
+                profitability tracking, and menu mix analysis for optimization.
+            </p>
+            <a href="{% url 'menu_management:menu_list' %}" class="btn btn-primary mt-3">Manage Menus</a>
+        </div>
+        
+        <div class="feature-card">
+            <span class="feature-icon">📊</span>
+            <h3 class="feature-title">Analytics & Insights</h3>
+            <p class="feature-description">
+                Track menu performance, analyze sales data, monitor conversion rates, and get 
+                optimization recommendations for better profitability.
+            </p>
+            <a href="{% url 'menu_management:performance_analytics' %}" class="btn btn-primary mt-3">View Analytics</a>
+        </div>
+        
+        <div class="feature-card">
+            <span class="feature-icon">💰</span>
+            <h3 class="feature-title">Cost Management</h3>
+            <p class="feature-description">
+                Track ingredient prices, calculate recipe costs automatically, manage pricing strategies, 
+                and monitor profitability in real-time.
+            </p>
+            <a href="#" class="btn btn-primary mt-3">Cost Analysis</a>
+        </div>
+        
+        <div class="feature-card">
+            <span class="feature-icon">🍳</span>
+            <h3 class="feature-title">Kitchen Operations</h3>
+            <p class="feature-description">
+                Manage preparation times, equipment requirements, plating instructions, and 
+                coordinate kitchen workflow efficiently.
+            </p>
+            <a href="{% url 'kitchen_display' %}" class="btn btn-primary mt-3">Kitchen Display</a>
+        </div>
+        
+        <div class="feature-card">
+            <span class="feature-icon">🎨</span>
+            <h3 class="feature-title">Multi-Brand Support</h3>
+            <p class="feature-description">
+                Support for cloud kitchen operations with independent menus for different virtual brands, 
+                platform-specific variations, and unified management.
+            </p>
+            <a href="{% url 'menu_management:multi_brand' %}" class="btn btn-primary mt-3">Brand Management</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

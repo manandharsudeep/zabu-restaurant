@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Venue - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .venue-form {
+        background: white;
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .venue-hero {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 60px 0;
+        text-align: center;
+        border-radius: 20px;
+        margin-bottom: 3rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control, .form-select, .form-textarea {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus, .form-textarea:focus {
+        border-color: #f5576c;
+        box-shadow: 0 0 0 0.2rem rgba(245, 87, 108, 0.25);
+    }
+    
+    .form-textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    .btn-book-venue {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        border: none;
+        color: white;
+        padding: 1rem 3rem;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-book-venue:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(240, 147, 251, 0.3);
+    }
+    
+    .event-type-card {
+        border: 2px solid #e9ecef;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .event-type-card:hover {
+        border-color: #f5576c;
+        box-shadow: 0 5px 15px rgba(245, 87, 108, 0.2);
+    }
+    
+    .event-type-card.selected {
+        border-color: #f5576c;
+        background: linear-gradient(135deg, rgba(240, 147, 251, 0.1) 0%, rgba(245, 87, 108, 0.1) 100%);
+    }
+    
+    .capacity-info {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Venue Hero Section -->
+    <div class="venue-hero">
+        <h1 class="display-4 fw-bold mb-3">🏛️ Book the Entire Venue</h1>
+        <p class="lead">Host your special event in our exclusive restaurant space</p>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="venue-form">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Event Details -->
+                    <div class="mb-4">
+                        <h4 class="mb-3">🎉 Event Details</h4>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="event_name" class="form-label">Event Name *</label>
+                                <input type="text" class="form-control" id="event_name" name="event_name" required placeholder="e.g., Sarah's Wedding Reception">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="event_type" class="form-label">Event Type *</label>
+                                <select class="form-select" id="event_type" name="event_type" required>
+                                    <option value="">Select event type...</option>
+                                    <option value="wedding">Wedding Reception</option>
+                                    <option value="corporate">Corporate Event</option>
+                                    <option value="birthday">Birthday Party</option>
+                                    <option value="anniversary">Anniversary</option>
+                                    <option value="fundraiser">Fundraiser</option>
+                                    <option value="conference">Conference</option>
+                                    <option value="workshop">Workshop</option>
+                                    <option value="private_party">Private Party</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Date and Time -->
+                    <div class="mb-4">
+                        <h4 class="mb-3">📅 Date and Time</h4>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="date" class="form-label">Event Date *</label>
+                                <input type="date" class="form-control" id="date" name="date" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="start_time" class="form-label">Start Time *</label>
+                                <select class="form-select" id="start_time" name="start_time" required>
+                                    <option value="">Select start time...</option>
+                                    <option value="10:00">10:00 AM</option>
+                                    <option value="11:00">11:00 AM</option>
+                                    <option value="12:00">12:00 PM</option>
+                                    <option value="13:00">1:00 PM</option>
+                                    <option value="14:00">2:00 PM</option>
+                                    <option value="15:00">3:00 PM</option>
+                                    <option value="16:00">4:00 PM</option>
+                                    <option value="17:00">5:00 PM</option>
+                                    <option value="18:00">6:00 PM</option>
+                                    <option value="19:00">7:00 PM</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="end_time" class="form-label">End Time *</label>
+                                <select class="form-select" id="end_time" name="end_time" required>
+                                    <option value="">Select end time...</option>
+                                    <option value="14:00">2:00 PM</option>
+                                    <option value="15:00">3:00 PM</option>
+                                    <option value="16:00">4:00 PM</option>
+                                    <option value="17:00">5:00 PM</option>
+                                    <option value="18:00">6:00 PM</option>
+                                    <option value="19:00">7:00 PM</option>
+                                    <option value="20:00">8:00 PM</option>
+                                    <option value="21:00">9:00 PM</option>
+                                    <option value="22:00">10:00 PM</option>
+                                    <option value="23:00">11:00 PM</option>
+                                    <option value="00:00">12:00 AM</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Guest Information -->
+                    <div class="mb-4">
+                        <h4 class="mb-3">👥 Guest Information</h4>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="expected_guests" class="form-label">Expected Guests *</label>
+                                <input type="number" class="form-control" id="expected_guests" name="expected_guests" min="1" max="500" required placeholder="Number of guests">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="budget_range" class="form-label">Budget Range *</label>
+                                <select class="form-select" id="budget_range" name="budget_range" required>
+                                    <option value="">Select budget range...</option>
+                                    <option value="under_1000">Under Nrs 1,000</option>
+                                    <option value="1000_5000">Nrs 1,000 - Nrs 5,000</option>
+                                    <option value="5000_10000">Nrs 5,000 - Nrs 10,000</option>
+                                    <option value="10000_25000">Nrs 10,000 - Nrs 25,000</option>
+                                    <option value="over_25000">Over Nrs 25,000</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <div class="mb-4">
+                        <h4 class="mb-3">📞 Contact Information</h4>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="contact_phone" class="form-label">Phone Number *</label>
+                                <input type="tel" class="form-control" id="contact_phone" name="contact_phone" required placeholder="(555) 123-4567">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="contact_email" class="form-label">Email Address *</label>
+                                <input type="email" class="form-control" id="contact_email" name="contact_email" required placeholder="your@email.com">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Catering and Setup -->
+                    <div class="mb-4">
+                        <h4 class="mb-3">🍽️ Catering and Setup</h4>
+                        <div class="mb-3">
+                            <label for="catering_options" class="form-label">Catering Requirements *</label>
+                            <textarea class="form-textarea form-control" id="catering_options" name="catering_options" rows="4" required placeholder="Please describe your catering needs, dietary restrictions, preferred cuisine, etc."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="setup_requirements" class="form-label">Setup Requirements</label>
+                            <textarea class="form-textarea form-control" id="setup_requirements" name="setup_requirements" rows="3" placeholder="Special setup requirements (decorations, AV equipment, seating arrangements, etc.)"></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Capacity Information -->
+                    <div class="capacity-info">
+                        <h5 class="mb-3">🏛️ Venue Capacity Information</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p><strong>Maximum Capacity:</strong> 500 guests</p>
+                                <p><strong>Indoor Space:</strong> 300 guests</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>Outdoor Patio:</strong> 100 guests</p>
+                                <p><strong>Private Rooms:</strong> 100 guests</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>Standing Reception:</strong> 500 guests</p>
+                                <p><strong>Seated Dinner:</strong> 300 guests</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-book-venue btn-lg">
+                            🏛️ Book Venue
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set minimum date to today
+    const dateInput = document.getElementById('date');
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.min = today;
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const startTime = document.getElementById('start_time').value;
+        const endTime = document.getElementById('end_time').value;
+        
+        if (startTime && endTime && startTime >= endTime) {
+            e.preventDefault();
+            alert('End time must be after start time');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

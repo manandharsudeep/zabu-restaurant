@@ -1,0 +1,584 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .function-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border-left: 4px solid #667eea;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .function-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .function-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    .function-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .function-description {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    .function-stats {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .quick-actions {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        border-left: 4px solid #28a745;
+    }
+    
+    .action-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .action-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 1rem;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        display: block;
+        text-align: center;
+    }
+    
+    .action-btn:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        transform: translateY(-2px);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .action-btn.primary {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+    
+    .action-btn.primary:hover {
+        background: linear-gradient(135deg, #20c997 0%, #28a745 100%);
+    }
+    
+    .overview-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .overview-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        text-align: center;
+    }
+    
+    .overview-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .overview-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .priority-high {
+        border-left-color: #dc3545;
+    }
+    
+    .priority-medium {
+        border-left-color: #ffc107;
+    }
+    
+    .priority-low {
+        border-left-color: #28a745;
+    }
+    
+    .section-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #667eea;
+    }
+    
+    .section-header h2 {
+        color: #333;
+        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    
+    .section-header p {
+        color: #6c757d;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Admin Dashboard Header -->
+<div class="dashboard-header">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="display-5">🎯 Admin Dashboard</h1>
+            <p class="lead">Complete control center for your restaurant operations</p>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Overview Statistics -->
+    <div class="overview-stats">
+        <div class="overview-card">
+            <div class="overview-number">{{ total_brands }}</div>
+            <div class="overview-label">Active Brands</div>
+        </div>
+        <div class="overview-card">
+            <div class="overview-number">{{ total_menu_items }}</div>
+            <div class="overview-label">Menu Items</div>
+        </div>
+        <div class="overview-card">
+            <div class="overview-number">${{ total_revenue|floatformat:0 }}</div>
+            <div class="overview-label">Total Revenue</div>
+        </div>
+        <div class="overview-card">
+            <div class="overview-number">{{ brand_activity_rate|floatformat:0 }}%</div>
+            <div class="overview-label">Brand Activity</div>
+        </div>
+    </div>
+
+    <!-- Core Operations Section -->
+    <div class="section-header">
+        <h2>🚀 Core Operations</h2>
+        <p>Essential restaurant operations and order management</p>
+    </div>
+    <div class="dashboard-grid">
+        <!-- Order Management -->
+        <a href="{% url 'order_status' %}" class="function-card priority-high">
+            <span class="function-icon">📦</span>
+            <div class="function-title">Order Management</div>
+            <div class="function-description">Track orders, manage status and view customer information</div>
+        </a>
+
+        <!-- Kitchen Display System -->
+        <a href="{% url 'menu_management:kitchen_display_system' %}" class="function-card priority-high">
+            <span class="function-icon">🍳</span>
+            <div class="function-title">Kitchen Display System</div>
+            <div class="function-description">Real-time order visualization, fire timing, and order management</div>
+            <div class="function-stats">
+                <div class="stat-item">
+                    <div class="stat-number">5</div>
+                    <div class="stat-label">Active Orders</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">2</div>
+                    <div class="stat-label">Rush Orders</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">🔥</div>
+                    <div class="stat-label">High</div>
+                </div>
+            </div>
+        </a>
+
+        <!-- Notification Center -->
+        <a href="{% url 'menu_management:notification_center' %}" class="function-card priority-high">
+            <span class="function-icon">🔔</span>
+            <div class="function-title">Notification Center</div>
+            <div class="function-description">Real-time kitchen notifications, alerts and staff communication</div>
+        </a>
+
+        <!-- Station Management -->
+        <a href="{% url 'menu_management:station_management' %}" class="function-card priority-high">
+            <span class="function-icon">🍳</span>
+            <div class="function-title">Station Management</div>
+            <div class="function-description">Smart kitchen station routing, load balancing and performance optimization</div>
+        </a>
+    </div>
+
+    <!-- Menu & Recipe Management Section -->
+    <div class="section-header">
+        <h2>🍽️ Menu & Recipe Management</h2>
+        <p>Create and manage recipes, menus, and course offerings</p>
+    </div>
+    <div class="dashboard-grid">
+        <!-- Recipe Management -->
+        <a href="{% url 'menu_management:recipe_list' %}" class="function-card priority-medium">
+            <span class="function-icon">📖</span>
+            <div class="function-title">Recipe Management</div>
+            <div class="function-description">Create recipes with scaling calculator, cost analysis and nutritional info</div>
+        </a>
+
+        <!-- Menu Management -->
+        <a href="{% url 'menu_management:menu_list' %}" class="function-card priority-medium">
+            <span class="function-icon">📋</span>
+            <div class="function-title">Menu Management</div>
+            <div class="function-description">Create and manage menus, sections and menu items</div>
+        </a>
+
+        <!-- Course Menu Coordination -->
+        <a href="{% url 'menu_management:enhanced_course_menu_dashboard' %}" class="function-card priority-low">
+            <span class="function-icon">🍽️</span>
+            <div class="function-title">Enhanced Course Menu Management</div>
+            <div class="function-description">Multi-course tasting menus, wine pairings, dietary accommodations, and seasonal rotations</div>
+            <div class="function-stats">
+                <div class="stat-item">
+                    <div class="stat-number">8</div>
+                    <div class="stat-label">Menu Types</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">15m</div>
+                    <div class="stat-label">Avg Time</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">🟢</div>
+                    <div class="stat-label">Low</div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Kitchen Operations Section -->
+    <div class="section-header">
+        <h2>👨‍🍳 Kitchen Operations</h2>
+        <p>Kitchen workflow, prep management, and station coordination</p>
+    </div>
+    <div class="dashboard-grid">
+        <!-- Prep Management -->
+        <a href="{% url 'menu_management:prep_management' %}" class="function-card priority-medium">
+            <span class="function-icon">🥗</span>
+            <div class="function-title">Prep Management</div>
+            <div class="function-description">Automated prep lists, task tracking, and efficiency monitoring</div>
+            <div class="function-stats">
+                <div class="stat-item">
+                    <div class="stat-number">8</div>
+                    <div class="stat-label">Prep Items</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">5</div>
+                    <div class="stat-label">Tasks Today</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">⚡</div>
+                    <div class="stat-label">Medium</div>
+                </div>
+            </div>
+        </a>
+
+        <!-- Ghost Kitchen Operations -->
+        <a href="{% url 'menu_management:ghost_kitchen' %}" class="function-card priority-medium">
+            <span class="function-icon">👻</span>
+            <div class="function-title">Ghost Kitchen Operations</div>
+            <div class="function-description">Optimize kitchen workflow, stations and staff management</div>
+        </a>
+
+        <!-- Cloud Kitchen Operations -->
+        <a href="{% url 'menu_management:cloud_kitchen_operations' %}" class="function-card priority-medium">
+            <span class="function-icon">☁️</span>
+            <div class="function-title">Cloud Kitchen Operations</div>
+            <div class="function-description">Batch order processing, driver handoff, and multi-brand workflow</div>
+            <div class="function-stats">
+                <div class="stat-item">
+                    <div class="stat-number">12</div>
+                    <div class="stat-label">Orders</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">Drivers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">⚡</div>
+                    <div class="stat-label">Medium</div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Analytics & Insights Section -->
+    <div class="section-header">
+        <h2>📊 Analytics & Insights</h2>
+        <p>Performance tracking, business intelligence, and optimization</p>
+    </div>
+    <div class="dashboard-grid">
+        <!-- Performance Analytics -->
+        <a href="{% url 'menu_management:performance_analytics' %}" class="function-card priority-medium">
+            <span class="function-icon">📊</span>
+            <div class="function-title">Performance Analytics</div>
+            <div class="function-description">Track revenue, orders, customer behavior and growth metrics</div>
+        </a>
+
+        <!-- Advanced Analytics -->
+        <a href="{% url 'menu_management:analytics_dashboard' %}" class="function-card priority-low">
+            <span class="function-icon">📈</span>
+            <div class="function-title">Advanced Analytics</div>
+            <div class="function-description">A/B testing, menu optimization and business intelligence</div>
+        </a>
+
+        <!-- Menu Optimization -->
+        <a href="{% url 'menu_management:menu_optimization' %}" class="function-card priority-medium">
+            <span class="function-icon">🍽️</span>
+            <div class="function-title">Menu Optimization</div>
+            <div class="function-description">AI-powered recommendations for pricing and menu performance</div>
+        </a>
+    </div>
+
+    <!-- Safety & Compliance Section -->
+    <div class="section-header">
+        <h2>🛡️ Safety & Compliance</h2>
+        <p>Food safety, HACCP compliance, and quality control</p>
+    </div>
+    <div class="dashboard-grid">
+        <!-- Enhanced Food Safety -->
+        <a href="{% url 'menu_management:food_safety_dashboard' %}" class="function-card priority-high">
+            <span class="function-icon">🛡️</span>
+            <div class="function-title">Enhanced Food Safety</div>
+            <div class="function-description">Temperature monitoring, HACCP compliance, and safety automation</div>
+            <div class="function-stats">
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Compliant</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24</div>
+                    <div class="stat-label">Checks</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">🔥</div>
+                    <div class="stat-label">High</div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Customer & Staff Management Section -->
+    <div class="section-header">
+        <h2>👥 Customer & Staff Management</h2>
+        <p>Customer relations, staff coordination, and team management</p>
+    </div>
+    <div class="dashboard-grid">
+        <!-- Customer Management -->
+        <a href="{% url 'customer_management' %}" class="function-card priority-medium">
+            <span class="function-icon">👥</span>
+            <div class="function-title">Customer Management</div>
+            <div class="function-description">View customer profiles, order history, and analytics</div>
+        </a>
+
+        <!-- Staff Management -->
+        <a href="{% url 'menu_management:staff_dashboard' %}" class="function-card priority-medium">
+            <span class="function-icon">👥</span>
+            <div class="function-title">Staff Management</div>
+            <div class="function-description">Scheduling, task management, communications and performance tracking</div>
+        </a>
+
+        <!-- Staff Portal -->
+        <a href="{% url 'staff_portal' %}" class="function-card priority-medium">
+            <span class="function-icon">👨‍🍳</span>
+            <div class="function-title">Staff Portal</div>
+            <div class="function-description">Staff dashboard, schedules and performance tracking</div>
+        </a>
+    </div>
+
+    <!-- Multi-Brand & Platform Section -->
+    <div class="section-header">
+        <h2>🏢 Multi-Brand & Platform</h2>
+        <p>Multi-brand operations and third-party platform integration</p>
+    </div>
+    <div class="dashboard-grid">
+        <!-- Multi-Brand Management -->
+        <a href="{% url 'menu_management:multi_brand' %}" class="function-card priority-high">
+            <span class="function-icon">🏢</span>
+            <div class="function-title">Multi-Brand Management</div>
+            <div class="function-description">Create and manage virtual brands with unique menus and identities</div>
+        </a>
+
+        <!-- Platform Integration -->
+        <a href="{% url 'menu_management:platform_integration' %}" class="function-card priority-high">
+            <span class="function-icon">📱</span>
+            <div class="function-title">Platform Integration</div>
+            <div class="function-description">Connect with Uber Eats, DoorDash, Grubhub and sync menus</div>
+        </a>
+
+        <!-- Inventory Management -->
+        <a href="{% url 'menu_management:inventory_dashboard' %}" class="function-card priority-medium">
+            <span class="function-icon">📦</span>
+            <div class="function-title">Inventory Management</div>
+            <div class="function-description">Real-time tracking, purchasing, waste management and cost control</div>
+        </a>
+    </div>
+
+    <!-- Digital & External Section -->
+    <div class="section-header">
+        <h2>📺 Digital & External</h2>
+        <p>Digital displays and external customer interfaces</p>
+    </div>
+    <div class="dashboard-grid">
+        <!-- Digital Menu Boards -->
+        <a href="{% url 'menu_management:public_digital_menu' %}" class="function-card priority-low" target="_blank">
+            <span class="function-icon">📺</span>
+            <div class="function-title">Digital Menu Boards</div>
+            <div class="function-description">Interactive menu display interface with real-time updates</div>
+        </a>
+    </div>
+
+    <!-- Quick Actions Panel -->
+    <div class="quick-actions">
+        <h3>⚡ Quick Actions</h3>
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="window.location.href='{% url 'menu_management:recipe_create' %}'">
+                ➕ Create Recipe
+            </button>
+            <button class="btn btn-success" onclick="window.location.href='{% url 'menu_management:station_management' %}'">
+                🍳 Manage Stations
+            </button>
+            <button class="btn btn-info" onclick="window.location.href='/menu-management/notifications/'">
+                🔔 View Notifications
+            </button>
+            <button class="btn btn-warning" onclick="window.location.href='{% url 'menu_management:kitchen_display_system' %}'">
+                👨‍🍳 Kitchen Display
+            </button>
+            <button class="btn btn-secondary" onclick="window.location.href='{% url 'customer_management' %}'">
+                👥 Customer Management
+            </button>
+            <button class="btn btn-outline-primary" onclick="window.location.href='{% url 'menu_management:prep_management' %}'">
+                🥗 Prep Management
+            </button>
+            <button class="btn btn-outline-success" onclick="window.location.href='{% url 'menu_management:cloud_kitchen_operations' %}'">
+                ☁️ Cloud Kitchen
+            </button>
+            <button class="btn btn-outline-info" onclick="window.location.href='{% url 'menu_management:food_safety_dashboard' %}'">
+                🛡️ Food Safety
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Add styles for quick actions -->
+<style>
+.quick-actions {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    margin-top: 2rem;
+}
+
+.quick-actions h3 {
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.action-buttons .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.action-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+</style>
+
+<script>
+// Auto-refresh dashboard data every 30 seconds
+setInterval(() => {
+    console.log('Refreshing dashboard data...');
+    
+    // Add visual indicator of refresh
+    const cards = document.querySelectorAll('.function-card');
+    cards.forEach(card => {
+        card.style.opacity = '0.7';
+        setTimeout(() => {
+            card.style.opacity = '1';
+        }, 500);
+    });
+}, 30000);
+
+// Add click feedback for function cards
+document.querySelectorAll('.function-card').forEach(card => {
+    card.addEventListener('click', function() {
+        this.style.transform = 'scale(0.98)';
+        setTimeout(() => {
+            this.style.transform = '';
+        }, 100);
+    });
+});
+</script>
+{% endblock %}

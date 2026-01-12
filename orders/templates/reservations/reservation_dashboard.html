@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block title %}Reservations - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .reservation-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 0;
+        text-align: center;
+        border-radius: 0 0 30px 30px;
+    }
+    
+    .reservation-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        border-left: 4px solid #667eea;
+        transition: transform 0.3s ease;
+    }
+    
+    .reservation-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .quick-action-card {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: none;
+    }
+    
+    .quick-action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(240, 147, 251, 0.4);
+        color: white;
+    }
+    
+    .quick-action-card h3 {
+        color: white;
+        margin-bottom: 1rem;
+    }
+    
+    .reservation-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-confirmed { background: #d4edda; color: #155724; }
+    .status-completed { background: #d1ecf1; color: #0c5460; }
+    .status-cancelled { background: #f8d7da; color: #721c24; }
+    
+    .confirmation-code {
+        background: #f8f9fa;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        font-family: monospace;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+    
+    .empty-state h4 {
+        color: #495057;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Reservation Hero Section -->
+<section class="reservation-hero">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3">🍽️ Your Reservations</h1>
+        <p class="lead">Manage your table reservations, venue bookings, and course menu experiences</p>
+    </div>
+</section>
+
+<!-- Quick Actions Section -->
+<section class="py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <a href="{% url 'create_table_reservation' %}" class="text-decoration-none">
+                    <div class="quick-action-card">
+                        <h3>🪑 Reserve Table</h3>
+                        <p>Book a table for your dining experience</p>
+                        <div class="mt-3">
+                            <i class="fas fa-arrow-right"></i> Book Now
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 mb-3">
+                <a href="{% url 'create_venue_reservation' %}" class="text-decoration-none">
+                    <div class="quick-action-card">
+                        <h3>🏛️ Book Venue</h3>
+                        <p>Reserve the entire restaurant for your event</p>
+                        <div class="mt-3">
+                            <i class="fas fa-arrow-right"></i> Book Venue
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Reservations Section -->
+<section class="py-4">
+    <div class="container">
+        <div class="row">
+            <!-- Table Reservations -->
+            <div class="col-lg-6">
+                <h3 class="mb-4">🪑 Table Reservations</h3>
+                {% if table_reservations %}
+                    {% for reservation in table_reservations %}
+                    <div class="reservation-card">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="mb-1">Table {{ reservation.table.table_number }}</h5>
+                                <p class="text-muted mb-1">{{ reservation.date|date:"F d, Y" }} at {{ reservation.time|time:"g:i A" }}</p>
+                                <p class="mb-2">Party Size: {{ reservation.party_size }} guests</p>
+                                {% if reservation.occasion %}
+                                <span class="badge bg-secondary">{{ reservation.get_occasion_display }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="text-end">
+                                <span class="reservation-status status-{{ reservation.status }}">{{ reservation.get_status_display }}</span>
+                                <div class="mt-2">
+                                    <small class="confirmation-code">{{ reservation.confirmation_code }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% if reservation.special_requests %}
+                        <p class="text-muted small mb-3">
+                            <strong>Special Requests:</strong> {{ reservation.special_requests }}
+                        </p>
+                        {% endif %}
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'reservation_detail' 'table' reservation.id %}" class="btn btn-sm btn-outline-primary">View Details</a>
+                            {% if reservation.status in 'pending confirmed' %}
+                            <a href="{% url 'cancel_reservation' 'table' reservation.id %}" class="btn btn-sm btn-outline-danger">Cancel</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <h4>No Table Reservations</h4>
+                        <p>You haven't made any table reservations yet.</p>
+                        <a href="{% url 'create_table_reservation' %}" class="btn btn-primary">Make Your First Reservation</a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Venue Reservations -->
+            <div class="col-lg-6">
+                <h3 class="mb-4">🏛️ Venue Bookings</h3>
+                {% if venue_reservations %}
+                    {% for reservation in venue_reservations %}
+                    <div class="reservation-card">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="mb-1">{{ reservation.event_name }}</h5>
+                                <p class="text-muted mb-1">{{ reservation.date|date:"F d, Y" }}</p>
+                                <p class="mb-2">{{ reservation.start_time|time:"g:i A" }} - {{ reservation.end_time|time:"g:i A" }}</p>
+                                <p class="mb-2">{{ reservation.expected_guests }} guests</p>
+                                <span class="badge bg-secondary">{{ reservation.get_event_type_display }}</span>
+                            </div>
+                            <div class="text-end">
+                                <span class="reservation-status status-{{ reservation.status }}">{{ reservation.get_status_display }}</span>
+                                <div class="mt-2">
+                                    <small class="confirmation-code">{{ reservation.confirmation_code }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'reservation_detail' 'venue' reservation.id %}" class="btn btn-sm btn-outline-primary">View Details</a>
+                            {% if reservation.status in 'inquiry pending confirmed' %}
+                            <a href="{% url 'cancel_reservation' 'venue' reservation.id %}" class="btn btn-sm btn-outline-danger">Cancel</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <h4>No Venue Bookings</h4>
+                        <p>You haven't booked the entire venue yet.</p>
+                        <a href="{% url 'create_venue_reservation' %}" class="btn btn-primary">Book the Venue</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

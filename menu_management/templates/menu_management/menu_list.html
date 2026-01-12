@@ -1,0 +1,305 @@
+{% extends 'base.html' %}
+
+{% block title %}Menu Engineering - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .menu-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        height: 100%;
+        border-left: 4px solid #667eea;
+    }
+    
+    .menu-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .menu-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .menu-name {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .menu-meta {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .meta-item {
+        background: #f8f9fa;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .menu-type-breakfast { background: #e3f2fd; color: #1976d2; }
+    .menu-type-lunch { background: #f3e5f5; color: #7b1fa2; }
+    .menu-type-dinner { background: #fce4ec; color: #c2185b; }
+    .menu-type-bar { background: #f3e5f5; color: #7b1fa2; }
+    .menu-type-dessert { background: #fff3e0; color: #f57c00; }
+    .menu-type-catering { background: #e8f5e8; color: #4caf50; }
+    .menu-type-seasonal { background: #fff8e1; color: #ffc107; }
+    .menu-type-tasting { background: #e1f5fe; color: #03a9f4; }
+    
+    .menu-description {
+        color: #666;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .menu-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-inactive {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .filter-section {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+    }
+    
+    .search-box {
+        position: relative;
+    }
+    
+    .search-box input {
+        padding-left: 2.5rem;
+        border-radius: 50px;
+        border: 2px solid #e9ecef;
+    }
+    
+    .search-box::before {
+        content: "🔍";
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    
+    .menu-stats {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+    
+    .menu-stats h4 {
+        margin: 0;
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .menu-stats .number {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5">📋 Menu Engineering</h1>
+            <p class="text-muted">Create and manage multiple menus with pricing strategies and analytics</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'menu_management:create_menu_item' %}" class="btn btn-success btn-lg me-2">
+                🍽️ New Item
+            </a>
+            <a href="{% url 'menu_management:menu_create' %}" class="btn btn-primary btn-lg">
+                ➕ Create Menu
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-section">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="search-box">
+                    <input type="text" class="form-control" placeholder="Search menus..." value="{{ search }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="menu_type">
+                    <option value="">All Types</option>
+                    <option value="breakfast" {% if menu_type == 'breakfast' %}selected{% endif %}>Breakfast</option>
+                    <option value="lunch" {% if menu_type == 'lunch' %}selected{% endif %}>Lunch</option>
+                    <option value="dinner" {% if menu_type == 'dinner' %}selected{% endif %}>Dinner</option>
+                    <option value="bar" {% if menu_type == 'bar' %}selected{% endif %}>Bar</option>
+                    <option value="dessert" {% if menu_type == 'dessert' %}selected{% endif %}>Dessert</option>
+                    <option value="catering" {% if menu_type == 'catering' %}selected{% endif %}>Catering</option>
+                    <option value="seasonal" {% if menu_type == 'seasonal' %}selected{% endif %}>Seasonal</option>
+                    <option value="tasting" {% if menu_type == 'tasting' %}selected{% endif %}>Tasting</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="status">
+                    <option value="">All Status</option>
+                    <option value="active" {% if status == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-outline-primary">🔍 Filter</button>
+                <a href="{% url 'menu_management:menu_list' %}" class="btn btn-outline-secondary ms-2">🔄 Clear</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Grid -->
+    <div class="row">
+        {% for menu in menus %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="menu-card">
+                    <div class="menu-header">
+                        <div class="menu-name">{{ menu.name }}</div>
+                    </div>
+                    
+                    <div class="menu-meta">
+                        <span class="meta-item menu-type-{{ menu.menu_type }}">
+                            {{ menu.get_menu_type_display }}
+                        </span>
+                        <span class="meta-item">
+                            📅 {{ menu.start_date|date:"M d, Y"|default:"No start" }}
+                        </span>
+                        <span class="meta-item">
+                            📅 {{ menu.end_date|date:"M d, Y"|default:"No end" }}
+                        </span>
+                    </div>
+                    
+                    <div class="menu-description">
+                        {{ menu.description }}
+                    </div>
+                    
+                    <div class="menu-stats">
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="number">
+                                    0
+                                </div>
+                                <h4>Items</h4>
+                            </div>
+                            <div class="col-4">
+                                <div class="number">
+                                    ${{ menu.total_revenue|default:"0"|floatformat:0 }}
+                                </div>
+                                <h4>Revenue</h4>
+                            </div>
+                            <div class="col-4">
+                                <div class="number">
+                                    {{ menu.created_by.username }}
+                                </div>
+                                <h4>Created By</h4>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-footer">
+                        <div>
+                            <span class="status-badge {% if menu.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                {% if menu.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </div>
+                        <div>
+                            <a href="{% url 'menu_management:menu_detail' menu.id %}" class="btn btn-sm btn-outline-primary">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <h3 class="text-muted">No menus found</h3>
+                    <p class="text-muted">Create your first menu to get started</p>
+                    <a href="{% url 'menu_management:menu_create' %}" class="btn btn-primary">
+                        📋 Create Menu
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📊 Menu Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h3 class="text-primary">{{ total_menus }}</h3>
+                            <p class="text-muted">Total Menus</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-success">{{ active_menus }}</h3>
+                            <p class="text-muted">Active Menus</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-info">{{ inactive_menus }}</h3>
+                            <p class="text-muted">Inactive Menus</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-warning">{{ total_items }}</h3>
+                            <p class="text-muted">Total Items</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

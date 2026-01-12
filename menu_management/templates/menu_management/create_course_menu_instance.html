@@ -1,0 +1,458 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Course Menu Instance - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .create-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .form-container {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    
+    .form-section h3 {
+        color: #333;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #667eea;
+    }
+    
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-label {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-input {
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-select {
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        background: white;
+        cursor: pointer;
+    }
+    
+    .form-textarea {
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    .checkbox-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .checkbox-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+    
+    .template-preview {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+        border-left: 4px solid #667eea;
+    }
+    
+    .template-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .info-label {
+        font-size: 0.8rem;
+        color: #666;
+        margin-bottom: 0.25rem;
+    }
+    
+    .info-value {
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .price-display {
+        background: #e8f5e8;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+    
+    .price-display h4 {
+        color: #388e3c;
+        margin-bottom: 0.5rem;
+    }
+    
+    .price-details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    
+    .back-button {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .back-button:hover {
+        background: #5a67d8;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .submit-button {
+        background: #48bb78;
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    
+    .submit-button:hover {
+        background: #38a169;
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    
+    .alert-info {
+        background: #e3f2fd;
+        color: #1976d2;
+        border: 1px solid #bbdefb;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="create-header">
+    <div class="container">
+        <h1 class="display-4">🍽️ Create Course Menu Instance</h1>
+        <p class="lead">Create a new course menu instance from an existing template</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Back Button -->
+    <a href="{% url 'menu_management:course_menu_instances' %}" class="back-button">
+        ← Back to Instances
+    </a>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Template Selection -->
+        <div class="form-container">
+            <div class="form-section">
+                <h3>📋 Template Selection</h3>
+                <div class="form-group">
+                    <label class="form-label" for="template_id">Select Template *</label>
+                    <select name="template_id" id="template_id" class="form-select" required onchange="updateTemplatePreview()">
+                        <option value="">Choose a template...</option>
+                        {% for template in templates %}
+                        <option value="{{ template.template_id }}"
+                                data-name="{{ template.name }}"
+                                data-description="{{ template.description }}"
+                                data-course-count="{{ template.course_count }}"
+                                data-menu-type="{{ template.get_menu_type_display }}"
+                                data-base-price="{{ template.base_price }}"
+                                data-price-per-person="{{ template.price_per_person }}"
+                                data-min-party="{{ template.min_party_size }}"
+                                data-max-party="{{ template.max_party_size }}"
+                                data-advance-days="{{ template.advance_booking_days }}">
+                            {{ template.name }} - {{ template.get_menu_type_display }} - ${{ template.price_per_person }}/person
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Template Preview -->
+                <div id="template-preview" class="template-preview" style="display: none;">
+                    <h4>Template Details</h4>
+                    <div class="template-info">
+                        <div class="info-item">
+                            <span class="info-label">Name</span>
+                            <span class="info-value" id="preview-name">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Type</span>
+                            <span class="info-value" id="preview-menu-type">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Courses</span>
+                            <span class="info-value" id="preview-course-count">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Party Size</span>
+                            <span class="info-value" id="preview-party-size">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Advance Booking</span>
+                            <span class="info-value" id="preview-advance-days">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Base Price</span>
+                            <span class="info-value" id="preview-base-price">-</span>
+                        </div>
+                    </div>
+                    <div id="preview-description" style="margin-top: 1rem; color: #666;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instance Details -->
+        <div class="form-container">
+            <div class="form-section">
+                <h3>📝 Instance Details</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="customer_name">Customer Name *</label>
+                        <input type="text" name="customer_name" id="customer_name" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="table_number">Table Number *</label>
+                        <input type="text" name="table_number" id="table_number" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="customer_count">Number of Guests *</label>
+                        <input type="number" name="customer_count" id="customer_count" class="form-input" min="1" required onchange="updatePriceCalculation()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="booking_date">Booking Date *</label>
+                        <input type="date" name="booking_date" id="booking_date" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="booking_time">Booking Time *</label>
+                        <input type="time" name="booking_time" id="booking_time" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="pricing_tier">Pricing Tier</label>
+                        <select name="pricing_tier" id="pricing_tier" class="form-select" onchange="updatePriceCalculation()">
+                            <option value="standard">Standard</option>
+                            <option value="premium">Premium</option>
+                            <option value="deluxe">Deluxe</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="special_requests">Special Requests</label>
+                    <textarea name="special_requests" id="special_requests" class="form-textarea" placeholder="Any special requests or dietary notes..."></textarea>
+                </div>
+                
+                <!-- Dietary Requirements -->
+                <div class="form-group">
+                    <label class="form-label">Dietary Requirements</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="dietary_requirements" value="vegetarian" id="diet_vegetarian">
+                            <label for="diet_vegetarian">Vegetarian</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="dietary_requirements" value="vegan" id="diet_vegan">
+                            <label for="diet_vegan">Vegan</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="dietary_requirements" value="gluten_free" id="diet_gluten_free">
+                            <label for="diet_gluten_free">Gluten-Free</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="dietary_requirements" value="nut_free" id="diet_nut_free">
+                            <label for="diet_nut_free">Nut-Free</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="dietary_requirements" value="dairy_free" id="diet_dairy_free">
+                            <label for="diet_dairy_free">Dairy-Free</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Price Calculation -->
+                <div id="price-calculation" class="price-display" style="display: none;">
+                    <h4>💰 Price Calculation</h4>
+                    <div class="price-details">
+                        <span>Price per person: <span id="price-per-person">$0</span></span>
+                        <span>Total: <span id="total-price">$0</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Staff Assignment -->
+        <div class="form-container">
+            <div class="form-section">
+                <h3>👥 Staff Assignment</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="server">Server</label>
+                        <select name="server" id="server" class="form-select">
+                            <option value="">Select server...</option>
+                            {% for server in servers %}
+                            <option value="{{ server.id }}">{{ server.get_full_name|default:server.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="sommelier">Sommelier</label>
+                        <select name="sommelier" id="sommelier" class="form-select">
+                            <option value="">Select sommelier...</option>
+                            {% for server in servers %}
+                            <option value="{{ server.id }}">{{ server.get_full_name|default:server.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="assigned_chef">Assigned Chef</label>
+                        <select name="assigned_chef" id="assigned_chef" class="form-select">
+                            <option value="">Select chef...</option>
+                            {% for server in servers %}
+                            <option value="{{ server.id }}">{{ server.get_full_name|default:server.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-container">
+            <button type="submit" class="submit-button">
+                ✨ Create Instance
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+function updateTemplatePreview() {
+    const select = document.getElementById('template_id');
+    const preview = document.getElementById('template-preview');
+    const selectedOption = select.options[select.selectedIndex];
+    
+    if (selectedOption.value) {
+        // Update preview
+        document.getElementById('preview-name').textContent = selectedOption.dataset.name;
+        document.getElementById('preview-menu-type').textContent = selectedOption.dataset.menuType;
+        document.getElementById('preview-course-count').textContent = selectedOption.dataset.courseCount + ' courses';
+        document.getElementById('preview-party-size').textContent = selectedOption.dataset.minParty + ' - ' + selectedOption.dataset.maxParty + ' guests';
+        document.getElementById('preview-advance-days').textContent = selectedOption.dataset.advanceDays + ' days';
+        document.getElementById('preview-base-price').textContent = '$' + selectedOption.dataset.basePrice;
+        document.getElementById('preview-description').textContent = selectedOption.dataset.description || '';
+        
+        preview.style.display = 'block';
+        
+        // Update price calculation
+        updatePriceCalculation();
+    } else {
+        preview.style.display = 'none';
+        document.getElementById('price-calculation').style.display = 'none';
+    }
+}
+
+function updatePriceCalculation() {
+    const templateSelect = document.getElementById('template_id');
+    const customerCount = document.getElementById('customer_count').value;
+    const pricingTier = document.getElementById('pricing_tier').value;
+    const priceCalculation = document.getElementById('price-calculation');
+    
+    if (templateSelect.value && customerCount) {
+        const selectedOption = templateSelect.options[templateSelect.selectedIndex];
+        let basePrice = parseFloat(selectedOption.dataset.pricePerPerson);
+        
+        // Apply pricing tier multiplier
+        const tierMultipliers = {
+            'standard': 1.0,
+            'premium': 1.25,
+            'deluxe': 1.5
+        };
+        
+        const adjustedPrice = basePrice * (tierMultipliers[pricingTier] || 1.0);
+        const totalPrice = adjustedPrice * parseInt(customerCount);
+        
+        document.getElementById('price-per-person').textContent = '$' + adjustedPrice.toFixed(2);
+        document.getElementById('total-price').textContent = '$' + totalPrice.toFixed(2);
+        
+        priceCalculation.style.display = 'block';
+    } else {
+        priceCalculation.style.display = 'none';
+    }
+}
+
+// Set minimum date to today
+document.getElementById('booking_date').min = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}

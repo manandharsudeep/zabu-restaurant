@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}Generate Prep List - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .prep-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .form-container {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 0.75rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+    
+    .form-check {
+        margin-bottom: 1rem;
+    }
+    
+    .form-check-input {
+        transform: scale(1.2);
+        margin-right: 0.5rem;
+    }
+    
+    .btn-generate {
+        background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    
+    .btn-generate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(111, 66, 193, 0.3);
+    }
+    
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-left: 1rem;
+    }
+    
+    .btn-cancel:hover {
+        background: #5a6268;
+    }
+    
+    .info-box {
+        background: #e7f3ff;
+        border-left: 4px solid #007bff;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    
+    .info-box h5 {
+        color: #004085;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Prep Header -->
+<div class="prep-header">
+    <div class="container">
+        <h1 class="display-4">🔄 Generate Automated Prep List</h1>
+        <p class="lead">Create prep tasks based on demand forecasting and par levels</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="form-container">
+        <!-- Information Box -->
+        <div class="info-box">
+            <h5>📊 How it works:</h5>
+            <p>The system will analyze demand patterns from the past 4 weeks and generate prep tasks based on demand forecasting. It considers seasonal patterns, day of the week, and adds safety stock buffers.</p>
+        </div>
+        
+        <!-- Form -->
+        <form method="post" action="{% url 'menu_management:generate_prep_list' %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="targetDate" class="form-label">Target Date</label>
+                <input type="date" 
+                       class="form-control" 
+                       id="targetDate" 
+                       name="target_date" 
+                       value="{{ today|date:'Y-m-d' }}" 
+                       required>
+                <small class="text-muted">Select the date for which to generate prep tasks</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="forecastDays" class="form-label">Forecast Period</label>
+                <select class="form-control" id="forecastDays" name="forecast_days">
+                    <option value="7">7 days (1 week)</option>
+                    <option value="14">14 days (2 weeks)</option>
+                    <option value="21">21 days (3 weeks)</option>
+                    <option value="28">28 days (4 weeks)</option>
+                </select>
+                <small class="text-muted">Historical period to analyze for demand forecasting</small>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Prep Options</label>
+                
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="includeLowStock" name="include_low_stock" checked>
+                    <label class="form-check-label" for="includeLowStock">
+                        Include low stock items
+                    </label>
+                    <small class="text-muted">Generate tasks for items below par level</small>
+                </div>
+                
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="includeHistorical" name="include_historical" checked>
+                    <label class="form-check-label" for="includeHistorical">
+                        Use demand forecasting
+                    </label>
+                    <small class="text-muted">Analyze historical order patterns for accurate forecasting</small>
+                </div>
+                    <small class="text-muted">Analyze past usage patterns to predict demand</small>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <button type="submit" class="btn-generate">
+                    🚀 Generate Prep List
+                </button>
+                <a href="{% url 'menu_management:prep_management' %}" class="btn-cancel">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Set minimum date to today
+document.getElementById('targetDate').min = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}

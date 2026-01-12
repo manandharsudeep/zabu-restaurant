@@ -1,0 +1,991 @@
+{% extends 'base.html' %}
+
+{% block title %}Prep Management - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .prep-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-left: 4px solid #28a745;
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #28a745;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .prep-tasks-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .task-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-left: 4px solid #6c757d;
+        transition: all 0.3s ease;
+    }
+    
+    .task-card.scheduled {
+        border-left-color: #6c757d;
+    }
+    
+    .task-card.in_progress {
+        border-left-color: #007bff;
+        background: linear-gradient(135deg, #e6f3ff 0%, #ffffff 100%);
+    }
+    
+    .task-card.completed {
+        border-left-color: #28a745;
+        background: linear-gradient(135deg, #e6ffe6 0%, #ffffff 100%);
+    }
+    
+    .task-card.urgent {
+        border-left-color: #dc3545;
+        background: linear-gradient(135deg, #ffe6e6 0%, #ffffff 100%);
+    }
+    
+    .task-header {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .task-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin: 0;
+    }
+    
+    .task-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+    }
+    
+    .priority-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .priority-badge.low {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .priority-badge.medium {
+        background: #ffc107;
+        color: #000;
+    }
+    
+    .priority-badge.high {
+        background: #fd7e14;
+        color: white;
+    }
+    
+    .priority-badge.urgent {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .task-body {
+        padding: 1rem;
+    }
+    
+    .task-details {
+        margin-bottom: 1rem;
+    }
+    
+    .task-quantity {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .quantity-bar {
+        background: #e9ecef;
+        height: 20px;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 0.5rem;
+    }
+    
+    .quantity-progress {
+        background: #28a745;
+        height: 100%;
+        transition: width 0.3s ease;
+    }
+    
+    .task-assignment {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .task-footer {
+        padding: 1rem;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .task-time {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .task-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .btn-task {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-task:hover {
+        background: #0056b3;
+        transform: translateY(-1px);
+    }
+    
+    .btn-task.complete {
+        background: #28a745;
+    }
+    
+    .btn-task.complete:hover {
+        background: #1e7e34;
+    }
+    
+    .btn-task:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .low-stock-alerts {
+        margin-bottom: 2rem;
+    }
+    
+    .stock-alert {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .checklists-section {
+        margin-top: 2rem;
+    }
+    
+    .checklist-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+        border-left: 4px solid #17a2b8;
+    }
+    
+    .checklist-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .checklist-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin: 0;
+    }
+    
+    .checklist-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .checklist-status.pending {
+        background: #ffc107;
+        color: #000;
+    }
+    
+    .checklist-status.completed {
+        background: #28a745;
+        color: white;
+    }
+    
+    .checklist-items {
+        margin-bottom: 1rem;
+    }
+    
+    .checklist-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0;
+    }
+    
+    .checklist-item input[type="checkbox"] {
+        transform: scale(1.2);
+    }
+    
+    .generate-prep-btn {
+        background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 2rem;
+    }
+    
+    .generate-prep-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(111, 66, 193, 0.3);
+    }
+    
+    .forecast-summary {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        border-left: 4px solid #17a2b8;
+    }
+    
+    .forecast-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .forecast-item {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        border-left: 4px solid #6c757d;
+        transition: all 0.3s ease;
+    }
+    
+    .forecast-item.high-priority {
+        border-left-color: #dc3545;
+        background: linear-gradient(135deg, #fff5f5 0%, #f8f9fa 100%);
+    }
+    
+    .forecast-item.medium-priority {
+        border-left-color: #ffc107;
+        background: linear-gradient(135deg, #fffbf0 0%, #f8f9fa 100%);
+    }
+    
+    .forecast-item.low-priority {
+        border-left-color: #28a745;
+        background: linear-gradient(135deg, #f0fff4 0%, #f8f9fa 100%);
+    }
+    
+    .forecast-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .forecast-header h5 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+    
+    .category-badge {
+        background: #6c757d;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.75rem;
+    }
+    
+    .forecast-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .forecast-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+    }
+    
+    .forecast-row .label {
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .forecast-row .value {
+        font-weight: bold;
+        color: #495057;
+    }
+    
+    .forecast-row .value.required {
+        color: #dc3545;
+    }
+    
+    .forecast-row .value.no-action {
+        color: #28a745;
+    }
+    
+    .priority-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    
+    .priority-badge.priority-high {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .priority-badge.priority-medium {
+        background: #ffc107;
+        color: #212529;
+    }
+    
+    .priority-badge.priority-low {
+        background: #28a745;
+        color: white;
+    }
+    
+    .forecast-stats {
+        display: flex;
+        justify-content: space-around;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+    
+    .forecast-stat {
+        text-align: center;
+    }
+    
+    .forecast-stat strong {
+        color: #495057;
+    }
+    
+    @media (max-width: 768px) {
+        .prep-tasks-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .forecast-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .forecast-stats {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Prep Header -->
+<div class="prep-header">
+    <div class="container">
+        <h1 class="display-4">🥗 Prep Management</h1>
+        <p class="lead">Automated prep lists, task management, and efficiency tracking</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Generate Prep List Button -->
+    <div class="text-center">
+        <button class="generate-prep-btn" onclick="showGeneratePrepModal()">
+            🔄 Generate Automated Prep List
+        </button>
+    </div>
+    
+    <!-- Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_tasks }}</div>
+            <div class="stat-label">Total Tasks</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ completed_tasks }}</div>
+            <div class="stat-label">Completed</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ in_progress_tasks }}</div>
+            <div class="stat-label">In Progress</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ low_stock_items|length }}</div>
+            <div class="stat-label">Low Stock Alerts</div>
+        </div>
+    </div>
+    
+    <!-- Demand Forecast Summary -->
+    {% if forecast_summary %}
+        <div class="forecast-summary">
+            <h3>📊 Demand Forecast Summary for {{ forecast_date }}</h3>
+            <p class="text-muted">Based on {{ forecast_days }} days of historical analysis</p>
+            
+            <div class="forecast-grid">
+                {% for item in forecast_summary %}
+                    <div class="forecast-item {% if item.priority == 'high' %}high-priority{% elif item.priority == 'medium' %}medium-priority{% elif item.priority == 'low' %}low-priority{% endif %}">
+                        <div class="forecast-header">
+                            <h5>{{ item.item_name }}</h5>
+                            <span class="category-badge">{{ item.category }}</span>
+                        </div>
+                        <div class="forecast-details">
+                            <div class="forecast-row">
+                                <span class="label">Forecasted Demand:</span>
+                                <span class="value">{{ item.forecasted_demand }}</span>
+                            </div>
+                            <div class="forecast-row">
+                                <span class="label">Required Quantity:</span>
+                                <span class="value">{{ item.required_quantity }}</span>
+                            </div>
+                            <div class="forecast-row">
+                                <span class="label">Net Required:</span>
+                                <span class="value {% if item.net_required > 0 %}required{% else %}no-action{% endif %}">{{ item.net_required }}</span>
+                            </div>
+                            <div class="forecast-row">
+                                <span class="label">Priority:</span>
+                                <span class="priority-badge priority-{{ item.priority }}">{{ item.priority|title }}</span>
+                            </div>
+                            <div class="forecast-row">
+                                <span class="label">Historical Orders:</span>
+                                <span class="value">{{ item.historical_orders }}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div class="forecast-stats">
+                <div class="forecast-stat">
+                    <strong>Total Items Analyzed:</strong> {{ forecast_summary|length }}
+                </div>
+                <div class="forecast-stat">
+                    <strong>High Priority Items:</strong> Check individual items
+                </div>
+                <div class="forecast-stat">
+                    <strong>Tasks Generated:</strong> Check individual items
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+    <!-- Low Stock Alerts -->
+    {% if low_stock_items %}
+        <div class="low-stock-alerts">
+            <h3>⚠️ Low Stock Alerts</h3>
+            {% for item in low_stock_items %}
+                <div class="stock-alert">
+                    <div>
+                        <strong>{{ item.name }}</strong>
+                        <br>
+                        <small>Current: {{ item.current_stock|default:0 }} | Par: {{ item.par_level }}</small>
+                    </div>
+                    <div>
+                        <button class="btn-task" onclick="createPrepTask('{{ item.id }}')">
+                            Create Task
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <!-- Prep Tasks -->
+    <h3>📋 Today's Prep Tasks</h3>
+    <div class="prep-tasks-container" id="prepTasksContainer">
+        {% for task in prep_tasks %}
+            <div class="task-card {{ task.status }} {% if task.priority == 'urgent' %}urgent{% endif %}" 
+                 data-task-id="{{ task.task_id }}">
+                
+                <div class="task-header">
+                    <div class="task-title">{{ task.prep_item.name }}</div>
+                    <div class="task-meta">
+                        <span class="priority-badge {{ task.priority }}">{{ task.priority }}</span>
+                        <span class="task-time">{{ task.scheduled_time|date:"H:i" }}</span>
+                    </div>
+                </div>
+                
+                <div class="task-body">
+                    <div class="task-details">
+                        <div class="task-quantity">
+                            <span>Progress: {{ task.completed_quantity|floatformat:1 }} / {{ task.target_quantity|floatformat:1 }} {{ task.prep_item.yield_unit }}</span>
+                            <span>{{ task.prep_item.prep_time }}min</span>
+                        </div>
+                        <div class="quantity-bar">
+                            <div class="quantity-progress" style="width: {% widthratio task.completed_quantity task.target_quantity 100 %}%"></div>
+                        </div>
+                    </div>
+                    
+                    {% if task.assigned_to %}
+                        <div class="task-assignment">
+                            👤 {{ task.assigned_to.get_full_name|default:task.assigned_to.username }}
+                        </div>
+                    {% endif %}
+                    
+                    {% if task.assigned_station %}
+                        <div class="task-assignment">
+                            📍 {{ task.assigned_station.name }}
+                        </div>
+                    {% endif %}
+                    
+                    {% if task.quality_notes %}
+                        <div class="mt-2">
+                            <small class="text-muted">📝 {{ task.quality_notes }}</small>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="task-footer">
+                    <div class="task-time">
+                        {% if task.started_at %}
+                            Started: {{ task.started_at|date:"H:i" }}
+                        {% else %}
+                            Scheduled: {{ task.scheduled_time|date:"H:i" }}
+                        {% endif %}
+                    </div>
+                    <div class="task-actions">
+                        {% if task.status == 'scheduled' %}
+                            <button class="btn-task" onclick="updateTaskStatus('{{ task.task_id }}', 'start')">
+                                Start Task
+                            </button>
+                        {% elif task.status == 'in_progress' %}
+                            <button class="btn-task complete" onclick="showCompleteModal('{{ task.task_id }}')">
+                                Complete
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <h4>📋 No prep tasks scheduled for today</h4>
+                    <p>Generate an automated prep list based on demand forecasting.</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Checklists -->
+    {% if today_checklists %}
+        <div class="checklists-section">
+            <h3>✅ Today's Checklists</h3>
+            {% for checklist in today_checklists %}
+                <div class="checklist-card">
+                    <div class="checklist-header">
+                        <h4 class="checklist-title">{{ checklist.name }} - {{ checklist.station.name }}</h4>
+                        <span class="checklist-status {% if checklist.is_completed %}completed{% else %}pending{% endif %}">
+                            {{ checklist.get_status_display }}
+                        </span>
+                    </div>
+                    
+                    <div class="checklist-items">
+                        {% for item in checklist.items %}
+                            <div class="checklist-item">
+                                <input type="checkbox" 
+                                       {% if item.completed %}checked{% endif %} 
+                                       {% if checklist.is_completed %}disabled{% endif %}>
+                                <span>{{ item.text }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            {% if checklist.assigned_to %}
+                                Assigned to: {{ checklist.assigned_to.get_full_name|default:checklist.assigned_to.username }}
+                            {% endif %}
+                        </small>
+                        {% if checklist.completed_at %}
+                            <small class="text-success">
+                                Completed: {{ checklist.completed_at|date:"H:i" }}
+                            </small>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<!-- Complete Task Modal -->
+<div class="modal fade" id="completeTaskModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Complete Prep Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="completeTaskForm">
+                    <div class="mb-3">
+                        <label for="completedQuantity" class="form-label">Completed Quantity</label>
+                        <input type="number" step="0.1" class="form-control" id="completedQuantity" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="qualityNotes" class="form-label">Quality Notes (Optional)</label>
+                        <textarea class="form-control" id="qualityNotes" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="completeTask()">Complete Task</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Generate Prep List Modal -->
+<div class="modal fade" id="generatePrepModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Generate Automated Prep List</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="generatePrepForm">
+                    <div class="mb-3">
+                        <label for="targetDate" class="form-label">Target Date</label>
+                        <input type="date" class="form-control" id="targetDate" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="forecastDays" class="form-label">Forecast Period</label>
+                        <select class="form-control" id="forecastDays">
+                            <option value="7">7 days (1 week)</option>
+                            <option value="14">14 days (2 weeks)</option>
+                            <option value="21">21 days (3 weeks)</option>
+                            <option value="28">28 days (4 weeks)</option>
+                        </select>
+                        <small class="text-muted">Historical period to analyze for demand forecasting</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Prep Options</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="includeLowStock" checked>
+                            <label class="form-check-label" for="includeLowStock">
+                                Include low stock items
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="includeHistorical" checked>
+                            <label class="form-check-label" for="includeHistorical">
+                                Use historical demand forecasting
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="generatePrepList()">Generate List</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentTaskId = null;
+
+// Update task status
+function updateTaskStatus(taskId, action) {
+    fetch(`/menu-management/kitchen/prep/${taskId}/update/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: `action=${action}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Task updated successfully', 'success');
+            location.reload();
+        } else {
+            showNotification('Error updating task', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error updating task:', error);
+        showNotification('Error updating task', 'error');
+    });
+}
+
+// Show complete modal
+function showCompleteModal(taskId) {
+    currentTaskId = taskId;
+    const modal = new bootstrap.Modal(document.getElementById('completeTaskModal'));
+    modal.show();
+}
+
+// Complete task
+function completeTask() {
+    const form = document.getElementById('completeTaskForm');
+    const formData = new FormData(form);
+    
+    fetch(`/menu-management/kitchen/prep/${currentTaskId}/update/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: `action=complete&completed_quantity=${formData.get('completed_quantity')}&quality_notes=${formData.get('qualityNotes') || ''}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Task completed successfully', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('completeTaskModal')).hide();
+            location.reload();
+        } else {
+            showNotification('Error completing task', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error completing task:', error);
+        showNotification('Error completing task', 'error');
+    });
+}
+
+// Show generate prep modal
+function showGeneratePrepModal() {
+    // Set default date to today
+    document.getElementById('targetDate').value = new Date().toISOString().split('T')[0];
+    
+    const modal = new bootstrap.Modal(document.getElementById('generatePrepModal'));
+    modal.show();
+}
+
+// Generate prep list
+function generatePrepList() {
+    const form = document.getElementById('generatePrepForm');
+    const formData = new FormData(form);
+    
+    fetch('/menu-management/kitchen/prep/generate/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: `target_date=${formData.get('targetDate')}&forecast_days=${document.getElementById('forecastDays').value}&include_low_stock=${document.getElementById('includeLowStock').checked}&include_historical=${document.getElementById('includeHistorical').checked}`
+    })
+    .then(response => {
+        if (response.redirected) {
+            // Server returned a redirect, follow it
+            window.location.href = response.url;
+        } else if (response.ok) {
+            // Server returned success response
+            showNotification('Prep list generated successfully', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('generatePrepModal')).hide();
+            location.reload();
+        } else {
+            throw new Error('Server returned error');
+        }
+    })
+    .catch(error => {
+        console.error('Error generating prep list:', error);
+        showNotification('Error generating prep list', 'error');
+    });
+}
+
+// Create prep task for low stock item
+function createPrepTask(itemId) {
+    // This would open a modal to create a custom prep task
+    showNotification('Prep task creation feature coming soon', 'info');
+}
+
+// Utility functions
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} position-fixed`;
+    notification.style.cssText = 'top: 100px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Auto-refresh prep tasks
+function loadPrepTasks() {
+    fetch('/menu-management/api/prep-tasks/')
+        .then(response => response.json())
+        .then(data => {
+            updatePrepTasksDisplay(data.data);
+        })
+        .catch(error => {
+            console.error('Error loading prep tasks:', error);
+        });
+}
+
+function updatePrepTasksDisplay(tasks) {
+    const container = document.getElementById('prepTasksContainer');
+    
+    if (tasks.length === 0) {
+        container.innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <h4>📋 No prep tasks scheduled for today</h4>
+                    <p>Generate an automated prep list based on demand forecasting.</p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    tasks.forEach(task => {
+        const taskClass = `${task.status} ${task.priority === 'urgent' ? 'urgent' : ''}`;
+        const progressPercentage = task.progress_percentage || 0;
+        
+        html += `
+            <div class="task-card ${taskClass}" data-task-id="${task.task_id}">
+                <div class="task-header">
+                    <div class="task-title">${task.prep_item}</div>
+                    <div class="task-meta">
+                        <span class="priority-badge ${task.priority}">${task.priority}</span>
+                        <span class="task-time">${task.scheduled_time}</span>
+                    </div>
+                </div>
+                
+                <div class="task-body">
+                    <div class="task-details">
+                        <div class="task-quantity">
+                            <span>Progress: ${task.completed_quantity} / ${task.target_quantity} units</span>
+                            <span>Prep time: 20min</span>
+                        </div>
+                        <div class="quantity-bar">
+                            <div class="quantity-progress" style="width: ${progressPercentage}%"></div>
+                        </div>
+                    </div>
+                    
+                    ${task.assigned_to ? `
+                        <div class="task-assignment">
+                            👤 ${task.assigned_to}
+                        </div>
+                    ` : ''}
+                    
+                    ${task.assigned_station ? `
+                        <div class="task-assignment">
+                            📍 ${task.assigned_station}
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="task-footer">
+                    <div class="task-time">
+                        Scheduled: ${task.scheduled_time}
+                    </div>
+                    <div class="task-actions">
+                        ${task.status === 'scheduled' ? 
+                            `<button class="btn-task" onclick="updateTaskStatus('${task.task_id}', 'start')">Start Task</button>` : 
+                            task.status === 'in_progress' ? 
+                            `<button class="btn-task complete" onclick="showCompleteModal('${task.task_id}')">Complete</button>` : ''
+                        }
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// Auto-refresh every 30 seconds
+setInterval(loadPrepTasks, 30000);
+</script>
+{% endblock %}

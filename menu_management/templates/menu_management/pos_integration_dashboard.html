@@ -1,0 +1,374 @@
+{% extends 'base.html' %}
+
+{% block title %}POS Integration Dashboard - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pos-integration-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 10px;
+    }
+    
+    .integration-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: transform 0.2s;
+    }
+    
+    .integration-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    
+    .status-active {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-error {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .sync-button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .sync-button:hover {
+        background-color: #0056b3;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #007bff;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        margin-top: 0.5rem;
+    }
+    
+    .integration-form {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+    
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+    
+    .recent-orders {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .order-item {
+        background: white;
+        padding: 1rem;
+        border-radius: 5px;
+        margin-bottom: 0.5rem;
+        border-left: 4px solid #007bff;
+    }
+    
+    .order-meta {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="pos-integration-header">
+        <div class="container">
+            <h1>🔄 POS Integration Dashboard</h1>
+            <p class="lead mb-0">Manage Point of Sale system integrations and sync operations</p>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_integrations }}</div>
+            <div class="stat-label">Total Integrations</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ active_integrations }}</div>
+            <div class="stat-label">Active Integrations</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ total_orders }}</div>
+            <div class="stat-label">Total Orders</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ recent_syncs }}</div>
+            <div class="stat-label">Recent Syncs</div>
+        </div>
+    </div>
+
+    <!-- Add New Integration Form -->
+    <div class="integration-form">
+        <h3>➕ Add New POS Integration</h3>
+        <form method="POST" action="{% url 'menu_management:create_pos_integration' %}">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="pos_system">POS System</label>
+                        <select name="pos_system" id="pos_system" required>
+                            <option value="">Select POS System</option>
+                            <option value="square">Square</option>
+                            <option value="toast">Toast</option>
+                            <option value="clover">Clover</option>
+                            <option value="lightspeed">Lightspeed</option>
+                            <option value="shopify">Shopify POS</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="location_name">Location Name</label>
+                        <input type="text" name="location_name" id="location_name" required>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="api_key">API Key</label>
+                        <input type="text" name="api_key" id="api_key" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="api_secret">API Secret</label>
+                        <input type="password" name="api_secret" id="api_secret" required>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn-primary">Add Integration</button>
+        </form>
+    </div>
+
+    <!-- Existing Integrations -->
+    <div class="row">
+        <div class="col-md-8">
+            <h3>📊 Active Integrations</h3>
+            {% for integration in integrations %}
+            <div class="integration-card">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5>{{ integration.get_pos_system_display }}</h5>
+                        <p class="mb-1"><strong>Location:</strong> {{ integration.location_name }}</p>
+                        <p class="mb-1"><strong>Last Sync:</strong> 
+                            {% if integration.last_sync %}
+                                {{ integration.last_sync|date:"M d, Y H:i" }}
+                            {% else %}
+                                Never synced
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-right">
+                        <span class="status-badge status-{{ integration.sync_status }}">
+                            {{ integration.get_sync_status_display }}
+                        </span>
+                        <br><br>
+                        <button class="sync-button" onclick="syncIntegration('{{ integration.integration_id }}')">
+                            🔄 Sync Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="alert alert-info">
+                <h4>No integrations found</h4>
+                <p>Add your first POS integration using the form above.</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="col-md-4">
+            <h3>📋 Recent Orders</h3>
+            <div class="recent-orders">
+                {% for order in recent_orders %}
+                <div class="order-item">
+                    <h6>Order #{{ order.pos_order_id }}</h6>
+                    <p class="mb-1"><strong>Amount:</strong> ${{ order.total_amount }}</p>
+                    <p class="order-meta">
+                        {{ order.order_time|date:"M d, Y H:i" }} - 
+                        <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
+                    </p>
+                </div>
+                {% empty %}
+                <div class="alert alert-light">
+                    <p class="mb-0">No recent orders found.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sync History -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <h3>📈 Sync History</h3>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Integration</th>
+                            <th>Sync Time</th>
+                            <th>Status</th>
+                            <th>Items Synced</th>
+                            <th>Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sync in sync_history %}
+                        <tr>
+                            <td>{{ sync.integration.location_name }}</td>
+                            <td>{{ sync.sync_time|date:"M d, Y H:i" }}</td>
+                            <td>
+                                <span class="status-badge status-{{ sync.sync_status }}">
+                                    {{ sync.get_sync_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ sync.items_synced }}</td>
+                            <td>
+                                {% if sync.sync_time %}
+                                    {{ sync.sync_time|timeuntil }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No sync history found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function syncIntegration(integrationId) {
+    const button = event.target;
+    button.disabled = true;
+    button.textContent = 'Syncing...';
+    
+    fetch(`/menu-management/api/pos-integration/${integrationId}/sync/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Sync completed successfully!');
+            location.reload();
+        } else {
+            alert('Sync failed: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred during sync.');
+    })
+    .finally(() => {
+        button.disabled = false;
+        button.textContent = '🔄 Sync Now';
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

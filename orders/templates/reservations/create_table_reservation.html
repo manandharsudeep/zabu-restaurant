@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block title %}Reserve Table - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .reservation-form {
+        background: white;
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .table-card {
+        border: 2px solid #e9ecef;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .table-card:hover {
+        border-color: #667eea;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+    }
+    
+    .table-card.selected {
+        border-color: #667eea;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .btn-reserve {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 1rem 3rem;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-reserve:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+    
+    .availability-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+    
+    .available { background: #28a745; }
+    .unavailable { background: #dc3545; }
+    .checking { background: #ffc107; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="reservation-form">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold mb-3">🪑 Reserve Your Table</h2>
+                    <p class="text-muted">Book the perfect table for your dining experience</p>
+                </div>
+                
+                <form method="post" id="reservationForm">
+                    {% csrf_token %}
+                    
+                    <!-- Step 1: Select Table -->
+                    <div class="mb-4">
+                        <h4 class="mb-3">Step 1: Choose Your Table</h4>
+                        <div class="row">
+                            {% for table in tables %}
+                            <div class="col-md-6 mb-3">
+                                <div class="table-card" data-table-id="{{ table.id }}">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="mb-2">Table {{ table.table_number }}</h5>
+                                            <p class="mb-1"><strong>Capacity:</strong> {{ table.capacity }} guests</p>
+                                            <p class="mb-1"><strong>Type:</strong> {{ table.get_table_type_display }}</p>
+                                            <p class="mb-1"><strong>Location:</strong> {{ table.get_location_display }}</p>
+                                        </div>
+                                        <div>
+                                            <span class="availability-indicator available"></span>
+                                            <small>Available</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="table" id="selectedTable" required>
+                    </div>
+                    
+                    <!-- Step 2: Reservation Details -->
+                    <div class="mb-4">
+                        <h4 class="mb-3">Step 2: Reservation Details</h4>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="date" class="form-label">Date *</label>
+                                <input type="date" class="form-control" id="date" name="date" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="time" class="form-label">Time *</label>
+                                <select class="form-select" id="time" name="time" required>
+                                    <option value="">Select time...</option>
+                                    <option value="17:00">5:00 PM</option>
+                                    <option value="17:30">5:30 PM</option>
+                                    <option value="18:00">6:00 PM</option>
+                                    <option value="18:30">6:30 PM</option>
+                                    <option value="19:00">7:00 PM</option>
+                                    <option value="19:30">7:30 PM</option>
+                                    <option value="20:00">8:00 PM</option>
+                                    <option value="20:30">8:30 PM</option>
+                                    <option value="21:00">9:00 PM</option>
+                                    <option value="21:30">9:30 PM</option>
+                                    <option value="22:00">10:00 PM</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="party_size" class="form-label">Party Size *</label>
+                                <select class="form-select" id="party_size" name="party_size" required>
+                                    <option value="">Select party size...</option>
+                                    {% for i in 1..20 %}
+                                    <option value="{{ i }}">{{ i }} {{ i|pluralize:"guest,guests" }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="occasion" class="form-label">Occasion</label>
+                                <select class="form-select" id="occasion" name="occasion">
+                                    <option value="">Select occasion...</option>
+                                    <option value="casual">Casual Dining</option>
+                                    <option value="business">Business Meeting</option>
+                                    <option value="celebration">Celebration</option>
+                                    <option value="date_night">Date Night</option>
+                                    <option value="family">Family Gathering</option>
+                                    <option value="romantic">Romantic Dinner</option>
+                                    <option value="special_occasion">Special Occasion</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Special Requests -->
+                    <div class="mb-4">
+                        <h4 class="mb-3">Step 3: Special Requests</h4>
+                        <div class="mb-3">
+                            <label for="special_requests" class="form-label">Special Requests (Optional)</label>
+                            <textarea class="form-control" id="special_requests" name="special_requests" rows="3" placeholder="Any dietary restrictions, accessibility needs, or special occasions..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-reserve btn-lg">
+                            🪑 Reserve Table
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Table selection
+    const tableCards = document.querySelectorAll('.table-card');
+    const selectedTableInput = document.getElementById('selectedTable');
+    
+    tableCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Remove selected class from all cards
+            tableCards.forEach(c => c.classList.remove('selected'));
+            
+            // Add selected class to clicked card
+            this.classList.add('selected');
+            
+            // Set the hidden input value
+            selectedTableInput.value = this.dataset.tableId;
+        });
+    });
+    
+    // Set minimum date to today
+    const dateInput = document.getElementById('date');
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.min = today;
+    
+    // Form validation
+    const form = document.getElementById('reservationForm');
+    form.addEventListener('submit', function(e) {
+        if (!selectedTableInput.value) {
+            e.preventDefault();
+            alert('Please select a table');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

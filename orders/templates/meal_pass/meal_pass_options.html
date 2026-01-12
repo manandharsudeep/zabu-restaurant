@@ -1,0 +1,310 @@
+{% extends 'base.html' %}
+
+{% block title %}Meal Pass Options - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .meal-pass-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 80px 0;
+        text-align: center;
+        border-radius: 0 0 30px 30px;
+    }
+    
+    .meal-pass-section {
+        padding: 80px 0;
+        background: white;
+    }
+    
+    .tier-section {
+        margin-bottom: 60px;
+    }
+    
+    .tier-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 3rem;
+        color: #333;
+    }
+    
+    .meal-pass-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        height: 100%;
+        border-left: 4px solid #667eea;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .meal-pass-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+    }
+    
+    .meal-pass-card.weekly {
+        border-left-color: #28a745;
+    }
+    
+    .meal-pass-card.monthly {
+        border-left-color: #ffc107;
+    }
+    
+    .meal-pass-card.super_special {
+        border-left-color: #dc3545;
+    }
+    
+    .pass-badge {
+        position: absolute;
+        top: 20px;
+        right: -30px;
+        background: #667eea;
+        color: white;
+        padding: 0.5rem 3rem;
+        transform: rotate(45deg);
+        font-weight: bold;
+        font-size: 0.8rem;
+    }
+    
+    .pass-badge.weekly {
+        background: #28a745;
+    }
+    
+    .pass-badge.monthly {
+        background: #ffc107;
+    }
+    
+    .pass-badge.super_special {
+        background: #dc3545;
+    }
+    
+    .pass-name {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+    
+    .pass-price {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+    
+    .pass-price.weekly {
+        color: #28a745;
+    }
+    
+    .pass-price.monthly {
+        color: #ffc107;
+    }
+    
+    .pass-price.super_special {
+        color: #dc3545;
+    }
+    
+    .pass-duration {
+        color: #666;
+        margin-bottom: 2rem;
+        font-size: 1.1rem;
+    }
+    
+    .pass-features {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 2rem;
+    }
+    
+    .pass-features li {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        align-items: center;
+    }
+    
+    .pass-features li:last-child {
+        border-bottom: none;
+    }
+    
+    .pass-features li::before {
+        content: "✓";
+        color: #28a745;
+        font-weight: bold;
+        margin-right: 1rem;
+        font-size: 1.2rem;
+    }
+    
+    .btn-purchase {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        width: 100%;
+        text-align: center;
+    }
+    
+    .btn-purchase:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        color: white;
+    }
+    
+    .btn-purchase.weekly {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+    
+    .btn-purchase.monthly {
+        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    }
+    
+    .btn-purchase.super_special {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    }
+    
+    .current-subscription {
+        background: #d4edda;
+        border: 2px solid #28a745;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .current-subscription h5 {
+        color: #155724;
+        margin-bottom: 0.5rem;
+    }
+    
+    .current-subscription p {
+        color: #155724;
+        margin-bottom: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Meal Pass Hero Section -->
+<section class="meal-pass-hero">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3">🍽️ Meal Pass Options</h1>
+        <p class="lead">Save money and enjoy exclusive benefits with our meal pass subscriptions</p>
+    </div>
+</section>
+
+<!-- Meal Pass Options Section -->
+<section class="meal-pass-section">
+    <div class="container">
+        
+        {% if user_subscriptions %}
+        <div class="current-subscription">
+            <h5>🎉 You have active meal pass subscriptions!</h5>
+            <p>Check your <a href="{% url 'meal_pass_dashboard' %}" style="color: #155724; text-decoration: underline;">dashboard</a> to manage your passes.</p>
+        </div>
+        {% endif %}
+        
+        <!-- Weekly Passes -->
+        <div class="tier-section">
+            <h2 class="tier-title">📅 Weekly Passes</h2>
+            <div class="row">
+                {% for pass in weekly_passes %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="meal-pass-card weekly">
+                        <div class="pass-badge weekly">POPULAR</div>
+                        <h3 class="pass-name">{{ pass.name }}</h3>
+                        <div class="pass-price weekly">Nrs {{ pass.price }}</div>
+                        <div class="pass-duration">{{ pass.duration_days }} days • {{ pass.meals_per_period }} meals</div>
+                        <p class="text-muted mb-3">{{ pass.description }}</p>
+                        <ul class="pass-features">
+                            <li>{{ pass.meals_per_period }} meals included</li>
+                            {% if pass.discount_percentage > 0 %}
+                            <li>{{ pass.discount_percentage }}% discount on all orders</li>
+                            {% endif %}
+                            {% for feature, value in pass.features.items %}
+                            <li>{{ feature }}: {{ value }}</li>
+                            {% endfor %}
+                            {% if pass.preorder_days %}
+                            <li><strong>Pre-Order Required:</strong> {{ pass.preorder_description }}</li>
+                            {% endif %}
+                        </ul>
+                        <a href="{% url 'meal_pass_billing' pass.id %}" class="btn-purchase weekly">Get Weekly Pass</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Monthly Passes -->
+        <div class="tier-section">
+            <h2 class="tier-title">📅 Monthly Passes</h2>
+            <div class="row">
+                {% for pass in monthly_passes %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="meal-pass-card monthly">
+                        <div class="pass-badge monthly">BEST VALUE</div>
+                        <h3 class="pass-name">{{ pass.name }}</h3>
+                        <div class="pass-price monthly">Nrs {{ pass.price }}</div>
+                        <div class="pass-duration">{{ pass.duration_days }} days • {{ pass.meals_per_period }} meals</div>
+                        <p class="text-muted mb-3">{{ pass.description }}</p>
+                        <ul class="pass-features">
+                            <li>{{ pass.meals_per_period }} meals included</li>
+                            {% if pass.discount_percentage > 0 %}
+                            <li>{{ pass.discount_percentage }}% discount on all orders</li>
+                            {% endif %}
+                            {% for feature, value in pass.features.items %}
+                            <li>{{ feature }}: {{ value }}</li>
+                            {% endfor %}
+                            {% if pass.preorder_days %}
+                            <li><strong>Pre-Order Required:</strong> {{ pass.preorder_description }}</li>
+                            {% endif %}
+                        </ul>
+                        <a href="{% url 'meal_pass_billing' pass.id %}" class="btn-purchase monthly">Get Monthly Pass</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Super Special Passes -->
+        <div class="tier-section">
+            <h2 class="tier-title">⭐ Super Special Passes</h2>
+            <div class="row">
+                {% for pass in super_special_passes %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="meal-pass-card super_special">
+                        <div class="pass-badge super_special">EXCLUSIVE</div>
+                        <h3 class="pass-name">{{ pass.name }}</h3>
+                        <div class="pass-price super_special">Nrs {{ pass.price }}</div>
+                        <div class="pass-duration">{{ pass.duration_days }} days • {{ pass.meals_per_period }} meals</div>
+                        <p class="text-muted mb-3">{{ pass.description }}</p>
+                        <ul class="pass-features">
+                            <li>{{ pass.meals_per_period }} meals included</li>
+                            {% if pass.discount_percentage > 0 %}
+                            <li>{{ pass.discount_percentage }}% discount on all orders</li>
+                            {% endif %}
+                            {% for feature, value in pass.features.items %}
+                            <li>{{ feature }}: {{ value }}</li>
+                            {% endfor %}
+                            {% if pass.preorder_days %}
+                            <li><strong>Pre-Order Required:</strong> {{ pass.preorder_description }}</li>
+                            {% endif %}
+                        </ul>
+                        <a href="{% url 'meal_pass_billing' pass.id %}" class="btn-purchase super_special">Get Super Pass</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+    </div>
+</section>
+{% endblock %}

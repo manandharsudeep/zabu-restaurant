@@ -1,0 +1,416 @@
+{% extends 'base.html' %}
+
+{% block title %}Inventory Items - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .inventory-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .filter-section {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .filter-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr auto;
+        gap: 1rem;
+        align-items: end;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #495057;
+    }
+    
+    .form-control {
+        padding: 0.75rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #28a745;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    }
+    
+    .items-grid {
+        display: grid;
+        gap: 1.5rem;
+    }
+    
+    .item-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-left: 4px solid #28a745;
+        transition: transform 0.3s ease;
+    }
+    
+    .item-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .item-card.low-stock {
+        border-left-color: #ffc107;
+    }
+    
+    .item-card.critical-stock {
+        border-left-color: #dc3545;
+    }
+    
+    .item-header {
+        display: flex;
+        justify-content: between;
+        align-items: start;
+        margin-bottom: 1rem;
+    }
+    
+    .item-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .item-sku {
+        color: #6c757d;
+        font-size: 0.9rem;
+        font-family: monospace;
+    }
+    
+    .item-description {
+        color: #6c757d;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .item-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stat {
+        text-align: center;
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .stock-status {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    .stock-status.normal {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .stock-status.low {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .stock-status.critical {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .locations-list {
+        margin-top: 1rem;
+    }
+    
+    .location-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .location-item:last-child {
+        border-bottom: none;
+    }
+    
+    .location-name {
+        font-weight: 500;
+        color: #495057;
+    }
+    
+    .location-quantity {
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .pagination a {
+        padding: 0.5rem 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        text-decoration: none;
+        color: #495057;
+        transition: all 0.3s ease;
+    }
+    
+    .pagination a:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+    }
+    
+    .pagination .current {
+        background: #28a745;
+        color: white;
+        border-color: #28a745;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    @media (max-width: 768px) {
+        .filter-form {
+            grid-template-columns: 1fr;
+        }
+        
+        .item-stats {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="inventory-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-4">📦 Inventory Items</h1>
+                <p class="lead">Manage and monitor all inventory items across locations</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'menu_management:create_inventory_item' %}" class="btn btn-success btn-lg me-2">
+                    📦 New Item
+                </a>
+                <a href="{% url 'menu_management:create_vendor' %}" class="btn btn-primary btn-lg me-2">
+                    🏢 New Vendor
+                </a>
+                <a href="{% url 'menu_management:inventory_dashboard' %}" class="btn btn-light btn-lg">
+                    ← Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <form method="GET" class="filter-form">
+            <div class="form-group">
+                <label for="search">Search Items</label>
+                <input type="text" name="search" id="search" class="form-control" 
+                       placeholder="Search by name, SKU, or description..." 
+                       value="{{ search }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select name="category" id="category" class="form-control">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>
+                            {{ cat }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="location">Location</label>
+                <select name="location" id="location" class="form-control">
+                    <option value="">All Locations</option>
+                    {% for loc in locations %}
+                        <option value="{{ loc.id }}" {% if selected_location == loc.id|stringformat:"s" %}selected{% endif %}>
+                            {{ loc.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">
+                    🔍 Search
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Items Grid -->
+    <div class="items-grid">
+        {% for item_data in items %}
+            <div class="item-card {% if item_data.is_low_stock %}low-stock{% endif %} {% if item_data.is_critical_stock %}critical-stock{% endif %}">
+                <div class="item-header">
+                    <div>
+                        <div class="item-title">{{ item_data.item.name }}</div>
+                        <div class="item-sku">SKU: {{ item_data.item.sku }}</div>
+                    </div>
+                </div>
+                
+                {% if item_data.item.description %}
+                    <div class="item-description">{{ item_data.item.description|truncatewords:20 }}</div>
+                {% endif %}
+                
+                <div class="item-stats">
+                    <div class="stat">
+                        <div class="stat-value">{{ item_data.total_stock|floatformat:2 }}</div>
+                        <div class="stat-label">Total Stock</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">${{ item_data.total_value|floatformat:2 }}</div>
+                        <div class="stat-label">Total Value</div>
+                    </div>
+                </div>
+                
+                <div class="stock-status {% if item_data.is_low_stock %}{% if item_data.is_critical_stock %}critical{% else %}low{% endif %}{% else %}normal{% endif %}">
+                    {% if item_data.is_low_stock %}
+                        {% if item_data.is_critical_stock %}
+                            🚨 Critical Stock - Below 50% of reorder point
+                        {% else %}
+                            ⚠️ Low Stock - Below reorder point
+                        {% endif %}
+                    {% else %}
+                        ✅ Normal Stock
+                    {% endif %}
+                </div>
+                
+                <div class="locations-list">
+                    <strong>Stock by Location:</strong>
+                    {% for location in item_data.locations %}
+                        <div class="location-item">
+                            <span class="location-name">{{ location.location.name }}</span>
+                            <span class="location-quantity">{{ location.available_quantity|floatformat:2 }} {{ item_data.item.unit }}</span>
+                        </div>
+                    {% empty %}
+                        <div class="location-item">
+                            <span class="location-name">No stock available</span>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e9ecef;">
+                    <small class="text-muted">
+                        Category: {{ item_data.item.category }} | 
+                        Unit: {{ item_data.item.unit }} | 
+                        Reorder Point: {{ item_data.item.reorder_point|floatformat:2 }} {{ item_data.item.unit }}
+                    </small>
+                </div>
+            </div>
+        {% empty %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📦</div>
+                <h3>No Inventory Items Found</h3>
+                <p>No inventory items match your current filters.</p>
+                <a href="{% url 'menu_management:inventory_items' %}" class="btn btn-primary">
+                    Clear Filters
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if items.has_other_pages %}
+        <div class="pagination">
+            {% if items.has_previous %}
+                <a href="?page={{ items.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_location %}&location={{ selected_location }}{% endif %}">
+                    ← Previous
+                </a>
+            {% endif %}
+            
+            <span class="current">
+                Page {{ items.number }} of {{ items.paginator.num_pages }}
+            </span>
+            
+            {% if items.has_next %}
+                <a href="?page={{ items.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_location %}&location={{ selected_location }}{% endif %}">
+                    Next →
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

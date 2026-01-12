@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+
+{% block title %}Task Management - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .task-management {
+        padding: 20px;
+    }
+    
+    .task-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .task-filters {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .filter-row {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .filter-row select,
+    .filter-row input {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    
+    .task-table {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .task-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .task-table th,
+    .task-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .task-table th {
+        background: #f8f9fa;
+        font-weight: 600;
+    }
+    
+    .task-priority {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: 500;
+    }
+    
+    .priority-high {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .priority-medium {
+        background: #ffc107;
+        color: #212529;
+    }
+    
+    .priority-low {
+        background: #28a745;
+        color: white;
+    }
+    
+    .task-status {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: 500;
+    }
+    
+    .status-pending {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .status-in_progress {
+        background: #17a2b8;
+        color: white;
+    }
+    
+    .status-completed {
+        background: #28a745;
+        color: white;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    
+    .pagination span,
+    .pagination a {
+        padding: 8px 12px;
+        margin: 0 4px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        text-decoration: none;
+    }
+    
+    .pagination .current {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-sm {
+        padding: 4px 8px;
+        font-size: 0.8em;
+    }
+    
+    .btn:hover {
+        opacity: 0.9;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="task-management">
+    <div class="task-header">
+        <h2>📋 Task Management</h2>
+        <a href="{% url 'menu_management:create_task' %}" class="btn btn-primary">+ Create Task</a>
+    </div>
+    
+    <!-- Filters -->
+    <div class="task-filters">
+        <form method="GET" class="filter-row">
+            <div>
+                <label for="status">Status:</label>
+                <select name="status" id="status">
+                    <option value="">All Status</option>
+                    <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="in_progress" {% if selected_status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                    <option value="completed" {% if selected_status == 'completed' %}selected{% endif %}>Completed</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="assigned_to">Assigned To:</label>
+                <select name="assigned_to" id="assigned_to">
+                    <option value="">All Staff</option>
+                    {% for staff in active_staff %}
+                        <option value="{{ staff.id }}" {% if selected_assigned_to == staff.id|stringformat:"0" %}selected{% endif %}>
+                            {{ staff.user.get_full_name|default:staff.user.username }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label for="priority">Priority:</label>
+                <select name="priority" id="priority">
+                    <option value="">All Priorities</option>
+                    <option value="high" {% if selected_priority == 'high' %}selected{% endif %}>High</option>
+                    <option value="medium" {% if selected_priority == 'medium' %}selected{% endif %}>Medium</option>
+                    <option value="low" {% if selected_priority == 'low' %}selected{% endif %}>Low</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-secondary">Filter</button>
+            <a href="{% url 'menu_management:task_management' %}" class="btn btn-secondary">Clear</a>
+        </form>
+    </div>
+    
+    <!-- Tasks Table -->
+    <div class="task-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Assigned To</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Due Date</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks_page %}
+                <tr>
+                    <td>
+                        <strong>{{ task.title }}</strong>
+                        {% if task.description %}
+                            <br><small class="text-muted">{{ task.description|truncatechars:50 }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if task.assigned_to %}
+                            {{ task.assigned_to.user.get_full_name|default:task.assigned_to.user.username }}
+                        {% else %}
+                            <span class="text-muted">Unassigned</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="task-priority priority-{{ task.priority }}">
+                            {{ task.get_priority_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="task-status status-{{ task.status|slugify }}">
+                            {{ task.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if task.due_date %}
+                            {{ task.due_date|date:"M d, Y" }}
+                            {% if task.due_date < today %}
+                                <span class="text-danger">⚠️ Overdue</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted">No due date</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ task.created_at|date:"M d, Y H:i" }}</td>
+                    <td>
+                        <a href="{% url 'menu_management:task_detail' task.task_id %}" class="btn btn-sm btn-primary">View</a>
+                        <a href="{% url 'menu_management:edit_task' task.task_id %}" class="btn btn-sm btn-secondary">Edit</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted">
+                        No tasks found matching your criteria.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% if tasks_page.has_other_pages %}
+    <div class="pagination">
+        {% if tasks_page.has_previous %}
+            <a href="?page=1{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.assigned_to %}&assigned_to={{ request.GET.assigned_to }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}">&laquo; First</a>
+            <a href="?page={{ tasks_page.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.assigned_to %}&assigned_to={{ request.GET.assigned_to }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}">&lsaquo; Previous</a>
+        {% endif %}
+        
+        <span class="current">
+            Page {{ tasks_page.number }} of {{ tasks_page.paginator.num_pages }}
+        </span>
+        
+        {% if tasks_page.has_next %}
+            <a href="?page={{ tasks_page.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.assigned_to %}&assigned_to={{ request.GET.assigned_to }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}">Next &rsaquo;</a>
+            <a href="?page={{ tasks_page.paginator.num_pages }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.assigned_to %}&assigned_to={{ request.GET.assigned_to }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}">Last &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

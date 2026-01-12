@@ -1,0 +1,769 @@
+{% extends 'base.html' %}
+
+{% block title %}Kitchen Display System - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .kds-header {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        padding: 1rem 0;
+        margin-bottom: 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+    
+    .kds-title {
+        font-size: 2rem;
+        font-weight: bold;
+        text-align: center;
+        margin: 0;
+    }
+    
+    .kds-timestamp {
+        text-align: center;
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+    
+    .orders-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1rem;
+        padding: 1rem;
+    }
+    
+    .order-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-left: 5px solid #6c757d;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .order-card.received {
+        border-left-color: #ffc107;
+        background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+    }
+    
+    .order-card.confirmed {
+        border-left-color: #17a2b8;
+        background: linear-gradient(135deg, #e6f7ff 0%, #ffffff 100%);
+    }
+    
+    .order-card.preparing {
+        border-left-color: #6f42c1;
+        background: linear-gradient(135deg, #f3e6ff 0%, #ffffff 100%);
+    }
+    
+    .order-card.cooking {
+        border-left-color: #fd7e14;
+        background: linear-gradient(135deg, #fff4e6 0%, #ffffff 100%);
+    }
+    
+    .order-card.plating {
+        border-left-color: #20c997;
+        background: linear-gradient(135deg, #e6fff9 0%, #ffffff 100%);
+    }
+    
+    .order-card.ready {
+        border-left-color: #28a745;
+        background: linear-gradient(135deg, #e6ffe6 0%, #ffffff 100%);
+        animation: pulse 2s infinite;
+    }
+    
+    .order-card.urgent {
+        border-left-color: #dc3545;
+        background: linear-gradient(135deg, #ffe6e6 0%, #ffffff 100%);
+    }
+    
+    .order-card.vip {
+        border-left-color: #6f42c1;
+        background: linear-gradient(135deg, #f0e6ff 0%, #ffffff 100%);
+        border-width: 3px;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+        100% { transform: scale(1); }
+    }
+    
+    .order-header {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        background: rgba(248, 249, 250, 0.5);
+    }
+    
+    .order-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin: 0;
+    }
+    
+    .order-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+    }
+    
+    .order-type {
+        background: #6c757d;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .priority-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .priority-badge.normal {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .priority-badge.high {
+        background: #fd7e14;
+        color: white;
+    }
+    
+    .priority-badge.urgent {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .priority-badge.vip {
+        background: #6f42c1;
+        color: white;
+    }
+    
+    .order-body {
+        padding: 1rem;
+    }
+    
+    .order-items {
+        margin-bottom: 1rem;
+    }
+    
+    .order-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+    
+    .order-item:last-child {
+        border-bottom: none;
+    }
+    
+    .item-name {
+        font-weight: 500;
+        flex: 1;
+    }
+    
+    .item-quantity {
+        background: #e9ecef;
+        padding: 0.25rem 0.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        margin-right: 0.5rem;
+    }
+    
+    .item-status {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+    
+    .item-status.pending {
+        background: #f8f9fa;
+        color: #6c757d;
+    }
+    
+    .item-status.cooking {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .item-status.ready {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .station-badge {
+        background: #007bff;
+        color: white;
+        padding: 0.2rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin-left: 0.5rem;
+        display: inline-block;
+    }
+    
+    .special-instructions {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .order-footer {
+        padding: 1rem;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .order-time {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .order-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .btn-bump {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-bump:hover {
+        background: #0056b3;
+        transform: translateY(-1px);
+    }
+    
+    .btn-fire {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-fire:hover {
+        background: #1e7e34;
+        transform: translateY(-1px);
+    }
+    
+    .btn-fire:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .completed-orders {
+        margin-top: 2rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
+    
+    .completed-orders h3 {
+        margin-top: 0;
+        color: #6c757d;
+    }
+    
+    .completed-order {
+        background: white;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        border-radius: 8px;
+        border-left: 3px solid #28a745;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .station-filter {
+        position: sticky;
+        top: 80px;
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+        z-index: 999;
+    }
+    
+    .filter-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+        background: #e9ecef;
+        border: 1px solid #dee2e6;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .filter-btn:hover {
+        background: #dee2e6;
+    }
+    
+    .filter-btn.active {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+    
+    .auto-refresh-indicator {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #28a745;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        z-index: 1001;
+        animation: fadeInOut 5s infinite;
+    }
+    
+    @keyframes fadeInOut {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 1; }
+    }
+    
+    @media (max-width: 768px) {
+        .orders-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .kds-title {
+            font-size: 1.5rem;
+        }
+        
+        .station-filter {
+            position: relative;
+            top: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Auto-refresh indicator -->
+<div class="auto-refresh-indicator">
+    🔄 Auto-refresh: <span id="refreshCountdown">5</span>s
+</div>
+
+<!-- KDS Header -->
+<div class="kds-header">
+    <div class="container">
+        <h1 class="kds-title">🍳 Kitchen Display System</h1>
+        <div class="kds-timestamp" id="currentTimestamp">Loading...</div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Station Filter -->
+    <div class="station-filter">
+        <h5>📍 Filter by Station</h5>
+        <div class="filter-buttons">
+            <button class="filter-btn active" onclick="filterByStation('all', event)">All Stations</button>
+            {% for station in stations %}
+                <button class="filter-btn" onclick="filterByStation('{{ station.id }}', event)">{{ station.name }}</button>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Active Orders -->
+    <div class="orders-container" id="activeOrders">
+        {% for order in active_orders %}
+            <div class="order-card {{ order.status }} {% if order.is_rush_order %}urgent{% endif %} {% if order.is_vip_order %}vip{% endif %}" 
+                 data-order-id="{{ order.order_id }}" 
+                 data-stations="{% for item in order.items.all %}{% if item.assigned_station %}{{ item.assigned_station.id }}{% if not forloop.last %},{% endif %}{% endif %}{% endfor %}">
+                
+                <div class="order-header">
+                    <div class="order-number">
+                        #{{ order.external_order_id|default:order.order_id|slice:":8" }}
+                        {% if order.is_vip_order %}👑{% endif %}
+                        {% if order.is_rush_order %}🔥{% endif %}
+                    </div>
+                    <div class="order-meta">
+                        <span class="order-type">{{ order.get_order_type_display }}</span>
+                        <span class="priority-badge {{ order.priority }}">{{ order.priority }}</span>
+                    </div>
+                </div>
+                
+                <div class="order-body">
+                    <div class="order-items">
+                        {% for item in order.items.all %}
+                            <div class="order-item" data-item-id="{{ item.id }}">
+                                <div class="item-name">
+                                    {{ item.quantity }}x {{ item.menu_item }}
+                                    {% if item.modifications %}
+                                        <small class="text-muted">({{ item.modifications|join:", " }})</small>
+                                    {% endif %}
+                                    {% if item.assigned_station %}
+                                        <span class="station-badge">{{ item.assigned_station.name }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="item-status {{ item.status }}">
+                                    {{ item.get_status_display }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    {% if order.special_instructions %}
+                        <div class="special-instructions">
+                            <strong>📝 Special Instructions:</strong> {{ order.special_instructions }}
+                        </div>
+                    {% endif %}
+                    
+                    {% if order.table_number %}
+                        <div class="mt-2">
+                            <strong>🪑 Table:</strong> {{ order.table_number }}
+                            {% if order.customer_name %} - {{ order.customer_name }}{% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="order-footer">
+                    <div class="order-time">
+                        <strong>⏱️ {{ order.estimated_prep_time }}min</strong>
+                        <br>
+                        <small>{{ order.received_at|date:"H:i" }}</small>
+                    </div>
+                    <div class="order-actions">
+                        {% if order.status == 'confirmed' %}
+                            <button class="btn-bump" onclick="updateOrderStatus('{{ order.order_id }}', 'preparing')">
+                                Start Preparing
+                            </button>
+                        {% elif order.status == 'preparing' %}
+                            <button class="btn-bump" onclick="updateOrderStatus('{{ order.order_id }}', 'cooking')">
+                                Start Cooking
+                            </button>
+                        {% elif order.status == 'cooking' %}
+                            <button class="btn-bump" onclick="updateOrderStatus('{{ order.order_id }}', 'plating')">
+                                Start Plating
+                            </button>
+                        {% elif order.status == 'plating' %}
+                            <button class="btn-bump" onclick="updateOrderStatus('{{ order.order_id }}', 'ready')">
+                                Mark Ready
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <h4>🍽️ No active orders</h4>
+                    <p>The kitchen is ready for new orders!</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Completed Orders -->
+    {% if completed_orders %}
+        <div class="completed-orders">
+            <h3>✅ Recently Completed</h3>
+            {% for order in completed_orders %}
+                <div class="completed-order">
+                    <div>
+                        <strong>#{{ order.external_order_id|default:order.order_id|slice:":8" }}</strong>
+                        {% if order.table_number %} - Table {{ order.table_number }}{% endif %}
+                    </div>
+                    <div class="text-muted">
+                        <small>{{ order.completed_at|date:"H:i" }}</small>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<script>
+let currentStation = 'all';
+let refreshInterval;
+
+// Auto-refresh functionality
+function startAutoRefresh() {
+    refreshInterval = setInterval(() => {
+        loadOrders();
+        updateCountdown();
+    }, 5000);
+}
+
+function updateCountdown() {
+    let countdown = 5;
+    const countdownElement = document.getElementById('refreshCountdown');
+    
+    const countdownInterval = setInterval(() => {
+        countdown--;
+        countdownElement.textContent = countdown;
+        
+        if (countdown <= 0) {
+            clearInterval(countdownInterval);
+        }
+    }, 1000);
+}
+
+function stopAutoRefresh() {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
+}
+
+// Load orders via API
+function loadOrders() {
+    let apiUrl = '/menu-management/api/kitchen-orders/';
+    
+    // Add station filter to API URL
+    if (currentStation && currentStation !== 'all') {
+        apiUrl += `?station=${currentStation}`;
+    }
+    
+    fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+            updateOrdersDisplay(data.data);
+            updateTimestamp();
+        })
+        .catch(error => {
+            console.error('Error loading orders:', error);
+        });
+}
+
+function updateOrdersDisplay(orders) {
+    const container = document.getElementById('activeOrders');
+    
+    if (orders.length === 0) {
+        container.innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <h4>🍽️ No active orders</h4>
+                    <p>The kitchen is ready for new orders!</p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    orders.forEach(order => {
+        const orderClass = `${order.status} ${order.is_rush_order ? 'urgent' : ''} ${order.is_vip_order ? 'vip' : ''}`;
+        const priorityBadge = order.is_vip_order ? 'vip' : order.is_rush_order ? 'urgent' : order.priority;
+        
+        html += `
+            <div class="order-card ${orderClass}" data-order-id="${order.order_id}">
+                <div class="order-header">
+                    <div class="order-number">
+                        #${order.external_order_id || order.order_id.substring(0, 8)}
+                        ${order.is_vip_order ? '👑' : ''}
+                        ${order.is_rush_order ? '🔥' : ''}
+                    </div>
+                    <div class="order-meta">
+                        <span class="order-type">${order.order_type}</span>
+                        <span class="priority-badge ${priorityBadge}">${priorityBadge}</span>
+                    </div>
+                </div>
+                
+                <div class="order-body">
+                    <div class="order-items">
+                        ${order.items.map(item => `
+                            <div class="order-item" data-item-id="${item.id}">
+                                <div class="item-name">
+                                    ${item.quantity}x ${item.menu_item}
+                                    ${item.modifications ? `<small class="text-muted">(${item.modifications.join(', ')})</small>` : ''}
+                                </div>
+                                <div class="item-status ${item.status}">${item.status}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    ${order.special_instructions ? `
+                        <div class="special-instructions">
+                            <strong>📝 Special Instructions:</strong> ${order.special_instructions}
+                        </div>
+                    ` : ''}
+                    
+                    ${order.table_number ? `
+                        <div class="mt-2">
+                            <strong>🪑 Table:</strong> ${order.table_number}
+                            ${order.customer_name ? ` - ${order.customer_name}` : ''}
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="order-footer">
+                    <div class="order-time">
+                        <strong>⏱️ ${order.estimated_prep_time}min</strong>
+                        <br>
+                        <small>${new Date(order.received_at).toLocaleTimeString()}</small>
+                    </div>
+                    <div class="order-actions">
+                        ${getActionButton(order.status, order.order_id)}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    
+    // Apply station filter
+    if (currentStation !== 'all') {
+        filterByStation(currentStation);
+    }
+}
+
+function getActionButton(status, orderId) {
+    const actions = {
+        'confirmed': `<button class="btn-bump" onclick="updateOrderStatus('${orderId}', 'preparing')">Start Preparing</button>`,
+        'preparing': `<button class="btn-bump" onclick="updateOrderStatus('${orderId}', 'cooking')">Start Cooking</button>`,
+        'cooking': `<button class="btn-bump" onclick="updateOrderStatus('${orderId}', 'plating')">Start Plating</button>`,
+        'plating': `<button class="btn-bump" onclick="updateOrderStatus('${orderId}', 'ready')">Mark Ready</button>`,
+        'ready': ''
+    };
+    
+    return actions[status] || '';
+}
+
+// Update order status
+function updateOrderStatus(orderId, newStatus) {
+    fetch(`/menu-management/kitchen/orders/${orderId}/status/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: `status=${newStatus}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success feedback
+            showNotification(`Order #${orderId.substring(0, 8)} updated to ${newStatus}`, 'success');
+            // Reload orders
+            loadOrders();
+        } else {
+            showNotification('Error updating order status', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error updating order:', error);
+        showNotification('Error updating order status', 'error');
+    });
+}
+
+// Station filtering
+function filterByStation(stationId, event) {
+    currentStation = stationId;
+    
+    // Update button states
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Find and activate the correct button
+    let targetButton;
+    if (event && event.target) {
+        // Called from button click
+        targetButton = event.target;
+    } else {
+        // Called from updateOrdersDisplay - find button by station ID
+        if (stationId === 'all') {
+            targetButton = document.querySelector('.filter-btn[onclick*="all"]');
+        } else {
+            targetButton = document.querySelector(`.filter-btn[onclick*="${stationId}"]`);
+        }
+    }
+    
+    if (targetButton) {
+        targetButton.classList.add('active');
+    }
+    
+    // Reload orders from API with station filter
+    loadOrders();
+}
+
+// Update timestamp
+function updateTimestamp() {
+    const timestampElement = document.getElementById('currentTimestamp');
+    timestampElement.textContent = new Date().toLocaleString();
+}
+
+// Utility functions
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} position-fixed`;
+    notification.style.cssText = 'top: 100px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    updateTimestamp();
+    loadOrders();
+    startAutoRefresh();
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    stopAutoRefresh();
+});
+</script>
+{% endblock %}

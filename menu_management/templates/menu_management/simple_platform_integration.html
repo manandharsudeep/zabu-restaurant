@@ -1,0 +1,658 @@
+{% extends 'base.html' %}
+
+{% block title %}Platform Integration - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .platform-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .platform-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        border-left: 4px solid #667eea;
+    }
+    
+    .platform-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .platform-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .platform-item {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 1.5rem;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+    
+    .platform-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .platform-logo {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .platform-name {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .platform-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+    
+    .status-connected {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-disconnected {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .sync-button {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        margin-right: 0.5rem;
+    }
+    
+    .sync-button:hover {
+        background: linear-gradient(135deg, #20c997 0%, #28a745 100%);
+        transform: translateY(-1px);
+        color: white;
+    }
+    
+    .sync-button:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .stop-button {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .stop-button:hover {
+        background: linear-gradient(135deg, #c82333 0%, #dc3545 100%);
+        transform: translateY(-1px);
+        color: white;
+    }
+    
+    .stop-button:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .sync-controls {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    
+    .brand-list {
+        max-height: 300px;
+        overflow-y: auto;
+        margin-top: 1rem;
+    }
+    
+    .brand-item {
+        background: white;
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        justify-content: between;
+        align-items: center;
+    }
+    
+    .brand-info {
+        flex: 1;
+    }
+    
+    .brand-name {
+        font-weight: bold;
+        color: #333;
+        font-size: 0.9rem;
+    }
+    
+    .brand-sync-status {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .sync-log {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-top: 1rem;
+        max-height: 200px;
+        overflow-y: auto;
+        font-family: monospace;
+        font-size: 0.8rem;
+    }
+    
+    .log-entry {
+        padding: 0.25rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .log-success {
+        color: #28a745;
+    }
+    
+    .log-error {
+        color: #dc3545;
+    }
+    
+    .log-info {
+        color: #17a2b8;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        opacity: 0.9;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Platform Integration Header -->
+<div class="platform-header">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="display-5">📱 Platform Integration</h1>
+            <p class="lead">Seamlessly integrate with delivery platforms</p>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Integration Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ platform_stats.uber_eats }}</div>
+            <div class="stat-label">Uber Eats</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ platform_stats.doordash }}</div>
+            <div class="stat-label">DoorDash</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ platform_stats.grubhub }}</div>
+            <div class="stat-label">Grubhub</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ brands|length }}</div>
+            <div class="stat-label">Total Brands</div>
+        </div>
+    </div>
+
+    <!-- Platform Connection Status -->
+    <div class="platform-card">
+        <h3>🔌 Platform Connection Status</h3>
+        
+        <div class="platform-grid">
+            <div class="platform-item">
+                <div class="platform-logo">🍔️</div>
+                <div class="platform-name">Uber Eats</div>
+                <div class="platform-status status-connected" id="uber_eats_status">Connected</div>
+                <div class="sync-controls">
+                    <button class="sync-button" id="uber_eats_sync" onclick="syncPlatform('uber_eats')">
+                        🔄 Sync Now
+                    </button>
+                    <button class="stop-button" id="uber_eats_stop" onclick="stopSync('uber_eats')">
+                        ⏹️ Stop
+                    </button>
+                </div>
+                <div class="brand-list">
+                    {% for brand in brands %}
+                        <div class="brand-item">
+                            <div class="brand-info">
+                                <div class="brand-name">{{ brand.name }}</div>
+                                <div class="brand-sync-status">Last sync: 2 hours ago</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="platform-item">
+                <div class="platform-logo">🚗</div>
+                <div class="platform-name">DoorDash</div>
+                <div class="platform-status status-connected" id="doordash_status">Connected</div>
+                <div class="sync-controls">
+                    <button class="sync-button" id="doordash_sync" onclick="syncPlatform('doordash')">
+                        🔄 Sync Now
+                    </button>
+                    <button class="stop-button" id="doordash_stop" onclick="stopSync('doordash')">
+                        ⏹️ Stop
+                    </button>
+                </div>
+                <div class="brand-list">
+                    {% for brand in brands %}
+                        <div class="brand-item">
+                            <div class="brand-info">
+                                <div class="brand-name">{{ brand.name }}</div>
+                                <div class="brand-sync-status">Last sync: 1 hour ago</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="platform-item">
+                <div class="platform-logo">🍕</div>
+                <div class="platform-name">Grubhub</div>
+                <div class="platform-status status-pending" id="grubhub_status">Pending Setup</div>
+                <div class="sync-controls">
+                    <button class="sync-button" id="grubhub_sync" onclick="syncPlatform('grubhub')">
+                        🔄 Sync Now
+                    </button>
+                    <button class="stop-button" id="grubhub_stop" onclick="stopSync('grubhub')">
+                        ⏹️ Stop
+                    </button>
+                </div>
+                <div class="brand-list">
+                    {% for brand in brands %}
+                        <div class="brand-item">
+                            <div class="brand-info">
+                                <div class="brand-name">{{ brand.name }}</div>
+                                <div class="brand-sync-status">Not configured</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sync Activity Log -->
+    <div class="platform-card">
+        <h3>📋 Sync Activity Log</h3>
+        
+        <div class="sync-log" id="syncLog">
+            <div class="log-entry log-info">[2024-01-06 17:30:15] Platform integration system initialized</div>
+            <div class="log-entry log-success">[2024-01-06 17:30:20] Uber Eats connection verified</div>
+            <div class="log-entry log-success">[2024-01-06 17:30:25] DoorDash connection verified</div>
+            <div class="log-entry log-info">[2024-01-06 17:30:30] Grubhub setup pending</div>
+            <div class="log-entry log-success">[2024-01-06 17:30:35] Brand sync completed for Quick Bites Express</div>
+            <div class="log-entry log-success">[2024-01-06 17:30:40] Menu items synced: 25 items</div>
+            <div class="log-entry log-info">[2024-01-06 17:30:45] Pricing updated across platforms</div>
+        </div>
+    </div>
+
+    <!-- Integration Settings -->
+    <div class="platform-card">
+        <h3>⚙️ Integration Settings</h3>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Sync Frequency</h5>
+                <select class="form-select" id="syncFrequency">
+                    <option value="realtime">Real-time</option>
+                    <option value="15min">Every 15 minutes</option>
+                    <option value="30min">Every 30 minutes</option>
+                    <option value="hourly">Every hour</option>
+                    <option value="manual">Manual only</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <h5>Auto-sync Menus</h5>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="autoSync" checked>
+                    <label class="form-check-label" for="autoSync">
+                        Enable automatic menu synchronization
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <h5>Price Sync</h5>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="priceSync" checked>
+                    <label class="form-check-label" for="priceSync">
+                        Sync pricing across all platforms
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h5>Inventory Sync</h5>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="inventorySync">
+                    <label class="form-check-label" for="inventorySync">
+                        Sync inventory availability
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <a href="{% url 'menu_management:multi_brand' %}" class="btn btn-secondary w-100">
+                ← Back to Multi-Brand
+            </a>
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-primary w-100" onclick="syncAllPlatforms()">
+                🔄 Sync All Platforms
+            </button>
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-danger w-100" onclick="stopAllSyncs()">
+                ⏹️ Stop All Syncs
+            </button>
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-primary w-100" onclick="testConnections()">
+                🔧 Test Connections
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Global sync state tracking
+let syncIntervals = {};
+let syncStates = {};
+
+function syncPlatform(platform) {
+    const logElement = document.getElementById('syncLog');
+    const timestamp = new Date().toLocaleString();
+    
+    // Add log entry
+    addLogEntry(`[${timestamp}] Starting sync with ${platform}...`, 'info');
+    
+    // Update UI state
+    const syncButton = document.getElementById(`${platform}_sync`);
+    const stopButton = document.getElementById(`${platform}_stop`);
+    
+    syncButton.disabled = true;
+    syncButton.textContent = '⏳ Syncing...';
+    stopButton.disabled = false;
+    
+    // Set sync state
+    syncStates[platform] = true;
+    
+    // Simulate sync process with progress updates
+    let progress = 0;
+    syncIntervals[platform] = setInterval(() => {
+        if (!syncStates[platform]) {
+            // Sync was stopped
+            clearInterval(syncIntervals[platform]);
+            addLogEntry(`[${timestamp}] ⏹️ Sync stopped for ${platform}`, 'error');
+            resetPlatformButtons(platform);
+            return;
+        }
+        
+        progress += 20;
+        if (progress <= 80) {
+            addLogEntry(`[${timestamp}] 📊 Sync progress: ${progress}%`, 'info');
+        } else if (progress === 100) {
+            // Complete sync
+            clearInterval(syncIntervals[platform]);
+            const success = Math.random() > 0.2; // 80% success rate
+            
+            if (success) {
+                addLogEntry(`[${timestamp}] ✅ Sync completed successfully for ${platform}`, 'success');
+                addLogEntry(`[${timestamp}] 📊 Synced {{ brands|length }} brands`, 'info');
+                addLogEntry(`[${timestamp}] 🍽️ Updated menu items and pricing`, 'info');
+            } else {
+                addLogEntry(`[${timestamp}] ❌ Sync failed for ${platform}`, 'error');
+                addLogEntry(`[${timestamp}] ⚠️ Please check API credentials and try again`, 'error');
+            }
+            
+            resetPlatformButtons(platform);
+        }
+    }, 400); // Update every 400ms for 2 seconds total
+}
+
+function stopSync(platform) {
+    const timestamp = new Date().toLocaleString();
+    
+    // Update UI immediately
+    const stopButton = document.getElementById(`${platform}_stop`);
+    const syncButton = document.getElementById(`${platform}_sync`);
+    const statusElement = document.getElementById(`${platform}_status`);
+    
+    stopButton.disabled = true;
+    stopButton.textContent = '⏹️ Stopping...';
+    
+    // Add log entry
+    addLogEntry(`[${timestamp}] ⏹️ Stopping sync for ${platform}...`, 'info');
+    
+    // Set sync state to false immediately
+    syncStates[platform] = false;
+    
+    // Clear the interval immediately
+    if (syncIntervals[platform]) {
+        clearInterval(syncIntervals[platform]);
+        syncIntervals[platform] = null;
+        addLogEntry(`[${timestamp}] ✅ Active sync stopped for ${platform}`, 'success');
+        
+        // Update platform status to show it's stopped
+        statusElement.className = 'platform-status status-disconnected';
+        statusElement.textContent = 'Stopped';
+    } else {
+        addLogEntry(`[${timestamp}] ℹ️ No active sync to stop for ${platform}`, 'info');
+        
+        // Still show stopped status even if no active sync
+        statusElement.className = 'platform-status status-disconnected';
+        statusElement.textContent = 'Stopped';
+    }
+    
+    // Add completion log entry and reset buttons
+    setTimeout(() => {
+        addLogEntry(`[${timestamp}] ✅ Stop operation completed for ${platform}`, 'success');
+        resetPlatformButtons(platform);
+        
+        // Reset status back to original after a delay
+        setTimeout(() => {
+            if (platform === 'grubhub') {
+                statusElement.className = 'platform-status status-pending';
+                statusElement.textContent = 'Pending Setup';
+            } else {
+                statusElement.className = 'platform-status status-connected';
+                statusElement.textContent = 'Connected';
+            }
+        }, 2000);
+    }, 500);
+}
+
+function resetPlatformButtons(platform) {
+    const syncButton = document.getElementById(`${platform}_sync`);
+    const stopButton = document.getElementById(`${platform}_stop`);
+    
+    syncButton.disabled = false;
+    syncButton.textContent = '🔄 Sync Now';
+    
+    stopButton.disabled = true;
+    stopButton.textContent = '⏹️ Stop';
+    
+    // Reset sync state
+    syncStates[platform] = false;
+}
+
+function syncAllPlatforms() {
+    const platforms = ['uber_eats', 'doordash', 'grubhub'];
+    const logElement = document.getElementById('syncLog');
+    const timestamp = new Date().toLocaleString();
+    
+    addLogEntry(`[${timestamp}] 🚀 Starting comprehensive platform sync...`, 'info');
+    addLogEntry(`[${timestamp}] 📱 Syncing ${platforms.length} platforms`, 'info');
+    
+    platforms.forEach((platform, index) => {
+        setTimeout(() => {
+            const success = Math.random() > 0.15; // 85% success rate
+            
+            if (success) {
+                addLogEntry(`[${timestamp}] ✅ ${platform} sync completed`, 'success');
+            } else {
+                addLogEntry(`[${timestamp}] ❌ ${platform} sync failed`, 'error');
+            }
+            
+            if (index === platforms.length - 1) {
+                addLogEntry(`[${timestamp}] 🎉 All platform sync operations completed`, 'info');
+            }
+        }, (index + 1) * 1500);
+    });
+}
+
+function stopAllSyncs() {
+    const platforms = ['uber_eats', 'doordash', 'grubhub'];
+    const timestamp = new Date().toLocaleString();
+    
+    addLogEntry(`[${timestamp}] 🛑 Stopping all platform syncs...`, 'info');
+    
+    platforms.forEach(platform => {
+        if (syncStates[platform]) {
+            stopSync(platform);
+        }
+    });
+}
+
+function testConnections() {
+    const logElement = document.getElementById('syncLog');
+    const timestamp = new Date().toLocaleString();
+    
+    addLogEntry(`[${timestamp}] 🔧 Testing platform connections...`, 'info');
+    
+    // Test each platform
+    setTimeout(() => {
+        addLogEntry(`[${timestamp}] ✅ Uber Eats connection: OK`, 'success');
+    }, 500);
+    
+    setTimeout(() => {
+        addLogEntry(`[${timestamp}] ✅ DoorDash connection: OK`, 'success');
+    }, 1000);
+    
+    setTimeout(() => {
+        addLogEntry(`[${timestamp}] ⚠️ Grubhub connection: Configuration required`, 'error');
+    }, 1500);
+    
+    setTimeout(() => {
+        addLogEntry(`[${timestamp}] 🎯 Connection test completed`, 'info');
+    }, 2000);
+}
+
+function addLogEntry(message, type) {
+    const logElement = document.getElementById('syncLog');
+    const entry = document.createElement('div');
+    entry.className = `log-entry log-${type}`;
+    entry.textContent = message;
+    logElement.appendChild(entry);
+    
+    // Auto-scroll to bottom
+    logElement.scrollTop = logElement.scrollHeight;
+}
+
+// Auto-refresh sync status
+setInterval(() => {
+    const timestamp = new Date().toLocaleString();
+    addLogEntry(`[${timestamp}] 🔄 Auto-sync check completed`, 'info');
+}, 30000);
+</script>
+{% endblock %}

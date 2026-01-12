@@ -1,0 +1,411 @@
+{% extends 'base.html' %}
+
+{% block title %}Multi-Brand Management - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .multi-brand-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .brand-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        border-left: 4px solid #667eea;
+    }
+    
+    .brand-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .feature-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: all 0.3s ease;
+        border-left: 4px solid #667eea;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .feature-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 1rem;
+    }
+    
+    .feature-description {
+        color: #666;
+        margin-bottom: 1.5rem;
+    }
+    
+    .brand-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .brand-item {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 3px solid #667eea;
+        display: flex;
+        justify-content: between;
+        align-items: center;
+    }
+    
+    .brand-info h5 {
+        margin: 0;
+        color: #333;
+        font-weight: bold;
+    }
+    
+    .brand-info p {
+        margin: 0;
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .brand-stats {
+        text-align: right;
+    }
+    
+    .brand-stat {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .brand-stat strong {
+        color: #667eea;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Multi-Brand Header -->
+<div class="multi-brand-header">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="display-5">🏢 Multi-Brand Management</h1>
+            <p class="lead">Create and manage virtual brands for cloud kitchen operations</p>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Statistics Overview -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_brands }}</div>
+            <div class="stat-label">Total Brands</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ active_brands }}</div>
+            <div class="stat-label">Active Brands</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ platform_integrations.uber_eats }}</div>
+            <div class="stat-label">Uber Eats</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ platform_integrations.doordash }}</div>
+            <div class="stat-label">DoorDash</div>
+        </div>
+    </div>
+
+    <!-- Feature Overview -->
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-icon">🏢</div>
+            <h3 class="feature-title">Virtual Brands</h3>
+            <p class="feature-description">Create independent virtual brands with unique menus and pricing strategies</p>
+            <a href="#" class="btn btn-primary" onclick="createBrand()">Create Brand</a>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">📱</div>
+            <h3 class="feature-title">Platform Integration</h3>
+            <p class="feature-description">Seamlessly integrate with Uber Eats, DoorDash, Grubhub, and other delivery platforms</p>
+            <a href="{% url 'menu_management:platform_integration' %}" class="btn btn-primary">Manage Platforms</a>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">🔄</div>
+            <h3 class="feature-title">Unified Management</h3>
+            <p class="feature-description">Manage all your brands from a single dashboard with shared resources</p>
+            <a href="{% url 'menu_management:unified_management' %}" class="btn btn-primary">Unified Dashboard</a>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3 class="feature-title">Performance Analytics</h3>
+            <p class="feature-description">Compare brand performance, analyze sales data, and optimize menu mix</p>
+            <a href="{% url 'menu_management:performance_analytics' %}" class="btn btn-primary">View Analytics</a>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">🍽️</div>
+            <h3 class="feature-title">Menu Optimization</h3>
+            <p class="feature-description">AI-powered recommendations for menu optimization and pricing strategies</p>
+            <a href="{% url 'menu_management:menu_optimization' %}" class="btn btn-primary">Optimize Menus</a>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">🎯</div>
+            <h3 class="feature-title">Ghost Kitchen</h3>
+            <p class="feature-description">Maximize kitchen efficiency with shared ingredients and optimized workflows</p>
+            <a href="{% url 'menu_management:ghost_kitchen' %}" class="btn btn-primary">Kitchen Operations</a>
+        </div>
+    </div>
+
+    <!-- Brand List -->
+    <div class="brand-card">
+        <h3>📋 Your Virtual Brands</h3>
+        
+        <div class="brand-list">
+            {% for brand in brands %}
+                <div class="brand-item">
+                    <div class="brand-info">
+                        <h5>{{ brand.name }}</h5>
+                        <p>{{ brand.description }}</p>
+                        <p><small>Type: {{ brand.get_menu_type_display }}</small></p>
+                    </div>
+                    <div class="brand-stats">
+                        <div class="brand-stat"><strong>{{ brand.menu_items_count|default:0 }}</strong> Items</div>
+                        <div class="brand-stat"><strong>Active</strong></div>
+                        <div class="brand-stat"><strong>{{ brand.created_at|date:"M d, Y" }}</strong></div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="text-center text-muted">
+                    <p>No virtual brands created yet.</p>
+                    <p>Click "Create Brand" to get started with your multi-brand operations.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <a href="{% url 'menu_management:dashboard' %}" class="btn btn-secondary w-100">
+                ← Back to Dashboard
+            </a>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-primary w-100" onclick="createBrand()">
+                🏢 Create New Brand
+            </button>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-primary w-100" onclick="syncAllPlatforms()">
+                📱 Sync All Platforms
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Create Brand Modal -->
+<div class="modal fade" id="createBrandModal" tabindex="-1" aria-labelledby="createBrandModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createBrandModalLabel">Create Virtual Brand</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createBrandForm">
+                    <div class="mb-3">
+                        <label for="brandName" class="form-label">Brand Name</label>
+                        <input type="text" class="form-control" id="brandName" name="brand_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="brandType" class="form-label">Brand Type</label>
+                        <select class="form-select" id="brandType" name="brand_type" required>
+                            <option value="">Select type...</option>
+                            <option value="breakfast">Breakfast</option>
+                            <option value="lunch">Lunch</option>
+                            <option value="dinner">Dinner</option>
+                            <option value="bar">Bar</option>
+                            <option value="dessert">Dessert</option>
+                            <option value="catering">Catering</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="brandDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="brandDescription" name="description" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitBrandForm()">Create Brand</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function createBrand() {
+    // Simple modal implementation
+    const brandName = prompt('Enter brand name:');
+    if (brandName) {
+        const brandType = prompt('Enter brand type (breakfast/lunch/dinner/bar/dessert/catering):');
+        const description = prompt('Enter description (optional):');
+        
+        if (brandType) {
+            // Create brand via AJAX
+            fetch('/menu-management/api/create-brand/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: `brand_name=${encodeURIComponent(brandName)}&brand_type=${encodeURIComponent(brandType)}&description=${encodeURIComponent(description || '')}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ Brand created successfully!');
+                    location.reload();
+                } else {
+                    alert('❌ Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('❌ Network error: ' + error.message);
+            });
+        }
+    }
+}
+
+function submitBrandForm() {
+    const form = document.getElementById('createBrandForm');
+    const formData = new FormData(form);
+    
+    fetch('/menu-management/api/create-brand/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ Brand created successfully!');
+            location.reload();
+        } else {
+            alert('❌ Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('❌ Network error: ' + error.message);
+    });
+}
+
+function syncAllPlatforms() {
+    alert('🔄 Syncing all platforms...\n\nThis would sync your menus with:\n• Uber Eats\n• DoorDash\n• Grubhub\n\nIn a real implementation, this would update all platform integrations.');
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

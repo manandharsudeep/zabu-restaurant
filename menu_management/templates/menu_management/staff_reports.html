@@ -1,0 +1,621 @@
+{% extends 'base.html' %}
+
+{% block title %}Staff Reports - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .reports-header {
+        background: linear-gradient(135deg, #20c997 0%, #198754 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .filter-section {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .filter-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr auto;
+        gap: 1rem;
+        align-items: end;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #495057;
+    }
+    
+    .form-control {
+        padding: 0.75rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #20c997;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #20c997 0%, #198754 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(32, 201, 151, 0.3);
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+    
+    .btn-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        color: #212529;
+    }
+    
+    .reports-grid {
+        display: grid;
+        gap: 2rem;
+    }
+    
+    .report-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-left: 4px solid #20c997;
+        transition: transform 0.3s ease;
+    }
+    
+    .report-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .report-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .report-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .report-period {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .chart-container {
+        height: 300px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border: 2px dashed #dee2e6;
+    }
+    
+    .chart-placeholder {
+        text-align: center;
+        color: #6c757d;
+    }
+    
+    .chart-placeholder-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .summary-item {
+        text-align: center;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+    
+    .summary-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #20c997;
+        margin-bottom: 0.5rem;
+    }
+    
+    .summary-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .table-container {
+        margin-top: 1.5rem;
+        overflow-x: auto;
+    }
+    
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+    
+    .table th {
+        background: #f8f9fa;
+        padding: 0.75rem;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #dee2e6;
+    }
+    
+    .table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .table tbody tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .performance-indicator {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.5rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .performance-excellent {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .performance-good {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .performance-average {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .performance-poor {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .export-buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .export-buttons .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    @media (max-width: 768px) {
+        .filter-form {
+            grid-template-columns: 1fr;
+        }
+        
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .report-header {
+            flex-direction: column;
+            align-items: start;
+            gap: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reports-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-4">📊 Staff Reports</h1>
+                <p class="lead">Comprehensive staff performance and activity reporting</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'menu_management:staff_dashboard' %}" class="btn btn-light btn-lg">
+                    ← Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <form method="GET" class="filter-form">
+            <div class="form-group">
+                <label for="report_type">Report Type</label>
+                <select name="report_type" id="report_type" class="form-control">
+                    <option value="">All Reports</option>
+                    <option value="performance">Performance Report</option>
+                    <option value="attendance">Attendance Report</option>
+                    <option value="tasks">Task Completion</option>
+                    <option value="productivity">Productivity Analysis</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="department">Department</label>
+                <select name="department" id="department" class="form-control">
+                    <option value="">All Departments</option>
+                    <option value="kitchen">👨‍🍳 Kitchen</option>
+                    <option value="service">👩‍🍼 Service</option>
+                    <option value="management">👔 Management</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="date_range">Date Range</label>
+                <select name="date_range" id="date_range" class="form-control">
+                    <option value="">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="quarter">This Quarter</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">
+                    🔍 Generate Report
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Reports Grid -->
+    <div class="reports-grid">
+        <!-- Staff Performance Report -->
+        <div class="report-card">
+            <div class="report-header">
+                <div>
+                    <div class="report-title">👥 Staff Performance Report</div>
+                    <div class="report-period">Individual and team performance metrics</div>
+                </div>
+                <div class="export-buttons">
+                    <a href="#" class="btn btn-success">📥 Excel</a>
+                    <a href="#" class="btn btn-warning">📄 PDF</a>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-placeholder">
+                    <div class="chart-placeholder-icon">📈</div>
+                    <div>Performance Trend Chart</div>
+                    <small>Staff performance over time</small>
+                </div>
+            </div>
+            
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-value">{{ total_staff }}</div>
+                    <div class="summary-label">Total Staff</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ active_staff }}</div>
+                    <div class="summary-label">Active Today</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ avg_performance }}%</div>
+                    <div class="summary-label">Avg Performance</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ top_performers }}</div>
+                    <div class="summary-label">Top Performers</div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Staff Member</th>
+                            <th>Department</th>
+                            <th>Tasks Completed</th>
+                            <th>Performance Score</th>
+                            <th>Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for staff in top_performing_staff %}
+                        <tr>
+                            <td>
+                                <strong>{{ staff.name }}</strong><br>
+                                <small class="text-muted">{{ staff.position }}</small>
+                            </td>
+                            <td>{{ staff.department }}</td>
+                            <td>{{ staff.tasks_completed }}</td>
+                            <td>{{ staff.performance_score }}%</td>
+                            <td>
+                                <span class="performance-indicator {{ staff.rating }}">
+                                    {{ staff.get_rating_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Attendance Report -->
+        <div class="report-card">
+            <div class="report-header">
+                <div>
+                    <div class="report-title">📅 Attendance Report</div>
+                    <div class="report-period">Staff attendance and punctuality analysis</div>
+                </div>
+                <div class="export-buttons">
+                    <a href="#" class="btn btn-success">📥 Excel</a>
+                    <a href="#" class="btn btn-warning">📄 PDF</a>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-placeholder">
+                    <div class="chart-placeholder-icon">📊</div>
+                    <div>Attendance Trend Chart</div>
+                    <small>Daily attendance patterns</small>
+                </div>
+            </div>
+            
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-value">{{ attendance_rate }}%</div>
+                    <div class="summary-label">Attendance Rate</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ punctuality_rate }}%</div>
+                    <div class="summary-label">Punctuality Rate</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ absent_today }}</div>
+                    <div class="summary-label">Absent Today</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ late_today }}</div>
+                    <div class="summary-label">Late Today</div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Staff Member</th>
+                            <th>Days Present</th>
+                            <th>Days Absent</th>
+                            <th>Late Arrivals</th>
+                            <th>Attendance %</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for staff in attendance_data %}
+                        <tr>
+                            <td>
+                                <strong>{{ staff.name }}</strong><br>
+                                <small class="text-muted">{{ staff.department }}</small>
+                            </td>
+                            <td>{{ staff.days_present }}</td>
+                            <td>{{ staff.days_absent }}</td>
+                            <td>{{ staff.late_arrivals }}</td>
+                            <td>{{ staff.attendance_percentage }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Task Completion Report -->
+        <div class="report-card">
+            <div class="report-header">
+                <div>
+                    <div class="report-title">✅ Task Completion Report</div>
+                    <div class="report-period">Task completion rates and efficiency</div>
+                </div>
+                <div class="export-buttons">
+                    <a href="#" class="btn btn-success">📥 Excel</a>
+                    <a href="#" class="btn btn-warning">📄 PDF</a>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-placeholder">
+                    <div class="chart-placeholder-icon">📉</div>
+                    <div>Task Completion Chart</div>
+                    <small>Daily task completion trends</small>
+                </div>
+            </div>
+            
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-value">{{ total_tasks }}</div>
+                    <div class="summary-label">Total Tasks</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ completed_tasks }}</div>
+                    <div class="summary-label">Completed</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ pending_tasks }}</div>
+                    <div class="summary-label">Pending</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ overdue_tasks }}</div>
+                    <div class="summary-label">Overdue</div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Staff Member</th>
+                            <th>Assigned Tasks</th>
+                            <th>Completed</th>
+                            <th>Pending</th>
+                            <th>Completion Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for staff in task_completion_data %}
+                        <tr>
+                            <td>
+                                <strong>{{ staff.name }}</strong><br>
+                                <small class="text-muted">{{ staff.department }}</small>
+                            </td>
+                            <td>{{ staff.assigned_tasks }}</td>
+                            <td>{{ staff.completed_tasks }}</td>
+                            <td>{{ staff.pending_tasks }}</td>
+                            <td>{{ staff.completion_rate }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Productivity Analysis -->
+        <div class="report-card">
+            <div class="report-header">
+                <div>
+                    <div class="report-title">⚡ Productivity Analysis</div>
+                    <div class="report-period">Staff productivity and efficiency metrics</div>
+                </div>
+                <div class="export-buttons">
+                    <a href="#" class="btn btn-success">📥 Excel</a>
+                    <a href="#" class="btn btn-warning">📄 PDF</a>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-placeholder">
+                    <div class="chart-placeholder-icon">💹</div>
+                    <div>Productivity Chart</div>
+                    <small>Staff productivity trends</small>
+                </div>
+            </div>
+            
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-value">{{ avg_productivity }}%</div>
+                    <div class="summary-label">Avg Productivity</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ most_productive }}</div>
+                    <div class="summary-label">Most Productive</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ efficiency_gain }}%</div>
+                    <div class="summary-label">Efficiency Gain</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">{{ improvement_areas }}</div>
+                    <div class="summary-label">Areas to Improve</div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Staff Member</th>
+                            <th>Tasks/Hour</th>
+                            <th>Efficiency Score</th>
+                            <th>Productivity Trend</th>
+                            <th>Recommendation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for staff in productivity_data %}
+                        <tr>
+                            <td>
+                                <strong>{{ staff.name }}</strong><br>
+                                <small class="text-muted">{{ staff.department }}</small>
+                            </td>
+                            <td>{{ staff.tasks_per_hour }}</td>
+                            <td>{{ staff.efficiency_score }}%</td>
+                            <td>
+                                <span class="performance-indicator {{ staff.trend }}">
+                                    {{ staff.trend_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <small>{{ staff.recommendation }}</small>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,470 @@
+{% extends 'base.html' %}
+
+{% block title %}Menu Optimization - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .optimization-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .optimization-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        border-left: 4px solid #667eea;
+    }
+    
+    .optimization-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .brand-section {
+        margin-bottom: 3rem;
+    }
+    
+    .brand-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 3px solid #667eea;
+    }
+    
+    .brand-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .brand-stats {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .recommendation-item {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+    }
+    
+    .recommendation-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .recommendation-header {
+        display: flex;
+        justify-content: between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+    
+    .recommendation-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .priority-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        margin-left: 1rem;
+    }
+    
+    .priority-high {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .priority-medium {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .priority-low {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .recommendation-description {
+        color: #666;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+    
+    .expected-impact {
+        background: #e7f3ff;
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        border-left: 3px solid #0066cc;
+    }
+    
+    .impact-label {
+        font-weight: bold;
+        color: #0066cc;
+        margin-bottom: 0.25rem;
+    }
+    
+    .implementation-status {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-in-progress {
+        background: #cce5ff;
+        color: #004085;
+    }
+    
+    .status-completed {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        transform: translateY(-1px);
+        color: white;
+    }
+    
+    .btn-success {
+        background: #28a745;
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-success:hover {
+        background: #218838;
+        transform: translateY(-1px);
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-1px);
+        color: white;
+    }
+    
+    .ai-insights {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .ai-insights h3 {
+        margin-bottom: 1rem;
+    }
+    
+    .insights-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .insight-item {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .insight-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .insight-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Optimization Header -->
+<div class="optimization-header">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="display-5">🍽️ Menu Optimization</h1>
+            <p class="lead">AI-powered recommendations for menu optimization</p>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- AI Insights Overview -->
+    <div class="ai-insights">
+        <h3>🤖 AI-Powered Insights</h3>
+        <p>Our AI analyzes your menu data to provide actionable recommendations for maximizing profitability and customer satisfaction.</p>
+        
+        <div class="insights-grid">
+            <div class="insight-item">
+                <div class="insight-number">{{ brand_recommendations|length }}</div>
+                <div class="insight-label">Brands Analyzed</div>
+            </div>
+            <div class="insight-item">
+                <div class="insight-number">{{ brand_recommendations|sum:'recommendations|length' }}</div>
+                <div class="insight-label">Total Recommendations</div>
+            </div>
+            <div class="insight-item">
+                <div class="insight-number">{{ brand_recommendations|sum:'recommendations'|filter:'priority'|filter:'high'|length }}</div>
+                <div class="insight-label">High Priority</div>
+            </div>
+            <div class="insight-item">
+                <div class="insight-number">{{ brand_recommendations|sum:'recommendations'|filter:'implementation_status'|filter:'pending'|length }}</div>
+                <div class="insight-label">Pending Implementation</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Brand Recommendations -->
+    {% for brand_data in brand_recommendations %}
+        <div class="brand-section">
+            <div class="brand-header">
+                <div class="brand-name">{{ brand_data.brand.name }}</div>
+                <div class="brand-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ brand_data.recommendations|length }}</div>
+                        <div class="stat-label">Recommendations</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ brand_data.recommendations|filter:'priority'|filter:'high'|length }}</div>
+                        <div class="stat-label">High Priority</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ brand_data.recommendations|filter:'implementation_status'|filter:'completed'|length }}</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                </div>
+            </div>
+            
+            {% for recommendation in brand_data.recommendations %}
+                <div class="recommendation-item">
+                    <div class="recommendation-header">
+                        <div>
+                            <div class="recommendation-title">{{ recommendation.title }}</div>
+                            <span class="priority-badge priority-{{ recommendation.priority }}">
+                                {{ recommendation.get_priority_display|title }} Priority
+                            </span>
+                        </div>
+                        <div>
+                            <span class="implementation-status status-{{ recommendation.implementation_status }}">
+                                {{ recommendation.get_implementation_status_display|title }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation-description">
+                        {{ recommendation.description }}
+                    </div>
+                    
+                    <div class="expected-impact">
+                        <div class="impact-label">💰 Expected Impact:</div>
+                        {{ recommendation.expected_impact }}
+                    </div>
+                    
+                    <div class="action-buttons">
+                        {% if recommendation.implementation_status == 'pending' %}
+                            <button class="btn btn-primary" onclick="implementRecommendation({{ recommendation.id }})">
+                                🚀 Implement
+                            </button>
+                            <button class="btn btn-secondary" onclick="deferRecommendation({{ recommendation.id }})">
+                                ⏰ Defer
+                            </button>
+                        {% elif recommendation.implementation_status == 'in_progress' %}
+                            <button class="btn btn-success" onclick="completeRecommendation({{ recommendation.id }})">
+                                ✅ Complete
+                            </button>
+                            <button class="btn btn-secondary" onclick="cancelRecommendation({{ recommendation.id }})">
+                                ❌ Cancel
+                            </button>
+                        {% else %}
+                            <button class="btn btn-secondary" onclick="viewDetails({{ recommendation.id }})">
+                                📊 View Details
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            {% empty %}
+                <div class="text-center text-muted">
+                    <p>No recommendations available for this brand yet.</p>
+                    <button class="btn btn-primary" onclick="generateRecommendations({{ brand_data.brand.id }})">
+                        🤖 Generate Recommendations
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    {% empty %}
+        <div class="text-center">
+            <div class="optimization-card">
+                <h3>🤖 No Brands Found</h3>
+                <p>Create virtual brands first to get AI-powered menu optimization recommendations.</p>
+                <a href="{% url 'menu_management:multi_brand' %}" class="btn btn-primary">
+                    🏢 Create Brands
+                </a>
+            </div>
+        </div>
+    {% endfor %}
+
+    <!-- Action Buttons -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <a href="{% url 'menu_management:multi_brand' %}" class="btn btn-secondary w-100">
+                ← Back to Multi-Brand
+            </a>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-primary w-100" onclick="generateAllRecommendations()">
+                🤖 Generate All Recommendations
+            </button>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-success w-100" onclick="exportRecommendations()">
+                📊 Export Recommendations
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function implementRecommendation(recommendationId) {
+    if (confirm('Are you ready to implement this recommendation?')) {
+        // Mock implementation
+        alert(`Implementing recommendation #${recommendationId}...\n\nIn a real implementation, this would:\n1. Create implementation tasks\n2. Assign responsibilities\n3. Set deadlines\n4. Track progress`);
+        
+        // Update status (mock)
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    }
+}
+
+function completeRecommendation(recommendationId) {
+    if (confirm('Mark this recommendation as completed?')) {
+        // Mock completion
+        alert(`Marking recommendation #${recommendationId} as completed...\n\nIn a real implementation, this would:\n1. Record completion date\n2. Calculate actual impact\n3. Generate follow-up recommendations`);
+        
+        // Update status (mock)
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    }
+}
+
+function deferRecommendation(recommendationId) {
+    const reason = prompt('Why are you deferring this recommendation?');
+    if (reason) {
+        alert(`Recommendation #${recommendationId} deferred.\nReason: ${reason}`);
+    }
+}
+
+function cancelRecommendation(recommendationId) {
+    if (confirm('Cancel this implementation?')) {
+        alert(`Implementation of recommendation #${recommendationId} cancelled.`);
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    }
+}
+
+function viewDetails(recommendationId) {
+    alert(`Detailed analysis for recommendation #${recommendationId}:\n\n• Implementation timeline: 2-3 weeks\n• Required resources: Staff training, menu updates\n• Expected ROI: 150% within 3 months\n• Risk level: Low\n• Dependencies: None`);
+}
+
+function generateRecommendations(brandId) {
+    alert(`🤖 Generating AI recommendations for brand #${brandId}...\n\nAnalyzing:\n• Sales data trends\n• Customer preferences\n• Ingredient costs\n• Market conditions\n• Competitor analysis\n\nThis may take a few moments...`);
+    
+    setTimeout(() => {
+        location.reload();
+    }, 2000);
+}
+
+function generateAllRecommendations() {
+    alert(`🤖 Generating AI recommendations for all brands...\n\nAnalyzing:\n• Cross-brand performance\n• Shared ingredient optimization\n• Market trends\n• Seasonal patterns\n• Customer feedback\n\nThis comprehensive analysis may take several minutes...`);
+    
+    setTimeout(() => {
+        location.reload();
+    }, 3000);
+}
+
+function exportRecommendations() {
+    alert(`📊 Exporting optimization recommendations...\n\nExport format: PDF\nIncludes:\n• All recommendations\n• Implementation status\n• Expected impacts\n• Timeline estimates\n• Resource requirements\n\nThe report will be sent to your email.`);
+}
+</script>
+{% endblock %}

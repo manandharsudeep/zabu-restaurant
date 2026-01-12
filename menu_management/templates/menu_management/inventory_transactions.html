@@ -1,0 +1,418 @@
+{% extends 'base.html' %}
+
+{% block title %}Inventory Transactions - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .transactions-header {
+        background: linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .filter-section {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .filter-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr auto;
+        gap: 1rem;
+        align-items: end;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #495057;
+    }
+    
+    .form-control {
+        padding: 0.75rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #6f42c1;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
+    }
+    
+    .transactions-table {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        overflow-x: auto;
+    }
+    
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .table th {
+        background: #f8f9fa;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #dee2e6;
+        white-space: nowrap;
+    }
+    
+    .table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        vertical-align: middle;
+    }
+    
+    .table tbody tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .transaction-type {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .transaction-type.receive {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .transaction-type.issue {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .transaction-type.transfer {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .transaction-type.adjustment {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .transaction-type.waste {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .transaction-type.return {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .transaction-type.physical_count {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+    
+    .quantity-positive {
+        color: #28a745;
+        font-weight: 600;
+    }
+    
+    .quantity-negative {
+        color: #dc3545;
+        font-weight: 600;
+    }
+    
+    .transaction-id {
+        font-family: monospace;
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .pagination a {
+        padding: 0.5rem 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        text-decoration: none;
+        color: #495057;
+        transition: all 0.3s ease;
+    }
+    
+    .pagination a:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+    }
+    
+    .pagination .current {
+        background: #6f42c1;
+        color: white;
+        border-color: #6f42c1;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #6f42c1;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    @media (max-width: 768px) {
+        .filter-form {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .table {
+            font-size: 0.8rem;
+        }
+        
+        .table th,
+        .table td {
+            padding: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="transactions-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-4">📊 Inventory Transactions</h1>
+                <p class="lead">Track all inventory movements and transactions</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'menu_management:inventory_dashboard' %}" class="btn btn-light btn-lg">
+                    ← Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <form method="GET" class="filter-form">
+            <div class="form-group">
+                <label for="transaction_type">Transaction Type</label>
+                <select name="type" id="transaction_type" class="form-control">
+                    <option value="">All Types</option>
+                    {% for type_value, type_label in transaction_types %}
+                        <option value="{{ type_value }}" {% if selected_type == type_value %}selected{% endif %}>
+                            {{ type_label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="date_from">From Date</label>
+                <input type="date" name="date_from" id="date_from" class="form-control" 
+                       value="{{ date_from }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="date_to">To Date</label>
+                <input type="date" name="date_to" id="date_to" class="form-control" 
+                       value="{{ date_to }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="search">Search</label>
+                <input type="text" name="search" id="search" class="form-control" 
+                       placeholder="Search items..." value="{{ request.GET.search }}">
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">
+                    🔍 Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="transactions-table">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date & Time</th>
+                    <th>Transaction ID</th>
+                    <th>Type</th>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                    <th>Unit Cost</th>
+                    <th>Total Cost</th>
+                    <th>Location</th>
+                    <th>Created By</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <span class="transaction-id">{{ transaction.transaction_id|slice:"8" }}</span>
+                        </td>
+                        <td>
+                            <span class="transaction-type {{ transaction.transaction_type }}">
+                                {{ transaction.get_transaction_type_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <strong>{{ transaction.item.name }}</strong><br>
+                            <small class="text-muted">{{ transaction.item.sku }}</small>
+                        </td>
+                        <td>
+                            {% if transaction.transaction_type == 'receive' or transaction.transaction_type == 'physical_count' %}
+                                <span class="quantity-positive">+{{ transaction.quantity }}</span>
+                            {% else %}
+                                <span class="quantity-negative">-{{ transaction.quantity }}</span>
+                            {% endif %}
+                            <br>
+                            <small class="text-muted">{{ transaction.item.unit }}</small>
+                        </td>
+                        <td>${{ transaction.unit_cost|floatformat:2 }}</td>
+                        <td>${{ transaction.total_cost|floatformat:2 }}</td>
+                        <td>{{ transaction.location.name }}</td>
+                        <td>
+                            {% if transaction.created_by %}
+                                {{ transaction.created_by.get_full_name|default:transaction.created_by.username }}
+                            {% else %}
+                                <span class="text-muted">System</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if transaction.notes %}
+                                <span title="{{ transaction.notes }}">
+                                    {{ transaction.notes|truncatechars:30 }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="10">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📊</div>
+                                <h3>No Transactions Found</h3>
+                                <p>No inventory transactions match your current filters.</p>
+                                <a href="{% url 'menu_management:inventory_transactions' %}" class="btn btn-primary">
+                                    Clear Filters
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if transactions.has_other_pages %}
+        <div class="pagination">
+            {% if transactions.has_previous %}
+                <a href="?page={{ transactions.previous_page_number }}{% if selected_type %}&type={{ selected_type }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                    ← Previous
+                </a>
+            {% endif %}
+            
+            <span class="current">
+                Page {{ transactions.number }} of {{ transactions.paginator.num_pages }}
+            </span>
+            
+            {% if transactions.has_next %}
+                <a href="?page={{ transactions.next_page_number }}{% if selected_type %}&type={{ selected_type }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                    Next →
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,474 @@
+{% extends 'menu_management/base.html' %}
+{% load nepali_currency %}
+
+{% block title %}Edit Course Menu Template - {{ template.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edit-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .form-container {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    
+    .form-section h3 {
+        color: #333;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #667eea;
+    }
+    
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-label {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-input {
+        padding: 0.75rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    .checkbox-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .checkbox-item input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: #667eea;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+    }
+    
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        margin-left: 1rem;
+    }
+    
+    .alert-info {
+        background: #e3f2fd;
+        border: 1px solid #2196f3;
+        color: #1976d2;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1>✏️ Edit Course Menu Template</h1>
+                <p class="lead mb-0">Modify the details of your course menu template</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="form-container">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h3>📝 Basic Information</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="name" class="form-label">Template Name *</label>
+                                <input type="text" id="name" name="name" class="form-input" 
+                                       value="{{ template.name }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="menu_type" class="form-label">Menu Type *</label>
+                                <select id="menu_type" name="menu_type" class="form-input" required>
+                                    <option value="">Select Menu Type</option>
+                                    {% for type_value, type_label in template.MENU_TYPE_CHOICES %}
+                                    <option value="{{ type_value }}" {% if template.menu_type == type_value %}selected{% endif %}>
+                                        {{ type_label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="description" class="form-label">Description *</label>
+                            <textarea id="description" name="description" class="form-input form-textarea" required>{{ template.description }}</textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Course Configuration -->
+                    <div class="form-section">
+                        <h3>🍽️ Course Configuration</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="course_count" class="form-label">Number of Courses *</label>
+                                <input type="number" id="course_count" name="course_count" class="form-input" 
+                                       value="{{ template.course_count }}" min="1" max="12" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="min_party_size" class="form-label">Minimum Party Size *</label>
+                                <input type="number" id="min_party_size" name="min_party_size" class="form-input" 
+                                       value="{{ template.min_party_size }}" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="max_party_size" class="form-label">Maximum Party Size *</label>
+                                <input type="number" id="max_party_size" name="max_party_size" class="form-input" 
+                                       value="{{ template.max_party_size }}" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="advance_booking_days" class="form-label">Advance Booking Days *</label>
+                                <input type="number" id="advance_booking_days" name="advance_booking_days" class="form-input" 
+                                       value="{{ template.advance_booking_days }}" min="0" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pricing -->
+                    <div class="form-section">
+                        <h3>💰 Pricing</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="base_price" class="form-label">Base Price (Rs.) *</label>
+                                <input type="number" id="base_price" name="base_price" class="form-input" 
+                                       value="{{ template.base_price }}" step="0.01" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="price_per_person" class="form-label">Price Per Person (Rs.) *</label>
+                                <input type="number" id="price_per_person" name="price_per_person" class="form-input" 
+                                       value="{{ template.price_per_person }}" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dietary Options -->
+                    <div class="form-section">
+                        <h3>🥗 Dietary Options</h3>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="vegetarian_available" name="vegetarian_available" 
+                                       {% if template.vegetarian_available %}checked{% endif %}>
+                                <label for="vegetarian_available">Vegetarian Available</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="vegan_available" name="vegan_available" 
+                                       {% if template.vegan_available %}checked{% endif %}>
+                                <label for="vegan_available">Vegan Available</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="gluten_free_available" name="gluten_free_available" 
+                                       {% if template.gluten_free_available %}checked{% endif %}>
+                                <label for="gluten_free_available">Gluten-Free Available</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pairing Options -->
+                    <div class="form-section">
+                        <h3>🍷 Pairing Options</h3>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="wine_pairing_available" name="wine_pairing_available" 
+                                       {% if template.wine_pairing_available %}checked{% endif %}>
+                                <label for="wine_pairing_available">Wine Pairing Available</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="beverage_pairing_available" name="beverage_pairing_available" 
+                                       {% if template.beverage_pairing_available %}checked{% endif %}>
+                                <label for="beverage_pairing_available">Beverage Pairing Available</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="sommelier_required" name="sommelier_required" 
+                                       {% if template.sommelier_required %}checked{% endif %}>
+                                <label for="sommelier_required">Sommelier Required</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Seasonal Options -->
+                    <div class="form-section">
+                        <h3>🍂 Seasonal & Holiday Options</h3>
+                        <div class="form-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="is_seasonal" name="is_seasonal" 
+                                       {% if template.is_seasonal %}checked{% endif %}>
+                                <label for="is_seasonal">Seasonal Menu</label>
+                            </div>
+                        </div>
+                        
+                        {% if template.is_seasonal %}
+                        <div class="form-group mt-3" id="seasonal_months_group">
+                            <label class="form-label">Seasonal Months</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="month_January" name="season_months" value="January"
+                                           {% if 'January' in template.season_months %}checked{% endif %}>
+                                    <label for="month_January">January</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="month_February" name="season_months" value="February"
+                                           {% if 'February' in template.season_months %}checked{% endif %}>
+                                    <label for="month_February">February</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="month_March" name="season_months" value="March"
+                                           {% if 'March' in template.season_months %}checked{% endif %}>
+                                    <label for="month_March">March</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="month_April" name="season_months" value="April"
+                                           {% if 'April' in template.season_months %}checked{% endif %}>
+                                    <label for="month_April">April</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="month_May" name="season_months" value="May"
+                                           {% if 'May' in template.season_months %}checked{% endif %}>
+                                    <label for="month_May">May</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="month_June" name="season_months" value="June"
+                                           {% if 'June' in template.season_months %}checked{% endif %}>
+                                    <label for="month_June">June</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="month_July" name="season_months" value="July"
+                                           {% if 'July' in template.season_months %}checked{% endif %}>
+                                    <label for="month_July">July</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="month_August" name="season_months" value="August"
+                                           {% if 'August' in template.season_months %}checked{% endif %}>
+                                    <label for="month_August">August</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="month_September" name="season_months" value="September"
+                                           {% if 'September' in template.season_months %}checked{% endif %}>
+                                    <label for="month_September">September</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="month_October" name="season_months" value="October"
+                                           {% if 'October' in template.season_months %}checked{% endif %}>
+                                    <label for="month_October">October</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="month_November" name="season_months" value="November"
+                                           {% if 'November' in template.season_months %}checked{% endif %}>
+                                    <label for="month_November">November</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="month_December" name="season_months" value="December"
+                                           {% if 'December' in template.season_months %}checked{% endif %}>
+                                    <label for="month_December">December</label>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="form-group mt-3">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="holiday_specific" name="holiday_specific" 
+                                       {% if template.holiday_specific %}checked{% endif %}>
+                                <label for="holiday_specific">Holiday Specific</label>
+                            </div>
+                        </div>
+                        
+                        {% if template.holiday_specific %}
+                        <div class="form-group mt-3" id="holiday_name_group">
+                            <label for="holiday_name" class="form-label">Holiday Name</label>
+                            <input type="text" id="holiday_name" name="holiday_name" class="form-input" 
+                                   value="{{ template.holiday_name }}">
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Template Info -->
+                    <div class="alert-info">
+                        <strong>📋 Template ID:</strong> <code>{{ template.template_id }}</code><br>
+                        <small>This ID cannot be changed and is used to identify this template.</small>
+                    </div>
+                    
+                    <!-- Submit Buttons -->
+                    <div class="form-section">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <a href="{% url 'menu_management:course_menu_template_detail' template.template_id %}" 
+                                   class="btn-cancel">← Cancel</a>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn-submit">
+                                    💾 Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Show/hide seasonal months based on checkbox
+document.getElementById('is_seasonal').addEventListener('change', function() {
+    const seasonalGroup = document.getElementById('seasonal_months_group');
+    if (this.checked) {
+        // Create seasonal months group if it doesn't exist
+        if (!seasonalGroup) {
+            const formSection = this.closest('.form-section');
+            const seasonalHTML = `
+                <div class="form-group mt-3" id="seasonal_months_group">
+                    <label class="form-label">Seasonal Months</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="month_January" name="season_months" value="January">
+                            <label for="month_January">January</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="month_February" name="season_months" value="February">
+                            <label for="month_February">February</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="month_March" name="season_months" value="March">
+                            <label for="month_March">March</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="month_April" name="season_months" value="April">
+                            <label for="month_April">April</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="month_May" name="season_months" value="May">
+                            <label for="month_May">May</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="month_June" name="season_months" value="June">
+                            <label for="month_June">June</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="month_July" name="season_months" value="July">
+                            <label for="month_July">July</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="month_August" name="season_months" value="August">
+                            <label for="month_August">August</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="month_September" name="season_months" value="September">
+                            <label for="month_September">September</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="month_October" name="season_months" value="October">
+                            <label for="month_October">October</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="month_November" name="season_months" value="November">
+                            <label for="month_November">November</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="month_December" name="season_months" value="December">
+                            <label for="month_December">December</label>
+                        </div>
+                    </div>
+                </div>
+            `;
+            formSection.insertAdjacentHTML('beforeend', seasonalHTML);
+        }
+    } else if (seasonalGroup) {
+        seasonalGroup.style.display = 'none';
+    }
+});
+
+// Show/hide holiday name based on checkbox
+document.getElementById('holiday_specific').addEventListener('change', function() {
+    const holidayGroup = document.getElementById('holiday_name_group');
+    if (this.checked) {
+        // Create holiday name group if it doesn't exist
+        if (!holidayGroup) {
+            const formSection = this.closest('.form-section');
+            const holidayHTML = `
+                <div class="form-group mt-3" id="holiday_name_group">
+                    <label for="holiday_name" class="form-label">Holiday Name</label>
+                    <input type="text" id="holiday_name" name="holiday_name" class="form-input" 
+                           placeholder="e.g., Christmas, New Year, etc.">
+                </div>
+            `;
+            formSection.insertAdjacentHTML('beforeend', holidayHTML);
+        }
+    } else if (holidayGroup) {
+        holidayGroup.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

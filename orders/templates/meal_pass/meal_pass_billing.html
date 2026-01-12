@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ meal_pass.name }} - Billing - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .billing-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 0;
+        text-align: center;
+        border-radius: 0 0 30px 30px;
+    }
+    
+    .billing-section {
+        padding: 60px 0;
+        background: white;
+    }
+    
+    .billing-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border-left: 5px solid #667eea;
+    }
+    
+    .pass-summary {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .price-display {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .btn-purchase {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 15px 30px;
+        border-radius: 50px;
+        font-weight: bold;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-purchase:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        color: white;
+    }
+    
+    .feature-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .feature-list li {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .feature-list li:before {
+        content: "✅ ";
+        margin-right: 0.5rem;
+    }
+    
+    .back-link {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .back-link:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Billing Hero -->
+<section class="billing-hero">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3">💳 Complete Your Purchase</h1>
+        <p class="lead">Review your meal pass selection and proceed to checkout</p>
+    </div>
+</section>
+
+<!-- Billing Section -->
+<section class="billing-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Pass Summary -->
+                <div class="pass-summary">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h3 class="mb-2">{{ meal_pass.name }}</h3>
+                            <p class="text-muted mb-0">{{ meal_pass.description }}</p>
+                            <div class="mt-2">
+                                <span class="badge bg-primary">{{ meal_pass.duration_days }} days</span>
+                                <span class="badge bg-success">{{ meal_pass.meals_per_period }} meals</span>
+                                {% if meal_pass.discount_percentage > 0 %}
+                                <span class="badge bg-warning">{{ meal_pass.discount_percentage }}% discount</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <div class="price-display">Nrs {{ meal_pass.price }}</div>
+                            <small class="text-muted">One-time payment</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features -->
+                <div class="billing-card">
+                    <h4 class="mb-3">🎯 What's Included</h4>
+                    <ul class="feature-list">
+                        <li>{{ meal_pass.meals_per_period }} meals included</li>
+                        {% if meal_pass.discount_percentage > 0 %}
+                        <li>{{ meal_pass.discount_percentage }}% discount on all orders</li>
+                        {% endif %}
+                        {% for feature, value in meal_pass.features.items %}
+                        <li>{{ feature }}: {{ value }}</li>
+                        {% endfor %}
+                        {% if meal_pass.preorder_days %}
+                        <li><strong>Pre-Order Required:</strong> {{ meal_pass.preorder_description }}</li>
+                        {% endif %}
+                        <li>Priority customer support</li>
+                        <li>Mobile app access</li>
+                        <li>Exclusive member benefits</li>
+                    </ul>
+                </div>
+
+                <!-- Payment Information -->
+                <div class="billing-card">
+                    <h4 class="mb-3">💳 Payment Information</h4>
+                    <p class="text-muted">Secure payment processing through our trusted payment partners.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li>✅ Secure SSL Encryption</li>
+                                <li>✅ Multiple Payment Methods</li>
+                                <li>✅ Instant Activation</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li>✅ 30-Day Money Back Guarantee</li>
+                                <li>✅ 24/7 Customer Support</li>
+                                <li>✅ Easy Cancellation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Order Summary -->
+                <div class="billing-card">
+                    <h4 class="mb-3">📋 Order Summary</h4>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>{{ meal_pass.name }}</span>
+                        <span>Nrs {{ meal_pass.price }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Duration</span>
+                        <span>{{ meal_pass.duration_days }} days</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Meals</span>
+                        <span>{{ meal_pass.meals_per_period }}</span>
+                    </div>
+                    {% if meal_pass.discount_percentage > 0 %}
+                    <div class="d-flex justify-content-between mb-2 text-success">
+                        <span>Discount</span>
+                        <span>{{ meal_pass.discount_percentage }}%</span>
+                    </div>
+                    {% endif %}
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>Total</span>
+                        <span class="text-primary">Nrs {{ meal_pass.price }}</span>
+                    </div>
+                </div>
+
+                <!-- Purchase Button -->
+                <div class="billing-card text-center">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'purchase_meal_pass' meal_pass.id %}" class="btn-purchase w-100">
+                            🛒 Complete Purchase
+                        </a>
+                        <p class="text-muted small mt-2">
+                            Logged in as {{ user.username }}
+                        </p>
+                    {% else %}
+                        <a href="{% url 'customer_login' %}?next={% url 'meal_pass_billing' meal_pass.id %}" class="btn-purchase w-100">
+                            🔐 Login to Purchase
+                        </a>
+                        <p class="text-muted small mt-2">
+                            <a href="{% url 'customer_signup' %}?next={% url 'meal_pass_billing' meal_pass.id %}">Create an account</a> to continue
+                        </p>
+                    {% endif %}
+                </div>
+
+                <!-- Trust Badges -->
+                <div class="billing-card text-center">
+                    <h5 class="mb-3">🔒 Secure & Trusted</h5>
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="text-primary">🛡️</div>
+                            <small>SSL Secure</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-success">💳</div>
+                            <small>Safe Payment</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-warning">⭐</div>
+                            <small>4.8 Rating</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back Link -->
+        <div class="text-center mt-4">
+            <a href="{% url 'meal_pass_options' %}" class="back-link">
+                ← Back to Meal Pass Options
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

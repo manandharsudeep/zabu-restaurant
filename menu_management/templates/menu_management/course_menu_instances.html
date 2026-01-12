@@ -1,0 +1,424 @@
+{% extends 'base.html' %}
+
+{% block title %}Course Menu Instances - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .instances-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .instances-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .instance-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border-left: 4px solid #667eea;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .instance-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .instance-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .instance-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .instance-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    
+    .status-booked {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+    
+    .status-confirmed {
+        background: #e8f5e8;
+        color: #388e3c;
+    }
+    
+    .status-in_progress {
+        background: #fff3e0;
+        color: #f57c00;
+    }
+    
+    .status-completed {
+        background: #e8f5e8;
+        color: #388e3c;
+    }
+    
+    .status-cancelled {
+        background: #ffebee;
+        color: #d32f2f;
+    }
+    
+    .instance-details {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .detail-label {
+        font-size: 0.8rem;
+        color: #666;
+        margin-bottom: 0.25rem;
+    }
+    
+    .detail-value {
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .instance-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .btn-action {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-view {
+        background: #667eea;
+        color: white;
+    }
+    
+    .btn-view:hover {
+        background: #5a67d8;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-edit {
+        background: #48bb78;
+        color: white;
+    }
+    
+    .btn-edit:hover {
+        background: #38a169;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-delete {
+        background: #f56565;
+        color: white;
+    }
+    
+    .btn-delete:hover {
+        background: #e53e3e;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .filter-section {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .filter-controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .filter-label {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .filter-input {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .back-button {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .back-button:hover {
+        background: #5a67d8;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .create-button {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: #48bb78;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .create-button:hover {
+        background: #38a169;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+    }
+    
+    .empty-state h3 {
+        color: #333;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="instances-header">
+    <div class="container">
+        <h1 class="display-4">🍽️ Course Menu Instances</h1>
+        <p class="lead">Manage individual course menu instances and track their progress</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Back Button -->
+    <a href="{% url 'menu_management:enhanced_course_menu_dashboard' %}" class="back-button">
+        ← Back to Course Menu Dashboard
+    </a>
+    
+    <!-- Create Button -->
+    <a href="{% url 'menu_management:create_course_menu_instance' %}" class="create-button">
+        + Create New Instance
+    </a>
+
+    <!-- Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_instances }}</div>
+            <div class="stat-label">Total Instances</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ booked_count }}</div>
+            <div class="stat-label">Booked</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ confirmed_count }}</div>
+            <div class="stat-label">Confirmed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ in_progress_count }}</div>
+            <div class="stat-label">In Progress</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ completed_count }}</div>
+            <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ cancelled_count }}</div>
+            <div class="stat-label">Cancelled</div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <h3>🔍 Filter Instances</h3>
+        <form method="get" class="filter-controls">
+            <div class="filter-group">
+                <label class="filter-label">Status</label>
+                <select name="status" class="filter-input">
+                    <option value="">All Statuses</option>
+                    {% for status_value, status_label in status_choices %}
+                    <option value="{{ status_value }}" {% if request.GET.status == status_value %}selected{% endif %}>
+                        {{ status_label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Date</label>
+                <input type="date" name="date" class="filter-input" value="{{ request.GET.date }}">
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Search</label>
+                <input type="text" name="search" class="filter-input" placeholder="Search by name or table..." value="{{ request.GET.search }}">
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">&nbsp;</label>
+                <button type="submit" class="btn-action btn-view">Apply Filters</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Instances Grid -->
+    {% if instances %}
+    <div class="instances-grid">
+        {% for instance in instances %}
+        <div class="instance-card">
+            <div class="instance-header">
+                <div class="instance-title">{{ instance.name }}</div>
+                <div class="instance-status status-{{ instance.status }}">
+                    {{ instance.get_status_display }}
+                </div>
+            </div>
+            
+            <div class="instance-details">
+                <div class="detail-item">
+                    <span class="detail-label">Table</span>
+                    <span class="detail-value">{{ instance.table_number }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Guests</span>
+                    <span class="detail-value">{{ instance.customer_count }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Date</span>
+                    <span class="detail-value">{{ instance.booking_date|date:"M d, Y" }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Time</span>
+                    <span class="detail-value">{{ instance.booking_time|time:"g:i A" }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Price/Person</span>
+                    <span class="detail-value">${{ instance.final_price_per_person }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Total Price</span>
+                    <span class="detail-value">${{ instance.total_price }}</span>
+                </div>
+            </div>
+            
+            {% if instance.special_requests %}
+            <div style="margin-bottom: 1rem;">
+                <span class="detail-label">Special Requests:</span>
+                <p style="margin: 0.5rem 0; color: #666; font-size: 0.9rem;">{{ instance.special_requests|truncatewords:20 }}</p>
+            </div>
+            {% endif %}
+            
+            {% if instance.dietary_requirements %}
+            <div style="margin-bottom: 1rem;">
+                <span class="detail-label">Dietary Requirements:</span>
+                <div style="margin: 0.5rem 0;">
+                    {% for requirement in instance.dietary_requirements %}
+                    <span style="display: inline-block; padding: 0.25rem 0.5rem; background: #f0f0f0; border-radius: 5px; margin-right: 0.5rem; font-size: 0.8rem;">
+                        {{ requirement }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="instance-actions">
+                <a href="{% url 'menu_management:course_menu_instance_detail' instance.instance_id %}" class="btn-action btn-view">
+                    View Details
+                </a>
+                <a href="#" class="btn-action btn-edit" onclick="alert('Edit functionality coming soon!')">
+                    Edit
+                </a>
+                <a href="#" class="btn-action btn-delete" onclick="alert('Delete functionality coming soon!')">
+                    Delete
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h3>No instances found</h3>
+        <p>No course menu instances match your current filters.</p>
+        <a href="{% url 'menu_management:create_course_menu_instance' %}" class="create-button">
+            Create Your First Instance
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

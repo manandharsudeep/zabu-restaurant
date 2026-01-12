@@ -1,0 +1,362 @@
+{% extends 'menu_management/base.html' %}
+{% load nepali_currency %}
+
+{% block title %}{{ template.name }} - Course Menu Template{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>📋 {{ template.name }}</h1>
+                <div>
+                    <a href="{% url 'menu_management:course_menu_templates' %}" class="btn btn-outline-secondary">
+                        ← Back to Templates
+                    </a>
+                    <a href="{% url 'menu_management:edit_course_menu_template' template.template_id %}" class="btn btn-primary">
+                        ✏️ Edit Template
+                    </a>
+                    <a href="{% url 'menu_management:create_course_menu_template' %}" class="btn btn-success">
+                        ➕ Create New Template
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Overview -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📝 Template Overview</h5>
+                </div>
+                <div class="card-body">
+                    <p class="lead">{{ template.description }}</p>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6>Basic Information</h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Menu Type:</strong></td>
+                                    <td><span class="badge bg-primary">{{ template.get_menu_type_display }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Course Count:</strong></td>
+                                    <td>{{ template.course_count }} courses</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Template ID:</strong></td>
+                                    <td><code>{{ template.template_id }}</code></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Pricing Information</h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Base Price:</strong></td>
+                                    <td>{{ template.base_price|nepali_currency }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Price Per Person:</strong></td>
+                                    <td>{{ template.price_per_person|nepali_currency }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Created:</strong></td>
+                                    <td>{{ template.created_at|date:"F d, Y" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">⚙️ Requirements</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>Party Size:</strong></td>
+                            <td>{{ template.min_party_size }}-{{ template.max_party_size }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Advance Booking:</strong></td>
+                            <td>{{ template.advance_booking_days }} days</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Last Updated:</strong></td>
+                            <td>{{ template.updated_at|date:"F d, Y" }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dietary Options -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🥗 Dietary Accommodations</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" 
+                                       {% if template.vegetarian_available %}checked{% endif %} disabled>
+                                <label class="form-check-label">
+                                    <span class="badge bg-success me-2">🥗 Vegetarian</span>
+                                    {% if template.vegetarian_available %}Available{% else %}Not Available{% endif %}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" 
+                                       {% if template.vegan_available %}checked{% endif %} disabled>
+                                <label class="form-check-label">
+                                    <span class="badge bg-success me-2">🌱 Vegan</span>
+                                    {% if template.vegan_available %}Available{% else %}Not Available{% endif %}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" 
+                                       {% if template.gluten_free_available %}checked{% endif %} disabled>
+                                <label class="form-check-label">
+                                    <span class="badge bg-success me-2">🌾 Gluten Free</span>
+                                    {% if template.gluten_free_available %}Available{% else %}Not Available{% endif %}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if template.other_dietary_options %}
+                    <div class="mt-3">
+                        <h6>Other Dietary Options:</h6>
+                        <div>
+                            {% for option in template.other_dietary_options %}
+                            <span class="badge bg-info me-2">{{ option }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pairing Options -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🍷️ Pairing Options</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" 
+                                       {% if template.wine_pairing_available %}checked{% endif %} disabled>
+                                <label class="form-check-label">
+                                    <span class="badge bg-info me-2">🍷️ Wine Pairing</span>
+                                    {% if template.wine_pairing_available %}Available{% else %}Not Available{% endif %}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" 
+                                       {% if template.beverage_pairing_available %}checked{% endif %} disabled>
+                                <label class="form-check-label">
+                                    <span class="badge bg-info me-2">🥤 Beverage Pairing</span>
+                                    {% if template.beverage_pairing_available %}Available{% else %}Not Available{% endif %}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" 
+                                       {% if template.sommelier_required %}checked{% endif %} disabled>
+                                <label class="form-check-label">
+                                    <span class="badge bg-warning me-2">👨‍🍳 Sommelier Required</span>
+                                    {% if template.sommelier_required %}Required{% else %}Not Required{% endif %}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seasonal Information -->
+    {% if template.is_seasonal or template.holiday_specific %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📅 Seasonal Information</h5>
+                </div>
+                <div class="card-body">
+                    {% if template.is_seasonal %}
+                    <div class="alert alert-info">
+                        <h6>🍂 Seasonal Menu</h6>
+                        <p>This template is available during specific months:</p>
+                        <div>
+                            {% for month in template.season_months %}
+                            <span class="badge bg-primary me-1">{{ month|date:"F" }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if template.holiday_specific %}
+                    <div class="alert alert-warning">
+                        <h6>🎄 Holiday Special</h6>
+                        <p>This template is specifically designed for:</p>
+                        <strong>{{ template.holiday_name }}</strong>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Price Tiers -->
+    {% if template.price_tiers %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">💰 Price Tiers</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Party Size</th>
+                                    <th>Price Per Person</th>
+                                    <th>Total Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tier_name, tier_info in template.price_tiers.items %}
+                                <tr>
+                                    <td>{{ tier_name }}</td>
+                                    <td>{{ tier_info.price_per_person|nepali_currency }}</td>
+                                    <td>{{ tier_info.total_price|nepali_currency }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <a href="{% url 'menu_management:course_menu_templates' %}" class="btn btn-outline-secondary">
+                        ← Back to Templates
+                    </a>
+                    <button class="btn btn-outline-danger" onclick="deleteTemplate('{{ template.template_id }}')">
+                        🗑️ Delete Template
+                    </button>
+                </div>
+                <div>
+                    <a href="{% url 'menu_management:create_course_menu_instance' %}?template={{ template.template_id }}" 
+                       class="btn btn-primary">
+                        🍽️ Create Course Menu from Template
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function deleteTemplate(templateId) {
+    if (confirm('Are you sure you want to delete this course menu template? This action cannot be undone.')) {
+        fetch(`/menu-management/courses/templates/${templateId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Template deleted successfully!');
+                window.location.href = '{% url "menu_management:course_menu_templates" %}';
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while deleting the template.');
+        });
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+
+<style>
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.badge {
+    font-size: 0.85em;
+}
+
+.form-check-input:disabled {
+    cursor: not-allowed;
+}
+
+.alert {
+    margin-bottom: 0;
+}
+
+.table-responsive {
+    border-radius: 0.375rem;
+}
+</style>
+{% endblock %}

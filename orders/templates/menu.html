@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+
+{% block title %}Menu - Restaurant System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .menu-item-img {
+        height: 250px;
+        object-fit: cover;
+        width: 100%;
+        border-radius: 10px 10px 0 0;
+    }
+    
+    .menu-item-img-placeholder {
+        height: 250px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        border-radius: 10px 10px 0 0;
+    }
+    
+    .price-tag {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #28a745;
+    }
+    
+    .cart-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #dc3545;
+        color: white;
+        border-radius: 50%;
+        padding: 2px 6px;
+        font-size: 0.8rem;
+    }
+    
+    .floating-cart {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        background: #007bff;
+        color: white;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    
+    .floating-cart:hover {
+        background: #0056b3;
+        transform: scale(1.1);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .order-status {
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+    }
+    .status-pending { background-color: #ffc107; }
+    .status-confirmed { background-color: #17a2b8; }
+    .status-preparing { background-color: #fd7e14; }
+    .status-ready { background-color: #28a745; }
+    .status-completed { background-color: #6c757d; }
+    .status-cancelled { background-color: #dc3545; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="text-center">Our Menu</h1>
+        <p class="text-center text-muted">Choose from our delicious selection</p>
+    </div>
+</div>
+
+<!-- Cart Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="mb-0">
+                            <i class="fas fa-shopping-cart"></i> 
+                            Your Cart
+                            {% if cart_count > 0 %}
+                                <span class="badge bg-primary ms-2">{{ cart_count }} items</span>
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        {% if cart_count > 0 %}
+                            <a href="{% url 'view_cart' %}" class="btn btn-outline-primary me-2">
+                                <i class="fas fa-eye"></i> View Cart
+                            </a>
+                            <a href="{% url 'checkout' %}" class="btn btn-primary">
+                                <i class="fas fa-credit-card"></i> Checkout
+                            </a>
+                        {% else %}
+                            <button class="btn btn-secondary" disabled>
+                                <i class="fas fa-shopping-cart"></i> Cart Empty
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if categories %}
+    <div class="mb-4">
+        <ul class="nav nav-pills justify-content-center" id="categoryTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab">All Items</button>
+            </li>
+            {% for category in categories %}
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="category-{{ category.id }}-tab" data-bs-toggle="tab" data-bs-target="#category-{{ category.id }}" type="button" role="tab">{{ category.name }}</button>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="tab-content" id="categoryTabContent">
+        <div class="tab-pane fade show active" id="all" role="tabpanel">
+            <div class="row">
+                {% for item in menu_items %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            {% if item.image %}
+                                <img src="{{ item.image.url }}" class="menu-item-img" alt="{{ item.name }}">
+                            {% else %}
+                                <div class="menu-item-img-placeholder">
+                                    <span class="menu-item-icon">
+                                        {% if "Chicken" in item.name %}🍗
+                                        {% elif "Vegetable" in item.name %}🥬
+                                        {% elif "Mutton" in item.name %}🥘
+                                        {% elif "Biryani" in item.name %}🍛
+                                        {% elif "Gulab" in item.name %}🍮
+                                        {% elif "Rasmalai" in item.name %}🍧
+                                        {% elif "Mango" in item.name %}🥭
+                                        {% elif "Masala" in item.name %}🍵
+                                        {% else %}🍽️
+                                        {% endif %}
+                                    </span>
+                                    <span class="menu-item-name">{{ item.name }}</span>
+                                </div>
+                            {% endif %}
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ item.name }}</h5>
+                                <p class="card-text">{{ item.description|truncatewords:20 }}</p>
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="price-tag">Nrs {{ item.price }}</span>
+                                        {% if item.available %}
+                                            <form action="{% url 'add_to_cart' item.id %}" method="post" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-primary btn-sm">Add to Cart</button>
+                                            </form>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Unavailable</span>
+                                        {% endif %}
+                                    </div>
+                                    <small class="text-muted">⏱️ {{ item.preparation_time }} mins</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12">
+                        <p class="text-center text-muted">No menu items available.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% for category in categories %}
+            <div class="tab-pane fade" id="category-{{ category.id }}" role="tabpanel">
+                <div class="row">
+                    {% for item in category.menu_items.all %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100">
+                                {% if item.image %}
+                                    <img src="{{ item.image.url }}" class="menu-item-img" alt="{{ item.name }}">
+                                {% else %}
+                                    <div class="menu-item-img-placeholder">
+                                        <span class="menu-item-icon">
+                                            {% if "Chicken" in item.name %}🍗
+                                            {% elif "Vegetable" in item.name %}🥬
+                                            {% elif "Mutton" in item.name %}🥘
+                                            {% elif "Biryani" in item.name %}🍛
+                                            {% elif "Gulab" in item.name %}🍮
+                                            {% elif "Rasmalai" in item.name %}🍧
+                                            {% elif "Mango" in item.name %}🥭
+                                            {% elif "Masala" in item.name %}🍵
+                                            {% else %}🍽️
+                                            {% endif %}
+                                        </span>
+                                        <span class="menu-item-name">{{ item.name }}</span>
+                                    </div>
+                                {% endif %}
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title">{{ item.name }}</h5>
+                                    <p class="card-text">{{ item.description|truncatewords:20 }}</p>
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="price-tag">Nrs {{ item.price }}</span>
+                                            {% if item.available %}
+                                                <form action="{% url 'add_to_cart' item.id %}" method="post" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-primary btn-sm">Add to Cart</button>
+                                                </form>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Unavailable</span>
+                                            {% endif %}
+                                        </div>
+                                        <small class="text-muted">⏱️ {{ item.preparation_time }} mins</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-12">
+                            <p class="text-center text-muted">No items in this category.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-center">
+        <p class="text-muted">No categories available. Please add categories through the admin panel.</p>
+    </div>
+{% endif %}
+{% endblock %}
+
+<!-- Login Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="loginModalLabel">Login to Order</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-pills mb-3" id="authTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" role="tab">Login</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="signup-tab" data-bs-toggle="tab" data-bs-target="#signup" type="button" role="tab">Sign Up</button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="authTabContent">
+                    <div class="tab-pane fade show active" id="login" role="tabpanel">
+                        <form method="post" action="{% url 'customer_login' %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="menu_username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="menu_username" name="username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="menu_password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="menu_password" name="password" required autocomplete="off">
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Login</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="tab-pane fade" id="signup" role="tabpanel">
+                        <form method="post" action="{% url 'customer_signup' %}">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="first_name" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="first_name" name="first_name" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="last_name" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="last_name" name="last_name" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="signup_username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="signup_username" name="username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Phone (Optional)</label>
+                                <input type="tel" class="form-control" id="phone" name="phone">
+                            </div>
+                            <div class="mb-3">
+                                <label for="password1" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password1" name="password1" required autocomplete="off">
+                            </div>
+                            <div class="mb-3">
+                                <label for="password2" class="form-label">Confirm Password</label>
+                                <input type="password" class="form-control" id="password2" name="password2" required autocomplete="off">
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success">Sign Up</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Cart Button -->
+{% if cart_count > 0 %}
+<a href="{% url 'view_cart' %}" class="floating-cart">
+    <i class="fas fa-shopping-cart fa-lg"></i>
+    {% if cart_count > 0 %}
+        <span class="cart-badge">{{ cart_count }}</span>
+    {% endif %}
+</a>
+{% endif %}

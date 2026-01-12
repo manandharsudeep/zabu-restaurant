@@ -1,0 +1,638 @@
+{% extends 'base.html' %}
+
+{% block title %}Advanced Analytics - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analytics-header {
+        background: linear-gradient(135deg, #6f42c1 0%, #4c1d95 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        text-align: center;
+        border-left: 4px solid #6f42c1;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #6f42c1;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .analytics-section {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .ab-test-item {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #6f42c1;
+    }
+    
+    .ab-test-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .ab-test-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-completed {
+        background: #cce5ff;
+        color: #004085;
+    }
+    
+    .status-created {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .variant-comparison {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .variant-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        border: 1px solid #e9ecef;
+    }
+    
+    .variant-winner {
+        text-align: center;
+    }
+    
+    .variant-name {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .variant-price {
+        color: #6f42c1;
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .variant-stats {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .winner-badge {
+        background: #28a745;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+    
+    .revenue-chart {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid #e9ecef;
+    }
+    
+    .top-items-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+    
+    .top-item {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        border-left: 4px solid #6f42c1;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .item-name {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .item-price {
+        color: #6f42c1;
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .btn-primary {
+        background: #6f42c1;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-success {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-info {
+        background: #17a2b8;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 2rem;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 500px;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 1rem;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #6f42c1;
+        box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
+    }
+    
+    .suggestion-item {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #6f42c1;
+    }
+    
+    .suggestion-type {
+        background: #6f42c1;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .suggestion-impact {
+        color: #28a745;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .confidence-bar {
+        background: #e9ecef;
+        border-radius: 10px;
+        height: 8px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .confidence-fill {
+        background: #6f42c1;
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Analytics Header -->
+<div class="analytics-header">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="display-5">📊 Advanced Analytics</h1>
+            <p class="lead">A/B testing, menu optimization and business intelligence</p>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Statistics Overview -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_menus }}</div>
+            <div class="stat-label">Total Menus</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ total_items }}</div>
+            <div class="stat-label">Menu Items</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ available_items }}</div>
+            <div class="stat-label">Available Items</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ menu_performance|length }}</div>
+            <div class="stat-label">Active Menus</div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <button class="btn-primary" onclick="createABTest()">
+            🧪 Create A/B Test
+        </button>
+        <button class="btn-success" onclick="getOptimizationSuggestions()">
+            💡 Get Suggestions
+        </button>
+        <button class="btn-info" onclick="refreshData()">
+            🔄 Refresh Data
+        </button>
+    </div>
+
+    <!-- A/B Testing Section -->
+    <div class="analytics-section">
+        <h3>🧪 A/B Testing</h3>
+        {% for test in ab_tests %}
+        <div class="ab-test-item">
+            <div class="ab-test-header">
+                <div>
+                    <h4>{{ test.name }}</h4>
+                    <p>{{ test.description }}</p>
+                    <span class="ab-test-status status-{{ test.status }}">{{ test.status|title }}</span>
+                    <small class="text-muted">Started: {{ test.start_date }}</small>
+                </div>
+                <div>
+                    <div class="winner-badge">🏆 Winner: {{ test.winner }}</div>
+                    <small>Confidence: {{ test.confidence }}% | Lift: {{ test.lift }}%</small>
+                </div>
+            </div>
+            <div class="variant-comparison">
+                {% for variant in test.variants %}
+                <div class="variant-card">
+                    <div class="variant-inner">
+                        <div class="variant-name">{{ variant.name }}</div>
+                        <div class="variant-price">{{ variant.price }}</div>
+                        <div class="variant-stats">
+                            <div>
+                                <div>Orders</div>
+                                <div>{{ variant.orders }}</div>
+                            </div>
+                            <div>
+                                <div>Revenue</div>
+                                <div>${{ variant.revenue }}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-4">
+            <p class="text-muted">No A/B tests running. Create your first test above!</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Revenue Trends -->
+    <div class="analytics-section">
+        <h3>📈 Revenue Trends (Last 30 Days)</h3>
+        <div class="revenue-chart">
+            <canvas id="revenueChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- Top Performing Items -->
+    <div class="analytics-section">
+        <h3>🏆 Top Performing Items</h3>
+        <div class="top-items-grid">
+            {% for item in top_items %}
+            <div class="top-item">
+                <div class="item-name">{{ item.name }}</div>
+                <div class="item-price">${{ item.avg_price|floatformat:2 }}</div>
+                <small class="text-muted">Avg Price</small>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Menu Performance -->
+    <div class="analytics-section">
+        <h3>📋 Menu Performance</h3>
+        {% for menu in menu_performance %}
+        <div class="top-item">
+            <div class="item-name">{{ menu.menu.name }}</div>
+            <div class="variant-stats">
+                <div>
+                    <div>Items</div>
+                    <div>{{ menu.total_items }}</div>
+                </div>
+                <div>
+                    <div>Available</div>
+                    <div>{{ menu.available_items }}</div>
+                </div>
+                <div>
+                    <div>Avg Price</div>
+                    <div>${{ menu.avg_price|floatformat:2 }}</div>
+                </div>
+            </div>
+            <div class="confidence-bar">
+                <div class="confidence-fill" style="width: {{ menu.availability_rate }}%"></div>
+            </div>
+            <small>{{ menu.availability_rate|floatformat:1 }}% Availability Rate</small>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Optimization Suggestions -->
+    <div class="analytics-section" id="suggestionsSection" style="display: none;">
+        <h3>💡 AI-Powered Optimization Suggestions</h3>
+        <div id="suggestionsList">
+            <!-- Suggestions will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<!-- A/B Test Modal -->
+<div id="abTestModal" class="modal">
+    <div class="modal-content">
+        <h3>🧪 Create A/B Test</h3>
+        <form id="abTestForm">
+            <div class="form-group">
+                <label for="testName">Test Name</label>
+                <input type="text" id="testName" name="name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="testDescription">Description</label>
+                <textarea id="testDescription" name="description" class="form-control" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="variantAName">Variant A Name</label>
+                <input type="text" id="variantAName" name="variantA_name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="variantAPrice">Variant A Price</label>
+                <input type="text" id="variantAPrice" name="variantA_price" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="variantBName">Variant B Name</label>
+                <input type="text" id="variantBName" name="variantB_name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="variantBPrice">Variant B Price</label>
+                <input type="text" id="variantBPrice" name="variantB_price" class="form-control" required>
+            </div>
+            <div class="text-end">
+                <button type="button" class="btn-secondary" onclick="hideABTestModal()">Cancel</button>
+                <button type="submit" class="btn-primary">Create Test</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Modal functions
+function showABTestModal() {
+    document.getElementById('abTestModal').style.display = 'block';
+}
+
+function hideABTestModal() {
+    document.getElementById('abTestModal').style.display = 'none';
+}
+
+function createABTest() {
+    showABTestModal();
+}
+
+function hideABTestModal() {
+    document.getElementById('abTestModal').style.display = 'none';
+}
+
+// Form submission
+document.getElementById('abTestForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData);
+    
+    fetch('/menu_management/analytics/ab-test/create/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('A/B test created successfully!');
+            hideABTestModal();
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while creating the A/B test.');
+    });
+});
+
+function getOptimizationSuggestions() {
+    fetch('/menu-management/analytics/suggestions/')
+        .then(response => response.json())
+        .then(data => {
+            const suggestionsDiv = document.getElementById('suggestionsList');
+            suggestionsDiv.innerHTML = '';
+            
+            data.suggestions.forEach(suggestion => {
+                const suggestionHtml = `
+                    <div class="suggestion-item">
+                        <div class="suggestion-type">${suggestion.type.charAt(0).toUpperCase() + suggestion.type.slice(1)}</div>
+                        <h4>${suggestion.title}</h4>
+                        <p>${suggestion.description}</p>
+                        <div class="suggestion-impact">Impact: ${suggestion.impact}</div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: ${suggestion.confidence}%"></div>
+                        </div>
+                        <small>Confidence: ${suggestion.confidence}%</small>
+                        <div>
+                            <strong>Recommended Items:</strong>
+                            <ul>
+                                ${suggestion.items.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                suggestionsDiv.innerHTML += suggestionHtml;
+            });
+            
+            document.getElementById('suggestionsSection').style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error loading suggestions');
+        });
+}
+
+function refreshData() {
+    location.reload();
+}
+
+// Helper function to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    if (event.target == document.getElementById('abTestModal')) {
+        hideABTestModal();
+    }
+}
+
+// Simple chart rendering
+document.addEventListener('DOMContentLoaded', function() {
+    const canvas = document.getElementById('revenueChart');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        
+        // Mock data for chart
+        const revenueData = [
+            {date: '2024-01-01', revenue: 1500},
+            {date: '2024-01-02', revenue: 1600},
+            {date: '2024-01-03', revenue: 1700},
+            {date: '2024-01-04', revenue: 1650},
+            {date: '2024-01-05', revenue: 1800}
+        ];
+        
+        const width = canvas.width;
+        const height = canvas.height;
+        
+        ctx.strokeStyle = '#6f42c1';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        
+        // Draw revenue trend line
+        revenueData.forEach((point, index) => {
+            const x = (index / (revenueData.length - 1)) * width;
+            const y = height - (point.revenue / 2000) * height;
+            
+            if (index === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        });
+        
+        ctx.stroke();
+        
+        // Draw points
+        ctx.fillStyle = '#6f42c1';
+        revenueData.forEach((point, index) => {
+            const x = (index / (revenueData.length - 1)) * width;
+            const y = height - (point.revenue / 2000) * height;
+            
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, 2 * Math.PI);
+            ctx.fill();
+        });
+    }
+});
+</script>
+{% endblock %}

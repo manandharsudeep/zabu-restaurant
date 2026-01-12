@@ -1,0 +1,380 @@
+{% extends 'base.html' %}
+
+{% block title %}Meal Pass Dashboard - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 0;
+        text-align: center;
+        border-radius: 0 0 30px 30px;
+    }
+    
+    .dashboard-section {
+        padding: 60px 0;
+        background: #f8f9fa;
+    }
+    
+    .subscription-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+    }
+    
+    .subscription-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    
+    .subscription-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .subscription-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .subscription-status {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-expired {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .subscription-details {
+        margin-bottom: 1.5rem;
+    }
+    
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+    
+    .meals-remaining {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #667eea;
+        text-align: center;
+        margin: 1.5rem 0;
+    }
+    
+    .meals-remaining.low {
+        color: #ffc107;
+    }
+    
+    .meals-remaining.critical {
+        color: #dc3545;
+    }
+    
+    .usage-history {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .usage-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .usage-item:last-child {
+        border-bottom: none;
+    }
+    
+    .usage-date {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .usage-meal {
+        color: #666;
+    }
+    
+    .usage-savings {
+        color: #28a745;
+        font-weight: 600;
+    }
+    
+    .savings-summary {
+        background: #d4edda;
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .savings-amount {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #155724;
+    }
+    
+    .btn-select-meal {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-select-meal:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        color: white;
+    }
+    
+    .btn-view-options {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        margin-right: 1rem;
+    }
+    
+    .btn-view-options:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(23, 162, 184, 0.3);
+        color: white;
+    }
+    
+    .btn-purchase {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-purchase:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+    }
+    
+    .empty-state h3 {
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Dashboard Hero -->
+<section class="dashboard-hero">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3">🎫 My Meal Pass Dashboard</h1>
+        <p class="lead">Manage your meal pass subscriptions and track your daily meal selections</p>
+    </div>
+</section>
+
+<!-- Dashboard Section -->
+<section class="dashboard-section">
+    <div class="container">
+        <!-- Total Savings -->
+        {% if total_savings > 0 %}
+        <div class="savings-summary">
+            <h3>💰 Total Savings</h3>
+            <div class="savings-amount">Nrs {{ total_savings|floatformat:2 }}</div>
+            <p class="text-muted mb-0">You've saved this much with your meal pass!</p>
+        </div>
+        {% endif %}
+        
+        <!-- Active Subscriptions -->
+        <div class="row">
+            <div class="col-lg-8">
+                <h2 class="mb-4">📋 Active Subscriptions</h2>
+                {% if active_subscriptions %}
+                    {% for subscription in active_subscriptions %}
+                    <div class="subscription-card">
+                        <div class="subscription-header">
+                            <div class="subscription-name">{{ subscription.meal_pass.name }}</div>
+                            <div class="subscription-status status-{{ subscription.status }}">
+                                {{ subscription.get_status_display }}
+                            </div>
+                        </div>
+                        
+                        <div class="subscription-details">
+                            <div class="detail-item">
+                                <span>Duration:</span>
+                                <span>{{ subscription.start_date|date:"M d, Y" }} - {{ subscription.end_date|date:"M d, Y" }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span>Total Meals:</span>
+                                <span>{{ subscription.total_meals }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span>Meals Used:</span>
+                                <span>{{ subscription.meals_used }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span>Payment ID:</span>
+                                <span>{{ subscription.payment_id }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="meals-remaining {% if subscription.meals_remaining <= 3 %}low{% endif %}{% if subscription.meals_remaining == 0 %}critical{% endif %}">
+                            {{ subscription.meals_remaining }} meals remaining
+                        </div>
+                        
+                        <div class="text-center">
+                            <a href="{% url 'daily_meal_selection_today' %}?subscription_id={{ subscription.id }}" class="btn-select-meal">📅 Select Meals</a>
+                            <a href="{% url 'daily_meal_selection_today' %}?subscription_id={{ subscription.id }}" class="btn-view-options">📅 View Calendar</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <h3>No Active Subscriptions</h3>
+                        <p>You don't have any active meal pass subscriptions.</p>
+                        <a href="{% url 'meal_pass_options' %}" class="btn-purchase">Purchase Meal Pass</a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="col-lg-4">
+                <h2 class="mb-4">🚀 Quick Actions</h2>
+                <div class="subscription-card">
+                    <div class="text-center">
+                        {% if active_subscriptions %}
+                        <a href="{% url 'daily_meal_selection_today' %}" class="btn-select-meal d-block mb-3">📅 Select Meals</a>
+                        {% endif %}
+                        <a href="{% url 'daily_meal_selection_today' %}" class="btn-view-options d-block mb-3">📅 View Calendar</a>
+                        <a href="{% url 'meal_pass_options' %}" class="btn-purchase d-block mb-3">🎫 Purchase New Pass</a>
+                        <a href="{% url 'meal_pass_benefits' %}" class="btn-view-options d-block">🎁 View Benefits</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Usage History -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="usage-history">
+                    <h2 class="mb-4">📊 Recent Usage History</h2>
+                    {% if usage_history %}
+                        {% for usage in usage_history %}
+                        <div class="usage-item">
+                            <div>
+                                <div class="usage-date">{{ usage.used_at|date:"M d, Y" }}</div>
+                                <div class="usage-meal">{{ usage.selected_meal.name }}</div>
+                            </div>
+                            <div class="text-end">
+                                {% if usage.amount_saved %}
+                                <div class="usage-savings">Saved Nrs {{ usage.amount_saved }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <h3>No Usage History</h3>
+                            <p>You haven't used any meal pass selections yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+// Refresh dashboard data periodically to show updated meal counts
+function refreshDashboardData() {
+    fetch(window.location.href, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Cache-Control': 'no-cache'
+        }
+    })
+    .then(response => response.text())
+    .then(html => {
+        // Parse the HTML and extract updated meal counts
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // Find all meal remaining elements
+        const mealRemainingElements = doc.querySelectorAll('.meals-remaining');
+        
+        // Update current page with new meal counts
+        mealRemainingElements.forEach(newElement => {
+            const oldElement = document.querySelector('.meals-remaining');
+            if (oldElement) {
+                oldElement.textContent = newElement.textContent;
+                oldElement.className = newElement.className;
+            }
+        });
+        
+        console.log('Dashboard data refreshed');
+    })
+    .catch(error => {
+        console.error('Error refreshing dashboard:', error);
+    });
+}
+
+// Refresh data every 30 seconds
+setInterval(refreshDashboardData, 30000);
+
+// Also refresh when page becomes visible again
+document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+        refreshDashboardData();
+    }
+});
+
+// Refresh when user returns to the page
+window.addEventListener('focus', function() {
+    refreshDashboardData();
+});
+</script>
+{% endblock %}

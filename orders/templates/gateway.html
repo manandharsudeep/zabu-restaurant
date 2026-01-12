@@ -1,0 +1,508 @@
+{% extends 'base.html' %}
+
+{% block title %}Zabu Restaurant - Fine Dining Experience{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff20" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,138.7C960,139,1056,117,1152,106.7C1248,96,1344,96,1392,96L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat center;
+        background-size: cover;
+        color: white;
+        padding: 120px 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .restaurant-name {
+        font-size: 4.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        animation: fadeInDown 1s ease-out;
+    }
+    
+    .tagline {
+        font-size: 1.8rem;
+        margin-bottom: 2rem;
+        opacity: 0.95;
+        animation: fadeInUp 1s ease-out 0.3s both;
+    }
+    
+    .cta-button {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        border: none;
+        color: white;
+        padding: 1rem 3rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        animation: fadeInUp 1s ease-out 0.6s both;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 1rem;
+    }
+    
+    .cta-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        color: white;
+    }
+    
+    .menu-preview-section {
+        padding: 80px 0;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .section-title {
+        font-size: 3rem;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+    
+    .section-subtitle {
+        text-align: center;
+        font-size: 1.2rem;
+        color: #666;
+        margin-bottom: 3rem;
+    }
+    
+    .menu-preview-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        transition: all 0.4s ease;
+        height: 100%;
+        position: relative;
+    }
+    
+    .menu-preview-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+    }
+    
+    .menu-preview-img {
+        height: 250px;
+        object-fit: cover;
+        width: 100%;
+    }
+    
+    .menu-preview-content {
+        padding: 2rem;
+    }
+    
+    .menu-preview-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+    
+    .menu-preview-description {
+        color: #666;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+    
+    .menu-preview-footer {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+    }
+    
+    .menu-preview-price {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .menu-preview-time {
+        color: #999;
+        font-size: 0.9rem;
+    }
+    
+    .features-section {
+        padding: 80px 0;
+        background: white;
+    }
+    
+    .feature-card {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        height: 100%;
+        border: 1px solid #f0f0f0;
+    }
+    
+    .feature-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        height: 100%;
+        border-left: 4px solid #667eea;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    
+    .reservation-card {
+        border-left-color: #f093fb;
+    }
+    
+    .reservation-card:hover {
+        border-left-color: #f5576c;
+    }
+    
+    .menu-card {
+        border-left-color: #28a745;
+    }
+    
+    .menu-card:hover {
+        border-left-color: #20c997;
+    }
+    
+    .venue-card {
+        border-left-color: #ffc107;
+    }
+    
+    .venue-card:hover {
+        border-left-color: #ff9800;
+    }
+    
+    .course-card {
+        border-left-color: #17a2b8;
+    }
+    
+    .course-card:hover {
+        border-left-color: #138496;
+    }
+    
+    .meal-pass-card {
+        border-left-color: #6f42c1;
+    }
+    
+    .meal-pass-card:hover {
+        border-left-color: #5a32a3;
+    }
+    
+    .feature-icon {
+        font-size: 3.5rem;
+        color: #667eea;
+        margin-bottom: 1.5rem;
+    }
+    
+    .feature-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+    
+    .feature-description {
+        color: #666;
+        line-height: 1.6;
+    }
+    
+    .testimonials-section {
+        padding: 80px 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .opening-hours-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        text-align: center;
+    }
+    
+    .hours-title {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 2rem;
+        color: #333;
+    }
+    
+    .hours-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .hours-list li {
+        padding: 0.8rem 0;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .hours-list li:last-child {
+        border-bottom: none;
+    }
+    
+    .day-name {
+        font-weight: 600;
+        color: #555;
+    }
+    
+    .day-hours {
+        color: #667eea;
+        font-weight: 500;
+    }
+    
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .restaurant-name {
+            font-size: 3rem;
+        }
+        
+        .tagline {
+            font-size: 1.4rem;
+        }
+        
+        .section-title {
+            font-size: 2.2rem;
+        }
+        
+        .menu-preview-img {
+            height: 200px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="restaurant-name">🍽️ Zabu Restaurant</h1>
+            <p class="tagline">Where Culinary Art Meets Excellence</p>
+        </div>
+    </div>
+</section>
+
+<!-- Reservations Section -->
+<section class="features-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">🍽️ Dining Experiences</h2>
+            <p class="section-subtitle">Choose your perfect dining experience with us</p>
+        </div>
+        
+        {% if user.is_authenticated %}
+        <div class="row">
+            <!-- Menu Section -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card menu-card">
+                    <div class="feature-icon">🍽️</div>
+                    <h3 class="feature-title">Menu</h3>
+                    <p class="feature-description">Explore our delicious menu with a wide variety of dishes crafted by our expert chefs.</p>
+                    <a href="{% url 'menu' %}" class="btn btn-primary">View Menu</a>
+                </div>
+            </div>
+            
+            <!-- Reservations Section -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card reservation-card">
+                    <div class="feature-icon">🪑</div>
+                    <h3 class="feature-title">Reservations</h3>
+                    <p class="feature-description">Book a table for your dining experience. Choose from our various table options and enjoy our exceptional cuisine.</p>
+                    <a href="{% url 'create_table_reservation' %}" class="btn btn-primary">Reserve Table</a>
+                </div>
+            </div>
+            
+            <!-- Venue Booking Section -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card venue-card">
+                    <div class="feature-icon">🏛️</div>
+                    <h3 class="feature-title">Venue Booking</h3>
+                    <p class="feature-description">Reserve the entire restaurant for your special event. Perfect for weddings, corporate events, and private parties.</p>
+                    <a href="{% url 'create_venue_reservation' %}" class="btn btn-primary">Book Venue</a>
+                </div>
+            </div>
+            
+            <!-- Course Menu Section -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card course-card">
+                    <div class="feature-icon">🍽️</div>
+                    <h3 class="feature-title">Course Menu</h3>
+                    <p class="feature-description">Indulge in our fine dining tasting menu experience. Multi-course meals with optional wine pairings.</p>
+                    <a href="/customer/course-menu/" class="btn btn-primary">Book Course Menu</a>
+                </div>
+            </div>
+            
+            <!-- Meal Pass Section -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card meal-pass-card">
+                    <div class="feature-icon">🎫</div>
+                    <h3 class="feature-title">Meal Pass</h3>
+                    <p class="feature-description">Save money with our meal pass subscriptions. Weekly, monthly, and super special passes available.</p>
+                    <a href="{% url 'meal_pass_options' %}" class="btn btn-primary">View Passes</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{% url 'reservation_dashboard' %}" class="btn btn-outline-primary btn-lg">
+                📋 View My Reservations
+            </a>
+            {% if user.is_staff %}
+            <a href="{% url 'staff_portal' %}" class="btn btn-outline-secondary btn-lg ms-2">
+                👨‍🍳 Staff Portal
+            </a>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="row">
+            <!-- Menu Section -->
+            <div class="col-lg-6 col-md-6 mb-4">
+                <div class="feature-card menu-card">
+                    <div class="feature-icon">🍽️</div>
+                    <h3 class="feature-title">Menu</h3>
+                    <p class="feature-description">Explore our delicious menu with a wide variety of dishes crafted by our expert chefs.</p>
+                    <a href="{% url 'menu' %}" class="btn btn-primary">View Menu</a>
+                </div>
+            </div>
+            
+            <!-- Reservations Section -->
+            <div class="col-lg-6 col-md-6 mb-4">
+                <div class="feature-card reservation-card">
+                    <div class="feature-icon">🪑</div>
+                    <h3 class="feature-title">Reservations</h3>
+                    <p class="feature-description">Book a table for your dining experience. Choose from our various table options and enjoy our exceptional cuisine.</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loginModal">Login to Reserve</button>
+                </div>
+            </div>
+            
+            <!-- Venue Booking Section -->
+            <div class="col-lg-6 col-md-6 mb-4">
+                <div class="feature-card venue-card">
+                    <div class="feature-icon">🏛️</div>
+                    <h3 class="feature-title">Venue Booking</h3>
+                    <p class="feature-description">Reserve the entire restaurant for your special event. Perfect for weddings, corporate events, and private parties.</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loginModal">Login to Book</button>
+                </div>
+            </div>
+            
+            <!-- Course Menu Section -->
+            <div class="col-lg-6 col-md-6 mb-4">
+                <div class="feature-card course-card">
+                    <div class="feature-icon">🍽️</div>
+                    <h3 class="feature-title">Course Menu</h3>
+                    <p class="feature-description">Indulge in our fine dining tasting menu experience. Multi-course meals with optional wine pairings.</p>
+                    <a href="/customer/course-menu/" class="btn btn-primary">View Course Menus</a>
+                </div>
+            </div>
+            
+            <!-- Meal Pass Section -->
+            <div class="col-lg-6 col-md-6 mb-4">
+                <div class="feature-card meal-pass-card">
+                    <div class="feature-icon">🎫</div>
+                    <h3 class="feature-title">Meal Pass</h3>
+                    <p class="feature-description">Save money with our meal pass subscriptions. Weekly, monthly, and super special passes available.</p>
+                    <a href="{% url 'meal_pass_options' %}" class="btn btn-primary">View Passes</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <p class="text-muted">Please <button class="btn btn-link p-0" data-bs-toggle="modal" data-bs-target="#loginModal">login or sign up</button> to make reservations</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section class="features-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <div class="text-center mb-4">
+                    <h2 class="section-title">Visit Us Today</h2>
+                    <p class="section-subtitle">We're here to serve you the finest dining experience</p>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="feature-card">
+                            <div class="feature-icon">📍</div>
+                            <h3 class="feature-title">Location</h3>
+                            <p class="feature-description">Kankacho Binayak Marga<br>Chauni<br>Kathmandu</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <div class="feature-card">
+                            <div class="feature-icon">📞</div>
+                            <h3 class="feature-title">Contact</h3>
+                            <p class="feature-description">Phone: 9841171178<br>Email: hello@zaburestaurant.com<br>Reservations Recommended</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 mb-4">
+                <div class="opening-hours-card">
+                    <h3 class="hours-title">🕐 Opening Hours</h3>
+                    <ul class="hours-list">
+                        <li>
+                            <span class="day-name">Monday - Friday</span>
+                            <span class="day-hours">11:00 AM - 10:00 PM</span>
+                        </li>
+                        <li>
+                            <span class="day-name">Saturday</span>
+                            <span class="day-hours">10:00 AM - 11:00 PM</span>
+                        </li>
+                        <li>
+                            <span class="day-name">Sunday</span>
+                            <span class="day-hours">10:00 AM - 9:00 PM</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

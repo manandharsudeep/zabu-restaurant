@@ -1,0 +1,375 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ menu.name }} - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .menu-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .menu-header-content {
+        text-align: center;
+    }
+    
+    .menu-title {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+    
+    .menu-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 2rem;
+    }
+    
+    .menu-meta {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .meta-item {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-size: 0.9rem;
+    }
+    
+    .section-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 0.5rem;
+    }
+    
+    .menu-item {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        border-left: 4px solid #667eea;
+    }
+    
+    .menu-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    
+    .menu-item-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .menu-item-name {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .menu-item-price {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .menu-item-description {
+        color: #666;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+    
+    .menu-item-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+    }
+    
+    .availability-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .available {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .unavailable {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .prep-time {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+    
+    .stat-item {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 1rem;
+        border-radius: 10px;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .empty-section {
+        text-align: center;
+        padding: 3rem;
+        background: #f8f9fa;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+    }
+    
+    .empty-section h4 {
+        color: #666;
+        margin-bottom: 1rem;
+    }
+    
+    .empty-section p {
+        color: #999;
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Menu Header -->
+<div class="menu-header">
+    <div class="container">
+        <div class="menu-header-content">
+            <h1 class="menu-title">{{ menu.name }}</h1>
+            <p class="menu-subtitle">{{ menu.get_menu_type_display }} Menu</p>
+            <div class="menu-meta">
+                <span class="meta-item">
+                    📅 {{ menu.start_date|date:"F j, Y"|default:"Available Now" }}
+                </span>
+                <span class="meta-item">
+                    📅 {{ menu.end_date|date:"F j, Y"|default:"Ongoing" }}
+                </span>
+                <span class="meta-item">
+                    👨‍🍳 Created by {{ menu.created_by.username }}
+                </span>
+                <span class="meta-item">
+                    {% if menu.is_active %}
+                        ✅ Active
+                    {% else %}
+                        ⏸️ Inactive
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Quick Stats -->
+    <div class="stats-card">
+        <h3>📊 Menu Statistics</h3>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">{{ sections.count }}</div>
+                <div class="stat-label">Sections</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ total_items }}</div>
+                <div class="stat-label">Total Items</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">${{ menu.total_revenue|default:"0"|floatformat:0 }}</div>
+                <div class="stat-label">Total Revenue</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">
+                    {% with available_items=sections.all.items.filter.is_available %}
+                        {{ available_items.count }}
+                    {% endwith %}
+                </div>
+                <div class="stat-label">Available Items</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Sections -->
+    {% for section in sections %}
+        <div class="section-card">
+            <h3 class="section-title">{{ section.name }}</h3>
+            {% if section.description %}
+                <p class="text-muted">{{ section.description }}</p>
+            {% endif %}
+            
+            {% if section.items.all %}
+                {% for item in section.items.all %}
+                    <div class="menu-item">
+                        <div class="menu-item-header">
+                            <div class="menu-item-name">{{ item.name }}</div>
+                            <div class="menu-item-price">${{ item.price }}</div>
+                        </div>
+                        
+                        <div class="menu-item-description">
+                            {{ item.description }}
+                        </div>
+                        
+                        {% if item.prep_time or item.plating_instructions or item.chef_notes %}
+                            <div class="menu-item-details">
+                                {% if item.prep_time %}
+                                    <span class="prep-time">⏱️ {{ item.prep_time }} mins</span>
+                                {% endif %}
+                                {% if item.plating_instructions %}
+                                    <p class="mb-1"><strong>Plating:</strong> {{ item.plating_instructions }}</p>
+                                {% endif %}
+                                {% if item.chef_notes %}
+                                    <p><strong>Chef's Notes:</strong> {{ item.chef_notes }}</p>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="menu-item-footer">
+                            <div>
+                                <span class="availability-badge {% if item.is_available %}available{% else %}unavailable{% endif %}">
+                                    {% if item.is_available %}✅ Available{% else %}86'd{% endif %}
+                                </span>
+                            </div>
+                            <div>
+                                <small class="text-muted">
+                                    {% if item.recipe %}
+                                        Recipe: {{ item.recipe.name }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-section">
+                    <h4>No items in this section</h4>
+                    <p>This section is currently empty. Add menu items to get started.</p>
+                    <a href="{% url 'menu_management:menu_item_create' section.id %}" class="btn btn-primary btn-sm">
+                        ➕ Add First Item
+                    </a>
+                </div>
+            {% endif %}
+            
+            {% if not forloop.last %}
+                <div class="text-center mt-3">
+                    <a href="{% url 'menu_management:menu_item_create' section.id %}" class="btn btn-outline-primary">
+                        ➕ Add Item to {{ section.name }}
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    {% empty %}
+        <div class="empty-section">
+            <h4>No sections yet</h4>
+            <p>This menu doesn't have any sections. Create sections to organize your menu items.</p>
+            <a href="{% url 'menu_management:section_create' menu.id %}" class="btn btn-primary btn-lg">
+                ➕ Create First Section
+            </a>
+        </div>
+    {% endfor %}
+            
+    <!-- Create Section Button (if sections exist) -->
+    {% if sections %}
+        <div class="text-center mt-3 mb-4">
+            <a href="{% url 'menu_management:section_create' menu.id %}" class="btn btn-outline-primary">
+                ➕ Add New Section
+            </a>
+        </div>
+    {% endif %}
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="{% url 'menu_management:menu_list' %}" class="btn btn-secondary">
+            ← Back to Menusus
+        </a>
+        <a href="{% url 'menu_management:menu_update' menu.id %}" class="btn btn-primary">
+            ✏️ Edit Menu
+        </a>
+    </div>
+</div>
+{% endblock %}

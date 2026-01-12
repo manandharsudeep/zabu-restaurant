@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Platform Integrations Test</title>
+</head>
+<body>
+    <h1>Platform Integrations Debug Test</h1>
+    
+    <h2>Statistics</h2>
+    <p>Total Integrations: {{ total_integrations }}</p>
+    <p>Active Integrations: {{ active_integrations }}</p>
+    
+    <h2>Integration Data</h2>
+    {% if integrations %}
+        <p>Found {{ integrations|length }} integrations</p>
+        <ul>
+        {% for integration in integrations %}
+            <li>
+                <strong>{{ integration.get_platform_display }}</strong> - 
+                Status: {{ integration.is_active|yesno:"Active Inactive" }} -
+                Brand: {{ integration.brand.name }} -
+                API Status: {{ integration.sync_status|title }}
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No integrations found</p>
+    {% endif %}
+    
+    <h2>Raw Data Check</h2>
+    {% if integrations %}
+        <p>First integration raw data:</p>
+        <pre>
+Platform: {{ integrations.0.platform }}
+Display: {{ integrations.0.get_platform_display }}
+Brand: {{ integrations.0.brand.name }}
+Sync Status: {{ integrations.0.sync_status }}
+API Key: {{ integrations.0.api_key }}
+Active: {{ integrations.0.is_active }}
+        </pre>
+    {% endif %}
+</body>
+</html>

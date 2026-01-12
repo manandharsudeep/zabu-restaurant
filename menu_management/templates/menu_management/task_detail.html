@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ task.title }} - Task Details{% endblock %}
+
+{% block extra_css %}
+<style>
+    .task-detail {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .task-header {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .task-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .task-meta {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    
+    .priority-high { background: #dc3545; color: white; }
+    .priority-medium { background: #ffc107; color: #212529; }
+    .priority-low { background: #28a745; color: white; }
+    .priority-urgent { background: #6f42c1; color: white; }
+    
+    .status-pending { background: #6c757d; color: white; }
+    .status-in_progress { background: #17a2b8; color: white; }
+    .status-completed { background: #28a745; color: white; }
+    .status-overdue { background: #dc3545; color: white; }
+    .status-cancelled { background: #6c757d; color: white; }
+    
+    .task-section {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #495057;
+    }
+    
+    .task-description {
+        line-height: 1.6;
+        margin-bottom: 15px;
+    }
+    
+    .task-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+    
+    .detail-item {
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+    
+    .detail-label {
+        font-weight: 600;
+        color: #6c757d;
+        font-size: 12px;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+    
+    .detail-value {
+        font-size: 14px;
+    }
+    
+    .task-history {
+        margin-top: 15px;
+    }
+    
+    .history-item {
+        padding: 10px;
+        border-left: 3px solid #007bff;
+        margin-bottom: 10px;
+        background: #f8f9fa;
+    }
+    
+    .history-action {
+        font-weight: 600;
+        color: #007bff;
+    }
+    
+    .history-time {
+        font-size: 12px;
+        color: #6c757d;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        font-weight: 500;
+        margin-right: 10px;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .btn:hover {
+        opacity: 0.9;
+    }
+    
+    .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="task-detail">
+    <div class="task-header">
+        <h1 class="task-title">{{ task.title }}</h1>
+        <div class="task-meta">
+            <div class="meta-item">
+                <span class="badge priority-{{ task.priority }}">{{ task.get_priority_display }}</span>
+            </div>
+            <div class="meta-item">
+                <span class="badge status-{{ task.status|slugify }}">{{ task.get_status_display }}</span>
+            </div>
+            <div class="meta-item">
+                <span class="badge">{{ task.get_task_type_display }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="task-section">
+        <h2 class="section-title">📝 Description</h2>
+        <div class="task-description">
+            {% if task.description %}
+                {{ task.description|linebreaks }}
+            {% else %}
+                <p class="text-muted">No description provided</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="task-section">
+        <h2 class="section-title">📋 Task Details</h2>
+        <div class="task-details">
+            <div class="detail-item">
+                <div class="detail-label">Assigned To</div>
+                <div class="detail-value">
+                    {% if task.assigned_to %}
+                        {{ task.assigned_to.user.get_full_name|default:task.assigned_to.user.username }}
+                        <br><small class="text-muted">{{ task.assigned_to.position }}</small>
+                    {% else %}
+                        <span class="text-muted">Unassigned</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Location</div>
+                <div class="detail-value">
+                    {% if task.location %}
+                        {{ task.location }}
+                    {% else %}
+                        <span class="text-muted">Not specified</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Station</div>
+                <div class="detail-value">
+                    {% if task.station %}
+                        {{ task.station }}
+                    {% else %}
+                        <span class="text-muted">Not specified</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Due Date</div>
+                <div class="detail-value">
+                    {{ task.due_date|date:"M d, Y H:i" }}
+                    {% if task.is_overdue %}
+                        <span class="text-danger">⚠️ Overdue</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Duration</div>
+                <div class="detail-value">
+                    {% if task.estimated_duration %}
+                        {{ task.estimated_duration }} minutes
+                    {% else %}
+                        <span class="text-muted">Not specified</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Created</div>
+                <div class="detail-value">
+                    {{ task.created_at|date:"M d, Y H:i" }}
+                    <br><small class="text-muted">by {{ task.assigned_by.get_full_name|default:task.assigned_by.username }}</small>
+                </div>
+            </div>
+            
+            {% if task.completed_at %}
+            <div class="detail-item">
+                <div class="detail-label">Completed</div>
+                <div class="detail-value">
+                    {{ task.completed_at|date:"M d, Y H:i" }}
+                    <br><small class="text-muted">by {{ task.completed_by.get_full_name|default:task.completed_by.username }}</small>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if task_history %}
+    <div class="task-section">
+        <h2 class="section-title">📜 Task History</h2>
+        <div class="task-history">
+            {% for history_item in task_history %}
+            <div class="history-item">
+                <div class="history-action">{{ history_item.action }}</div>
+                <div class="history-time">{{ history_item.timestamp|date:"M d, Y H:i" }}</div>
+                <div class="history-user">by {{ history_item.user }}</div>
+                {% if history_item.notes %}
+                <div class="history-notes">{{ history_item.notes }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if task.completion_notes %}
+    <div class="task-section">
+        <h2 class="section-title">📝 Completion Notes</h2>
+        <div class="task-description">
+            {{ task.completion_notes|linebreaks }}
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="actions">
+        <a href="{% url 'menu_management:edit_task' task.task_id %}" class="btn btn-primary">Edit Task</a>
+        <a href="{% url 'menu_management:task_management' %}" class="btn btn-secondary">Back to Tasks</a>
+        {% if task.status != 'completed' %}
+        <a href="{% url 'menu_management:delete_task' task.task_id %}" class="btn btn-danger">Delete Task</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,547 @@
+{% extends 'base.html' %}
+
+{% block title %}Course Menu Instance Details - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .instance-detail-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .detail-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border-left: 4px solid #667eea;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .detail-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .detail-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .detail-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .detail-label {
+        font-weight: 600;
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .detail-value {
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    
+    .status-booked { background: #e3f2fd; color: #1976d2; }
+    .status-confirmed { background: #e8f5e8; color: #388e3c; }
+    .status-in_progress { background: #fff3cd; color: #856404; }
+    .status-completed { background: #e8f5e8; color: #2e7d32; }
+    .status-cancelled { background: #ffebee; color: #f44336; }
+    
+    .course-instances {
+        margin-top: 2rem;
+    }
+    
+    .course-instance {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 3px solid #28a745;
+    }
+    
+    .course-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .course-name {
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .course-time {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .course-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    
+    .course-detail {
+        font-size: 0.85rem;
+        color: #666;
+    }
+    
+    .actions {
+        margin-top: 2rem;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+        background: #667eea;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #5a67d8;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+        color: white;
+    }
+    
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+    
+    .btn-success:hover {
+        background: #218838;
+        color: white;
+    }
+    
+    .btn-warning {
+        background: #ffc107;
+        color: #212529;
+    }
+    
+    .btn-warning:hover {
+        background: #e0a800;
+        color: #212529;
+    }
+    
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .btn-danger:hover {
+        background: #c82333;
+        color: white;
+    }
+    
+    .staff-assignment {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .staff-name {
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .staff-role {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .timeline {
+        margin-top: 2rem;
+    }
+    
+    .timeline-item {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 3px solid #667eea;
+    }
+    
+    .timeline-time {
+        font-weight: bold;
+        color: #667eea;
+        min-width: 120px;
+    }
+    
+    .timeline-content {
+        flex: 1;
+    }
+    
+    .timeline-title {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.25rem;
+    }
+    
+    .timeline-description {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    @media (max-width: 768px) {
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .actions {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Instance Header -->
+<div class="instance-detail-header">
+    <div class="container">
+        <h1 class="display-4">🍽️ Course Menu Instance Details</h1>
+        <p class="lead">Manage and view course menu instance information</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Instance Details -->
+    <div class="detail-grid">
+        <!-- Basic Information -->
+        <div class="detail-card">
+            <div class="detail-header">
+                <h3 class="detail-title">📋 Basic Information</h3>
+                <span class="status-badge status-{{ instance.status }}">{{ instance.get_status_display }}</span>
+            </div>
+            <div class="detail-content">
+                <div class="detail-row">
+                    <span class="detail-label">Instance ID:</span>
+                    <span class="detail-value">{{ instance.instance_id }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Name:</span>
+                    <span class="detail-value">{{ instance.name }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Table Number:</span>
+                    <span class="detail-value">{{ instance.table_number }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Customer Count:</span>
+                    <span class="detail-value">{{ instance.customer_count }} guests</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Template:</span>
+                    <span class="detail-value">{{ instance.template.name }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pricing Information -->
+        <div class="detail-card">
+            <div class="detail-header">
+                <h3 class="detail-title">💰 Pricing Information</h3>
+            </div>
+            <div class="detail-content">
+                <div class="detail-row">
+                    <span class="detail-label">Price Per Person:</span>
+                    <span class="detail-value">${{ instance.final_price_per_person }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Total Price:</span>
+                    <span class="detail-value">${{ instance.total_price }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Pricing Tier:</span>
+                    <span class="detail-value">{{ instance.pricing_tier_applied|title }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Timing Information -->
+        <div class="detail-card">
+            <div class="detail-header">
+                <h3 class="detail-title">⏰ Timing Information</h3>
+            </div>
+            <div class="detail-content">
+                <div class="detail-row">
+                    <span class="detail-label">Booking Date:</span>
+                    <span class="detail-value">{{ instance.booking_date }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Booking Time:</span>
+                    <span class="detail-value">{{ instance.booking_time }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Start Time:</span>
+                    <span class="detail-value">{{ instance.start_time|default:"Not started" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Estimated Completion:</span>
+                    <span class="detail-value">{{ instance.estimated_completion|default:"Not set" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Created:</span>
+                    <span class="detail-value">{{ instance.created_at }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Staff Assignment -->
+        <div class="detail-card">
+            <div class="detail-header">
+                <h3 class="detail-title">👥 Staff Assignment</h3>
+            </div>
+            <div class="detail-content">
+                <div class="staff-assignment">
+                    <span class="detail-label">Server:</span>
+                    {% if instance.server %}
+                        <span class="staff-name">{{ instance.server.get_full_name|default:instance.server.username }}</span>
+                        <span class="staff-role">Server</span>
+                    {% else %}
+                        <span class="staff-name">Not assigned</span>
+                    {% endif %}
+                </div>
+                {% if instance.sommelier %}
+                <div class="staff-assignment">
+                    <span class="detail-label">Sommelier:</span>
+                    <span class="staff-name">{{ instance.sommelier.get_full_name|default:instance.sommelier.username }}</span>
+                    <span class="staff-role">Sommelier</span>
+                </div>
+                {% endif %}
+                {% if instance.assigned_chef %}
+                <div class="staff-assignment">
+                    <span class="detail-label">Assigned Chef:</span>
+                    <span class="staff-name">{{ instance.assigned_chef.get_full_name|default:instance.assigned_chef.username }}</span>
+                    <span class="staff-role">Chef</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Dietary Requirements -->
+        <div class="detail-card">
+            <div class="detail-header">
+                <h3 class="detail-title">🥗 Dietary Requirements</h3>
+            </div>
+            <div class="detail-content">
+                {% if instance.dietary_requirements %}
+                    <div class="detail-row">
+                        <span class="detail-label">Requirements:</span>
+                        <span class="detail-value">
+                            {% for requirement in instance.dietary_requirements %}
+                                <span class="status-badge status-booked">{{ requirement }}</span>
+                            {% endfor %}
+                        </span>
+                    </div>
+                {% else %}
+                    <div class="detail-row">
+                        <span class="detail-label">Requirements:</span>
+                        <span class="detail-value">No dietary requirements</span>
+                    </div>
+                {% endif %}
+                {% if instance.special_requests %}
+                <div class="detail-row">
+                    <span class="detail-label">Special Requests:</span>
+                    <span class="detail-value">{{ instance.special_requests|default:"None" }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Course Instances -->
+    <div class="course-instances">
+        <h2>🍽️ Course Instances</h2>
+        {% for course_instance in course_instances %}
+            <div class="course-instance">
+                <div class="course-header">
+                    <div>
+                        <div class="course-name">{{ course_instance.course_definition.name }}</div>
+                        <div class="course-time">{{ course_instance.scheduled_start|time:"H:i" }} - {{ course_instance.scheduled_end|time:"H:i" }}</div>
+                    </div>
+                    <div>
+                        <span class="status-badge status-{{ course_instance.status }}">{{ course_instance.get_status_display }}</span>
+                    </div>
+                </div>
+                <div class="course-details">
+                    <div class="course-detail">
+                        <strong>Station:</strong> {{ course_instance.kitchen_station.name|default:"Not assigned" }}
+                    </div>
+                    <div class="course-detail">
+                        <strong>Plating:</strong> {{ course_instance.plating_station.name|default:"Not assigned" }}
+                    </div>
+                    <div class="course-detail">
+                        <strong>Duration:</strong> {{ course_instance.duration_minutes }} minutes
+                    </div>
+                    <div class="course-detail">
+                        <strong>Complexity:</strong> {{ course_instance.complexity_level|title }}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="alert alert-info">
+                <h4>No course instances found</h4>
+                <p>This template doesn't have any course instances yet.</p>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Actions -->
+    <div class="actions">
+        <a href="{% url 'menu_management:course_menu_instances' %}" class="btn btn-secondary">
+            ← Back to Instances
+        </a>
+        <button class="btn btn-primary" onclick="window.print()">
+            🖨️ Print Details
+        </button>
+        {% if instance.status == 'booked' %}
+        <button class="btn btn-success" onclick="updateStatus('confirmed')">
+            ✅ Confirm Booking
+        </button>
+        {% endif %}
+        {% if instance.status == 'confirmed' %}
+        <button class="btn btn-primary" onclick="updateStatus('in_progress')">
+            🍳 Start Progress
+        </button>
+        {% endif %}
+        {% if instance.status == 'in_progress' %}
+        <button class="btn btn-success" onclick="updateStatus('completed')">
+            ✅ Mark Complete
+        </button>
+        {% endif %}
+        <button class="btn btn-warning" onclick="showStatusModal()">
+            📝 Update Status
+        </button>
+    </div>
+    
+    <!-- Status Update Modal -->
+    <div id="statusModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Update Instance Status</h3>
+            <form id="statusForm" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="status">New Status:</label>
+                    <select name="status" id="status" class="form-control" required>
+                        <option value="">Select Status</option>
+                        <option value="booked">📅 Booked</option>
+                        <option value="confirmed">✅ Confirmed</option>
+                        <option value="in_progress">🍳 In Progress</option>
+                        <option value="completed">✅ Completed</option>
+                        <option value="cancelled">❌ Cancelled</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="notes">Notes:</label>
+                    <textarea name="notes" id="notes" class="form-control" rows="3" placeholder="Add any notes about this status change..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="hideStatusModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateStatus(status) {
+    const form = document.getElementById('statusForm');
+    const statusSelect = document.getElementById('status');
+    const notesField = document.getElementById('notes');
+    
+    statusSelect.value = status;
+    notesField.value = '';
+    
+    showStatusModal();
+    
+    // Auto-submit after a short delay
+    setTimeout(() => {
+        form.submit();
+    }, 100);
+}
+
+function showStatusModal() {
+    document.getElementById('statusModal').style.display = 'block';
+}
+
+function hideStatusModal() {
+    document.getElementById('statusModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('statusModal');
+    if (event.target == modal) {
+        hideStatusModal();
+    }
+}
+</script>
+{% endblock %}

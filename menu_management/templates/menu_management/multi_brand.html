@@ -1,0 +1,644 @@
+{% extends 'base.html' %}
+
+{% block title %}Multi-Brand Management - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .brand-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .brand-header-content {
+        text-align: center;
+    }
+    
+    .brand-title {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+    
+    .brand-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 2rem;
+    }
+    
+    .brand-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        border-left: 4px solid #667eea;
+    }
+    
+    .brand-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .brand-header-info {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .brand-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .brand-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-inactive {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .brand-meta {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .meta-item {
+        background: #f8f9fa;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .brand-description {
+        color: #666;
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+    }
+    
+    .platform-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .platform-item {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        text-align: center;
+        border-left: 3px solid #667eea;
+    }
+    
+    .platform-name {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .platform-status {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stat-item {
+        text-align: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 10px;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        opacity: 0.9;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY -2px;
+        color: white;
+    }
+    
+    .btn-success {
+        background: #28a745;
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-success:hover {
+        background: #218838;
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .btn-warning {
+        background: #ffc107;
+        border: none;
+        color: #212529;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-warning:hover {
+        background: #e0a800;
+        transform: translateY(-2px);
+        color: #212529;
+    }
+    
+    .btn-danger {
+        background: #dc3545;
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-danger:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background: #f8f9fa;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+    }
+    
+    .empty-state h3 {
+        color: #666;
+        margin-bottom: 1rem;
+    }
+    
+    .empty-state p {
+        color: #999;
+        margin-bottom: 1.5rem;
+    }
+    
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+    }
+    
+    .feature-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: all 0.3s ease;
+        border-left: 4px solid #667eea;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #667eea;
+    }
+    
+    .feature-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+    
+    .feature-description {
+        color: #666;
+        line-height: 1.6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Multi-Brand Header -->
+<div class="brand-header">
+    <div class="container">
+        <div class="brand-header-content">
+            <h1 class="brand-title">🏢 Multi-Brand Management</h1>
+            <p class="brand-subtitle">Cloud Kitchen Operations & Virtual Brand Management</p>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-item">
+                <div class="stat-number">{{ total_brands }}</div>
+                <div class="stat-label">Total Brands</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-item">
+                <div class="stat-number">{{ active_brands }}</div>
+                <div class="stat-label">Active Brands</div>
+            </div>
+        </div>
+        <div="col-md-3">
+            <div class="stat-item">
+                <div class="stat-number">{{ total_platforms }}</div>
+                <div class="stat-label">Platforms</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-item">
+                <div class="stat-number">{{ shared_ingredients }}</div>
+                <div class="stat-label">Shared Ingredients</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <a href="#" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#createBrandModal">
+                ➕ Create Brand
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="#" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#syncPlatformsModal">
+                🔄 Sync Platforms
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="#" class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#comparePerformanceModal">
+                📊 Compare Performance
+            </a>
+        </div>
+    </div>
+
+    <!-- Brands List -->
+    <div class="row">
+        {% for brand in brands %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="brand-card">
+                    <div class="brand-header-info">
+                        <div class="brand-name">{{ brand.name }}</div>
+                        <div class="brand-status {% if brand.is_active %}status-active{% else %}status-inactive{% endif %}">
+                            {% if brand.is_active %}Active{% else %}Inactive{% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="brand-meta">
+                        <span class="meta-item">
+                            📅 Created {{ brand.created_at|date:"M d, Y" }}
+                        </span>
+                        <span class="meta-item">
+                            👨‍🍳 {{ brand.created_by.username }}
+                        </span>
+                        <span class="meta-item">
+                            🍽️ {{ brand.menus.count }} Menus
+                        </span>
+                    </div>
+                    
+                    <div class="brand-description">
+                        {{ brand.description }}
+                    </div>
+                    
+                    <!-- Platform Integration -->
+                    <div class="platform-grid">
+                        <div class="platform-item">
+                            <div class="platform-name">🍔️ Uber Eats</div>
+                            <div class="platform-status">
+                                {% if brand.uber_eats_active %}✅ Active{% else %}❌ Inactive{% endif %}
+                            </div>
+                        </div>
+                        <div class="platform-item">
+                            <div class="platform-name">🚗 DoorDash</div>
+                            <div class="platform-status">
+                                {% if brand.doordash_active %}✅ Active{% else %}❌ Inactive{% endif %}
+                            </div>
+                        </div>
+                        <div class="platform-item">
+                            <div class="platform-name">🍕 Grubhub</div>
+                            <div class="platform-status">
+                                {% if brand.grubhub_active %}✅ Active{% else %}❌ Inactive{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Brand Stats -->
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number">{{ brand.total_items }}</div>
+                            <div class="stat-label">Menu Items</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">${{ brand.total_revenue|default:0|floatformat:0 }}</div>
+                            <div class="stat-label">Revenue</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">{{ brand.shared_ingredients_count }}</div>
+                            <div class="stat-label">Shared Items</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">{{ brand.avg_order_value|default:0|floatformat:0 }}</div>
+                            <div class="stat-label">Avg Order</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <a href="#" class="btn btn-primary btn-sm">
+                            📋 Manage Menus
+                        </a>
+                        <a href="#" class="btn btn-secondary btn-sm">
+                            ⚙️ Settings
+                        </a>
+                        <a href="#" class="btn btn-warning btn-sm">
+                            🔄 Sync
+                        </a>
+                        <a href="#" class="btn btn-danger btn-sm">
+                            🗑️ Delete
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="empty-state">
+                    <h3>🏢 No Brands Yet</h3>
+                    <p>Create your first virtual brand to start managing multiple restaurant concepts from a single kitchen.</p>
+                    <a href="#" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#createBrandModal">
+                        ➕ Create First Brand
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Feature Overview -->
+    <div class="feature-grid">
+        <div class="feature-card">
+            <span class="feature-icon">🏢</span>
+            <h3 class="feature-title">Virtual Brands</h3>
+            <p class="feature-description">
+                Create independent virtual brands with unique menus, pricing strategies, and customer experiences. Perfect for ghost kitchens and cloud operations.
+            </p>
+            <a href="#" class="btn btn-primary mt-3">Manage Brands</a>
+        </div>
+        
+        <div class="feature-card">
+            <span class="feature-icon">📱</span>
+            <h3 class="feature-title">Platform Integration</h3>
+            <p class="feature-description">
+                Seamlessly integrate with Uber Eats, DoorDash, Grubhub, and other delivery platforms. Sync menus, pricing, and availability automatically.
+            </p>
+            <a href="#" class="btn btn-primary mt-3">Manage Platforms</a>
+        </div>
+        
+        <div class="feature-card">
+            <span class="feature-icon">🔄</span>
+            <h3 class="feature-title">Unified Management</h3>
+            <p class="feature-description">
+                Manage all your brands from a single dashboard. Share ingredients across brands, optimize menus, and track performance metrics.
+            </p>
+            <a href="#" class="btn btn-primary mt-3">Unified Dashboard</a>
+        </div>
+        
+        <div class="feature-card">
+            <span class="feature-icon">📊</span>
+            <h3 class="feature-title">Performance Analytics</h3>
+            <p class="feature-description">
+                Compare brand performance, analyze sales data, track customer preferences, and optimize your menu mix for maximum profitability.
+            </p>
+            <a href="#" class="btn btn-primary mt-3">View Analytics</a>
+        </div>
+        
+        <div class="feature-card">
+            <span class="feature-icon">🍽️</span>
+            <h3 class="feature-title">Menu Optimization</h3>
+            <p class="feature-description">
+                AI-powered recommendations for menu optimization, pricing strategies, and inventory management across all your virtual brands.
+            </p>
+            <a href="#" class="btn btn-primary mt-3">Optimize Menus</a>
+        </div>
+        
+        <div class="feature-card">
+            <span class="feature-icon">🎯</span>
+            <h3 class="feature-title">Ghost Kitchen</h3>
+            <p class="feature-description">
+                Maximize kitchen efficiency with shared ingredients, optimized workflows, and multi-brand order management from a single location.
+            </p>
+            <a href="#" class="btn btn-primary mt-3">Kitchen Ops</a>
+        </div>
+    </div>
+</div>
+
+<!-- Create Brand Modal -->
+<div class="modal fade" id="createBrandModal" tabindex="-1" aria-labelledby="createBrandModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createBrandModalLabel">Create Virtual Brand</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createBrandForm">
+                    <div class="mb-3">
+                        <label for="brandName" class="form-label">Brand Name *</label>
+                        <input type="text" class="form-control" id="brandName" required placeholder="e.g., Quick Bites, Gourmet Express">
+                        <small class="form-text">Choose a memorable name for your virtual brand</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="brandDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="brandDescription" rows="3" placeholder="Describe your brand concept and target audience..."></textarea>
+                        <small class="form-text">Brief description of your brand</small>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="brandType" class="form-label">Brand Type *</label>
+                                <select class="form-select" id="brandType" required>
+                                    <option value="">Select type...</option>
+                                    <option value="fast_casual">🍔️ Fast Casual</option>
+                                    <option value="fine_dining">🍽️ Fine Dining</option>
+                                    <option value="cafe">☕ Cafe</option>
+                                    <option value="bakery">🥖 Bakery</option>
+                                    <option value="pizza">🍕 Pizza</option>
+                                    <option value="asian">🥘 Asian Cuisine</option>
+                                    <option value="healthy">🥗 Healthy</option>
+                                    <option value="desserts">🍰 Desserts</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="targetMarket" class="form-label">Target Market</label>
+                                <select class="form-select" id="targetMarket">
+                                    <option value="">Select market...</option>
+                                    <option value="urban">🏙️ Urban</option>
+                                    <option value="suburban">🏘 Suburban</option>
+                                    <option value="office">🏢 Office</option>
+                                    <option value="college">🎓 College</option>
+                                    <option value="family">👨‍👩‍👧‍👦 Family</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="baseMarkup" class="form-label">Base Markup (%)</label>
+                                <input type="number" class="form-control" id="baseMarkup" min="0" max="100" step="5" value="300" placeholder="300">
+                                <small class="form-text">Default markup for all items</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="deliveryFee" class="form-label">Delivery Fee ($)</label>
+                                <input type="number" class="form-control" id="deliveryFee" min="0" step="0.50" value="2.99" placeholder="2.99">
+                                <small class="form-text">Standard delivery fee</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="minOrder" class="form-label">Min Order ($)</label>
+                                <input type="number" class="form-control" id="minOrder" min="0" step="1" value="15" placeholder="15">
+                                <small class="form-text">Minimum order amount</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Platform Integration</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="uberEats" checked>
+                            <label class="form-check-label" for="uberEats">
+                                🍔️ Uber Eats
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="doorDash" checked>
+                            <label class="form-check-label" for="doorDash">
+                                🚗 DoorDash
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="grubhub">
+                            <label class="form-check-label" for="grubhub">
+                                🍕 Grubhub
+                            </label>
+                        </div>
+                        <small class="form-text">Select platforms to integrate with this brand</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="createBrand()">Create Brand</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function createBrand() {
+    // This would normally make an AJAX call to create the brand
+    // For now, we'll just show a success message and close the modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('createBrandModal'));
+    modal.hide();
+    
+    // Show success message
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x';
+    alertDiv.style.zIndex = '9999';
+    alertDiv.innerHTML = `
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <strong>Success!</strong> Brand creation functionality would be implemented here.
+    `;
+    document.body.appendChild(alertDiv);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 3000);
+}
+</script>
+{% endblock %}

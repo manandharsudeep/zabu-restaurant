@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Task - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .task-form {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .form-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    
+    .form-control:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+    }
+    
+    .form-row {
+        display: flex;
+        gap: 20px;
+    }
+    
+    .form-row .form-group {
+        flex: 1;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        font-weight: 500;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn:hover {
+        opacity: 0.9;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+    
+    .help-text {
+        font-size: 12px;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    
+    .required {
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="task-form">
+    <div class="form-header">
+        <h2>📝 Create New Task</h2>
+        <p class="text-muted">Create a new task and assign it to staff members</p>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="{{ form.title.id_for_label }}">
+                Task Title <span class="required">*</span>
+            </label>
+            {{ form.title }}
+            {% if form.title.errors %}
+                <div class="text-danger">{{ form.title.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.description.id_for_label }}">
+                Description
+            </label>
+            {{ form.description }}
+            {% if form.description.errors %}
+                <div class="text-danger">{{ form.description.errors }}</div>
+            {% endif %}
+            <div class="help-text">Provide detailed instructions for this task</div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ form.task_type.id_for_label }}">
+                    Task Type <span class="required">*</span>
+                </label>
+                {{ form.task_type }}
+                {% if form.task_type.errors %}
+                    <div class="text-danger">{{ form.task_type.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.priority.id_for_label }}">
+                    Priority <span class="required">*</span>
+                </label>
+                {{ form.priority }}
+                {% if form.priority.errors %}
+                    <div class="text-danger">{{ form.priority.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ form.assigned_to.id_for_label }}">
+                    Assigned To
+                </label>
+                {{ form.assigned_to }}
+                {% if form.assigned_to.errors %}
+                    <div class="text-danger">{{ form.assigned_to.errors }}</div>
+                {% endif %}
+                <div class="help-text">Select staff member to assign this task</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.status.id_for_label }}">
+                    Status <span class="required">*</span>
+                </label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                    <div class="text-danger">{{ form.status.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ form.location.id_for_label }}">
+                    Location
+                </label>
+                {{ form.location }}
+                {% if form.location.errors %}
+                    <div class="text-danger">{{ form.location.errors }}</div>
+                {% endif %}
+                <div class="help-text">Where this task should be performed</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.station.id_for_label }}">
+                    Station
+                </label>
+                {{ form.station }}
+                {% if form.station.errors %}
+                    <div class="text-danger">{{ form.station.errors }}</div>
+                {% endif %}
+                <div class="help-text">Kitchen station or work area</div>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ form.due_date.id_for_label }}">
+                    Due Date <span class="required">*</span>
+                </label>
+                {{ form.due_date }}
+                {% if form.due_date.errors %}
+                    <div class="text-danger">{{ form.due_date.errors }}</div>
+                {% endif %}
+                <div class="help-text">When this task should be completed</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.estimated_duration.id_for_label }}">
+                    Estimated Duration (minutes) <span class="required">*</span>
+                </label>
+                {{ form.estimated_duration }}
+                {% if form.estimated_duration.errors %}
+                    <div class="text-danger">{{ form.estimated_duration.errors }}</div>
+                {% endif %}
+                <div class="help-text">How long this task should take</div>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Create Task</button>
+            <a href="{% url 'menu_management:task_management' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

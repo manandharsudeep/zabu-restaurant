@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+
+{% block title %}Staff Management - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .staff-header {
+        background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-left: 4px solid;
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-card.total-staff {
+        border-left-color: #007bff;
+    }
+    
+    .stat-card.on-duty {
+        border-left-color: #28a745;
+    }
+    
+    .stat-card.pending {
+        border-left-color: #ffc107;
+    }
+    
+    .stat-card.overdue {
+        border-left-color: #dc3545;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .schedule-item {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-left: 4px solid #007bff;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .schedule-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+    
+    .schedule-time {
+        font-weight: 600;
+        color: #007bff;
+        font-size: 1.1rem;
+    }
+    
+    .schedule-staff {
+        font-weight: 500;
+        margin: 0.25rem 0;
+    }
+    
+    .schedule-details {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .action-btn {
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        text-decoration: none;
+        color: #495057;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .action-btn:hover {
+        border-color: #6f42c1;
+        color: #6f42c1;
+        transform: translateY(-3px);
+        box-shadow: 0 4px 15px rgba(111,66,193,0.2);
+    }
+    
+    .action-icon {
+        font-size: 2rem;
+    }
+    
+    .action-title {
+        font-weight: 600;
+    }
+    
+    .badge-status {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .badge-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .badge-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .alert-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .alert-card.warning {
+        border-left-color: #ffc107;
+        background: #fffbf0;
+    }
+    
+    .alert-card.danger {
+        border-left-color: #dc3545;
+        background: #fff5f5;
+    }
+    
+    @media (max-width: 768px) {
+        .quick-actions {
+            grid-template-columns: 1fr;
+        }
+        
+        .stat-card {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Staff Header -->
+<div class="staff-header">
+    <div class="container">
+        <h1 class="display-4">👥 Staff Management</h1>
+        <p class="lead">Scheduling, task management, and team communications</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a href="{% url 'menu_management:staff_scheduling' %}" class="action-btn">
+            <div class="action-icon">📅</div>
+            <div class="action-title">Scheduling</div>
+            <small>Manage staff schedules</small>
+        </a>
+        
+        <a href="{% url 'menu_management:task_management' %}" class="action-btn">
+            <div class="action-icon">✅</div>
+            <div class="action-title">Tasks</div>
+            <small>Task management</small>
+        </a>
+        
+        <a href="{% url 'menu_management:staff_communications' %}" class="action-btn">
+            <div class="action-icon">💬</div>
+            <div class="action-title">Communications</div>
+            <small>Internal messaging</small>
+        </a>
+        
+        <a href="{% url 'menu_management:staff_reports' %}" class="action-btn">
+            <div class="action-icon">📊</div>
+            <div class="action-title">Reports</div>
+            <small>Staff analytics</small>
+        </a>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stat-card total-staff">
+                <div class="stat-number">{{ total_staff }}</div>
+                <div class="stat-label">Total Staff</div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stat-card on-duty">
+                <div class="stat-number">{{ on_duty_staff }}</div>
+                <div class="stat-label">On Duty Today</div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stat-card pending">
+                <div class="stat-number">{{ pending_swaps }}</div>
+                <div class="stat-label">Pending Requests</div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stat-card overdue">
+                <div class="stat-number">{{ overdue_tasks }}</div>
+                <div class="stat-label">Overdue Tasks</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Today's Schedule -->
+        <div class="col-lg-6 mb-4">
+            <h3>📅 Today's Schedule</h3>
+            <div class="schedule-section">
+                {% if today_schedule %}
+                    {% for schedule in today_schedule %}
+                        <div class="schedule-item">
+                            <div class="schedule-time">
+                                {{ schedule.start_time|date:"H:i" }} - {{ schedule.end_time|date:"H:i" }}
+                            </div>
+                            <div class="schedule-staff">
+                                {{ schedule.staff.user.get_full_name|default:schedule.staff.user.username }}
+                            </div>
+                            <div class="schedule-details">
+                                {% if schedule.role %}{{ schedule.role }}{% endif %}
+                                {% if schedule.station %} • {{ schedule.station }}{% endif %}
+                                <span class="badge-status badge-active">{{ schedule.get_status_display }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-info">
+                        📝 No staff scheduled for today
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Pending Requests -->
+        <div class="col-lg-6 mb-4">
+            <h3>⏳ Pending Requests</h3>
+            <div class="requests-section">
+                {% if pending_swaps > 0 or pending_timeoff > 0 %}
+                    {% if pending_swaps > 0 %}
+                        <div class="alert-card warning">
+                            <div class="alert-title">🔄 Shift Swaps</div>
+                            <div class="alert-description">
+                                {{ pending_swaps }} shift swap request{{ pending_swaps|pluralize }} awaiting approval
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if pending_timeoff > 0 %}
+                        <div class="alert-card warning">
+                            <div class="alert-title">🏖️ Time Off Requests</div>
+                            <div class="alert-description">
+                                {{ pending_timeoff }} time off request{{ pending_timeoff|pluralize }} awaiting approval
+                            </div>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-success">
+                        ✅ All requests are up to date
+                    </div>
+                {% endif %}
+                
+                {% if overdue_tasks > 0 %}
+                    <div class="alert-card danger">
+                        <div class="alert-title">⚠️ Overdue Tasks</div>
+                        <div class="alert-description">
+                            {{ overdue_tasks }} task{{ overdue_tasks|pluralize }} overdue and need attention
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

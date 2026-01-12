@@ -1,0 +1,511 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Course Menu Template - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .create-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .form-container {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    
+    .form-section h3 {
+        color: #333;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #667eea;
+    }
+    
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-label {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-input {
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-select {
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        background: white;
+        cursor: pointer;
+    }
+    
+    .form-textarea {
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    .checkbox-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .checkbox-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+    
+    .price-tier-section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+    
+    .price-tier-item {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    }
+    
+    .seasonal-months {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .month-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        background: #f0f0f0;
+        border-radius: 5px;
+        font-size: 0.8rem;
+    }
+    
+    .month-checkbox input[type="checkbox"] {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .back-button {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .back-button:hover {
+        background: #5a67d8;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .submit-button {
+        background: #48bb78;
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    
+    .submit-button:hover {
+        background: #38a169;
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    
+    .alert-info {
+        background: #e3f2fd;
+        color: #1976d2;
+        border: 1px solid #bbdefb;
+    }
+    
+    .conditional-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+        border-left: 4px solid #667eea;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="create-header">
+    <div class="container">
+        <h1 class="display-4">🍽️ Create Course Menu Template</h1>
+        <p class="lead">Create a new course menu template for your restaurant</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Back Button -->
+    <a href="{% url 'menu_management:course_menu_templates' %}" class="back-button">
+        ← Back to Templates
+    </a>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Basic Information -->
+        <div class="form-container">
+            <div class="form-section">
+                <h3>📋 Basic Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="name">Template Name *</label>
+                        <input type="text" name="name" id="name" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="menu_type">Menu Type *</label>
+                        <select name="menu_type" id="menu_type" class="form-select" required>
+                            <option value="">Select menu type...</option>
+                            <option value="tasting_menu">Tasting Menu</option>
+                            <option value="prix_fixe">Prix Fixe</option>
+                            <option value="seasonal">Seasonal Menu</option>
+                            <option value="degustation">Degustation</option>
+                            <option value="chef_table">Chef's Table</option>
+                            <option value="wine_pairing">Wine Pairing Menu</option>
+                            <option value="vegetarian">Vegetarian Menu</option>
+                            <option value="seafood">Seafood Special</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="course_count">Number of Courses *</label>
+                        <input type="number" name="course_count" id="course_count" class="form-input" min="1" max="12" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="estimated_duration">Estimated Duration (minutes) *</label>
+                        <input type="number" name="estimated_duration" id="estimated_duration" class="form-input" min="30" max="480" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="description">Description</label>
+                    <textarea name="description" id="description" class="form-textarea" placeholder="Describe your course menu template..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing Information -->
+        <div class="form-container">
+            <div class="form-section">
+                <h3>💰 Pricing Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="base_price">Base Price *</label>
+                        <input type="number" name="base_price" id="base_price" class="form-input" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="price_per_person">Price Per Person *</label>
+                        <input type="number" name="price_per_person" id="price_per_person" class="form-input" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="min_party_size">Minimum Party Size *</label>
+                        <input type="number" name="min_party_size" id="min_party_size" class="form-input" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="max_party_size">Maximum Party Size *</label>
+                        <input type="number" name="max_party_size" id="max_party_size" class="form-input" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="advance_booking_days">Advance Booking Days *</label>
+                        <input type="number" name="advance_booking_days" id="advance_booking_days" class="form-input" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="pacing_interval">Pacing Interval (minutes) *</label>
+                        <input type="number" name="pacing_interval" id="pacing_interval" class="form-input" min="5" max="60" required>
+                    </div>
+                </div>
+                
+                <!-- Price Tiers -->
+                <div class="price-tier-section">
+                    <h4>Price Tiers (Optional)</h4>
+                    <div id="price-tiers">
+                        <div class="price-tier-item">
+                            <input type="text" name="tier_name" placeholder="Tier name (e.g., Premium)" class="form-input">
+                            <input type="number" name="tier_price" placeholder="Price" step="0.01" class="form-input">
+                            <input type="number" name="tier_min_size" placeholder="Min size" class="form-input">
+                            <input type="number" name="tier_max_size" placeholder="Max size" class="form-input">
+                        </div>
+                    </div>
+                    <button type="button" onclick="addPriceTier()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        + Add Price Tier
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dietary Options -->
+        <div class="form-container">
+            <div class="form-section">
+                <h3>🥗 Dietary Options</h3>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="vegetarian_available" id="vegetarian_available">
+                        <label for="vegetarian_available">Vegetarian Available</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="vegan_available" id="vegan_available">
+                        <label for="vegan_available">Vegan Available</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="gluten_free_available" id="gluten_free_available">
+                        <label for="gluten_free_available">Gluten-Free Available</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="wine_pairing_available" id="wine_pairing_available">
+                        <label for="wine_pairing_available">Wine Pairing Available</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="beverage_pairing_available" id="beverage_pairing_available">
+                        <label for="beverage_pairing_available">Beverage Pairing Available</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="sommelier_required" id="sommelier_required">
+                        <label for="sommelier_required">Sommelier Required</label>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label class="form-label">Other Dietary Options</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="dietary_options" value="nut_free" id="diet_nut_free">
+                            <label for="diet_nut_free">Nut-Free</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="dietary_options" value="dairy_free" id="diet_dairy_free">
+                            <label for="diet_dairy_free">Dairy-Free</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="dietary_options" value="kosher" id="diet_kosher">
+                            <label for="diet_kosher">Kosher</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="dietary_options" value="halal" id="diet_halal">
+                            <label for="diet_halal">Halal</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Special Features -->
+        <div class="form-container">
+            <div class="form-section">
+                <h3>⭐ Special Features</h3>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="is_seasonal" id="is_seasonal" onchange="toggleSeasonalOptions()">
+                        <label for="is_seasonal">Seasonal Menu</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="holiday_specific" id="holiday_specific" onchange="toggleHolidayOptions()">
+                        <label for="holiday_specific">Holiday Specific</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="chef_table_exclusive" id="chef_table_exclusive">
+                        <label for="chef_table_exclusive">Chef's Table Exclusive</label>
+                    </div>
+                </div>
+                
+                <!-- Conditional Seasonal Options -->
+                <div id="seasonal-options" class="conditional-section" style="display: none;">
+                    <h4>Seasonal Months</h4>
+                    <div class="seasonal-months">
+                        <div class="month-checkbox">
+                            <input type="checkbox" name="season_months" value="1" id="month_jan">
+                            <label for="month_jan">Jan</label>
+                        </div>
+                        <div class="month-checkbox">
+                            <input type="checkbox" name="season_months" value="2" id="month_feb">
+                            <label for="month_feb">Feb</label>
+                        </div>
+                        <div class="month-checkbox">
+                            <input type="checkbox" name="season_months" value="3" id="month_mar">
+                            <label for="month_mar">Mar</label>
+                        </div>
+                        <div class="month-checkbox">
+                            <input type="checkbox" name="season_months" value="4" id="month_apr">
+                            <label for="month_apr">Apr</label>
+                        </div>
+                        <div class="month-checkbox">
+                            <input type="checkbox" name="season_months" value="5" id="month_may">
+                            <label for="month_may">May</label>
+                        </div>
+                        <div class="month-checkbox">
+                            <input type="checkbox" name="season_months" value="6" id="month_jun">
+                            <label for="month_jun">Jun</label>
+                        </div>
+                        <div class="month-checkbox">
+                            <input type="checkbox" name="season_months" value="7" id="month_jul">
+                            <label for="month_jul">Jul</label>
+                        </div>
+                        <div class="month-checkbox">
+                            <input type="checkbox" name="season_months" value="8" id="month_aug">
+                            <label for="month_aug">Aug</label>
+                        </div>
+                        <div class="month-checkbox">
+                            <input type="checkbox" name="season_months" value="9" id="month_sep">
+                            <label for="month_sep">Sep</label>
+                        </div>
+                        <div class="month-checkbox">
+                            <input type="checkbox" name="season_months" value="10" id="month_oct">
+                            <label for="month_oct">Oct</label>
+                        </div>
+                        <div class="month-checkbox">
+                            <input type="checkbox" name="season_months" value="11" id="month_nov">
+                            <label for="month_nov">Nov</label>
+                        </div>
+                        <div class="month-checkbox">
+                            <input type="checkbox" name="season_months" value="12" id="month_dec">
+                            <label for="month_dec">Dec</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Conditional Holiday Options -->
+                <div id="holiday-options" class="conditional-section" style="display: none;">
+                    <h4>Holiday Information</h4>
+                    <div class="form-group">
+                        <label class="form-label" for="holiday_name">Holiday Name</label>
+                        <input type="text" name="holiday_name" id="holiday_name" class="form-input" placeholder="e.g., Christmas, Valentine's Day, Thanksgiving">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chef Requirements -->
+        <div class="form-container">
+            <div class="form-section">
+                <h3>👨‍🍳 Chef Requirements</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="required_chef_level">Required Chef Level *</label>
+                        <select name="required_chef_level" id="required_chef_level" class="form-select" required>
+                            <option value="">Select chef level...</option>
+                            <option value="line_cook">Line Cook</option>
+                            <option value="sous_chef">Sous Chef</option>
+                            <option value="executive_chef">Executive Chef</option>
+                            <option value="head_chef">Head Chef</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="chef_notes">Chef Notes</label>
+                    <textarea name="chef_notes" id="chef_notes" class="form-textarea" placeholder="Special instructions or requirements for the chef..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-container">
+            <button type="submit" class="submit-button">
+                ✨ Create Template
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+function toggleSeasonalOptions() {
+    const checkbox = document.getElementById('is_seasonal');
+    const options = document.getElementById('seasonal-options');
+    options.style.display = checkbox.checked ? 'block' : 'none';
+}
+
+function toggleHolidayOptions() {
+    const checkbox = document.getElementById('holiday_specific');
+    const options = document.getElementById('holiday-options');
+    options.style.display = checkbox.checked ? 'block' : 'none';
+}
+
+function addPriceTier() {
+    const container = document.getElementById('price-tiers');
+    const newTier = document.createElement('div');
+    newTier.className = 'price-tier-item';
+    newTier.innerHTML = `
+        <input type="text" name="tier_name" placeholder="Tier name (e.g., Premium)" class="form-input">
+        <input type="number" name="tier_price" placeholder="Price" step="0.01" class="form-input">
+        <input type="number" name="tier_min_size" placeholder="Min size" class="form-input">
+        <input type="number" name="tier_max_size" placeholder="Max size" class="form-input">
+    `;
+    container.appendChild(newTier);
+}
+
+// Set default values
+document.getElementById('course_count').value = '5';
+document.getElementById('estimated_duration').value = '120';
+document.getElementById('advance_booking_days').value = '1';
+document.getElementById('pacing_interval').value = '15';
+document.getElementById('min_party_size').value = '2';
+document.getElementById('max_party_size').value = '10';
+</script>
+{% endblock %}

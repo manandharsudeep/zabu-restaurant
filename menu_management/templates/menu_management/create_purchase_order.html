@@ -1,0 +1,448 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Purchase Order - Zabu Restaurant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .create-po-header {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .form-container {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #495057;
+    }
+    
+    .form-control {
+        padding: 0.75rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+    }
+    
+    .items-section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+    }
+    
+    .item-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr auto;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+    }
+    
+    .item-row.header {
+        font-weight: bold;
+        background: #007bff;
+        color: white;
+    }
+    
+    .add-item-btn {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.3s ease;
+    }
+    
+    .add-item-btn:hover {
+        background: #218838;
+    }
+    
+    .remove-item-btn {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 0.5rem;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+    
+    .remove-item-btn:hover {
+        background: #c82333;
+    }
+    
+    .summary-section {
+        background: #e9ecef;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    
+    .summary-row.total {
+        font-weight: bold;
+        font-size: 1.25rem;
+        color: #2c3e50;
+        border-top: 2px solid #495057;
+        padding-top: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+    }
+    
+    .btn {
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #545b62;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-po-header">
+    <div class="container">
+        <h1>📋 Create Purchase Order</h1>
+        <p>Create a new purchase order for your inventory needs</p>
+    </div>
+</div>
+
+<div class="container">
+    <form method="POST" id="purchaseOrderForm">
+        {% csrf_token %}
+        
+        <!-- Vendor Information -->
+        <div class="form-container">
+            <div class="form-section">
+                <div class="section-title">
+                    🏢 Vendor Information
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="vendor">Select Vendor *</label>
+                        <select name="vendor" id="vendor" class="form-control" required>
+                            <option value="">Choose a vendor...</option>
+                            {% for vendor in vendors %}
+                                <option value="{{ vendor.id }}">{{ vendor.name }} ({{ vendor.vendor_code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="expected_date">Expected Delivery Date *</label>
+                        <input type="date" name="expected_date" id="expected_date" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group full-width">
+                    <label for="delivery_address">Delivery Address</label>
+                    <input type="text" name="delivery_address" id="delivery_address" class="form-control" 
+                           value="Restaurant Address" placeholder="Enter delivery address">
+                </div>
+                <div class="form-group full-width">
+                    <label for="notes">Order Notes</label>
+                    <textarea name="notes" id="notes" class="form-control" rows="3" 
+                              placeholder="Add any special instructions or notes..."></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Items Section -->
+        <div class="form-container">
+            <div class="form-section">
+                <div class="section-title">
+                    📦 Order Items
+                </div>
+                <div class="items-section">
+                    <div class="item-row header">
+                        <div>Item</div>
+                        <div>Quantity</div>
+                        <div>Unit Price</div>
+                        <div>Total</div>
+                        <div>Action</div>
+                    </div>
+                    <div id="itemsContainer">
+                        <div class="item-row">
+                            <div>
+                                <select name="item_id[]" class="form-control item-select" required>
+                                    <option value="">Select item...</option>
+                                    {% for item in items %}
+                                        <option value="{{ item.id }}" data-cost="{{ item.current_cost }}">{{ item.name }} ({{ item.unit }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <input type="number" name="quantity[]" class="form-control quantity-input" 
+                                       step="0.001" min="0.001" placeholder="0.00" required>
+                            </div>
+                            <div>
+                                <input type="number" name="unit_price[]" class="form-control price-input" 
+                                       step="0.01" min="0.01" placeholder="0.00" required>
+                            </div>
+                            <div>
+                                <input type="number" name="total_price[]" class="form-control total-input" 
+                                       step="0.01" min="0.01" placeholder="0.00" readonly>
+                            </div>
+                            <div>
+                                <button type="button" class="remove-item-btn" onclick="removeItem(this)">❌</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button type="button" class="add-item-btn" onclick="addItem()">➕ Add Item</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Summary Section -->
+        <div class="form-container">
+            <div class="summary-section">
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">$0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Tax (10%):</span>
+                    <span id="tax">$0.00</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total:</span>
+                    <span id="total">$0.00</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a href="{% url 'menu_management:purchase_orders' %}" class="btn btn-secondary">
+                ❌ Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+                ✅ Create Purchase Order
+            </button>
+        </div>
+        
+        <!-- Hidden field for items data -->
+        <input type="hidden" name="items_data" id="items_data" value="[]">
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Set minimum date to today
+document.getElementById('expected_date').min = new Date().toISOString().split('T')[0];
+
+function addItem() {
+    const container = document.getElementById('itemsContainer');
+    const newItem = document.createElement('div');
+    newItem.className = 'item-row';
+    newItem.innerHTML = `
+        <div>
+            <select name="item_id[]" class="form-control item-select" required>
+                <option value="">Select item...</option>
+                {% for item in items %}
+                    <option value="{{ item.id }}" data-cost="{{ item.current_cost }}">{{ item.name }} ({{ item.unit }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <input type="number" name="quantity[]" class="form-control quantity-input" 
+                   step="0.001" min="0.001" placeholder="0.00" required>
+        </div>
+        <div>
+            <input type="number" name="unit_price[]" class="form-control price-input" 
+                   step="0.01" min="0.01" placeholder="0.00" required>
+        </div>
+        <div>
+            <input type="number" name="total_price[]" class="form-control total-input" 
+                   step="0.01" min="0.01" placeholder="0.00" readonly>
+        </div>
+        <div>
+            <button type="button" class="remove-item-btn" onclick="removeItem(this)">❌</button>
+        </div>
+    `;
+    container.appendChild(newItem);
+    attachItemListeners(newItem);
+}
+
+function removeItem(button) {
+    const itemRow = button.closest('.item-row');
+    itemRow.remove();
+    calculateTotals();
+}
+
+function attachItemListeners(itemRow) {
+    const itemSelect = itemRow.querySelector('.item-select');
+    const quantityInput = itemRow.querySelector('.quantity-input');
+    const priceInput = itemRow.querySelector('.price-input');
+    const totalInput = itemRow.querySelector('.total-input');
+    
+    itemSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const cost = selectedOption.dataset.cost || 0;
+        priceInput.value = cost;
+        calculateItemTotal(itemRow);
+    });
+    
+    quantityInput.addEventListener('input', () => calculateItemTotal(itemRow));
+    priceInput.addEventListener('input', () => calculateItemTotal(itemRow));
+}
+
+function calculateItemTotal(itemRow) {
+    const quantity = parseFloat(itemRow.querySelector('.quantity-input').value) || 0;
+    const price = parseFloat(itemRow.querySelector('.price-input').value) || 0;
+    const total = quantity * price;
+    itemRow.querySelector('.total-input').value = total.toFixed(2);
+    calculateTotals();
+}
+
+function calculateTotals() {
+    const totalInputs = document.querySelectorAll('.total-input');
+    let subtotal = 0;
+    
+    totalInputs.forEach(input => {
+        subtotal += parseFloat(input.value) || 0;
+    });
+    
+    const tax = subtotal * 0.10;
+    const total = subtotal + tax;
+    
+    document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+    document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
+    document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+}
+
+// Form submission
+document.getElementById('purchaseOrderForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Collect items data
+    const items = [];
+    const itemRows = document.querySelectorAll('#itemsContainer .item-row');
+    
+    itemRows.forEach(row => {
+        const itemSelect = row.querySelector('.item-select');
+        const quantityInput = row.querySelector('.quantity-input');
+        const priceInput = row.querySelector('.price-input');
+        
+        if (itemSelect.value && quantityInput.value && priceInput.value) {
+            items.push({
+                item_id: itemSelect.value,
+                quantity: parseFloat(quantityInput.value),
+                unit_price: parseFloat(priceInput.value)
+            });
+        }
+    });
+    
+    if (items.length === 0) {
+        alert('Please add at least one item to the purchase order.');
+        return;
+    }
+    
+    // Set items data and submit
+    document.getElementById('items_data').value = JSON.stringify(items);
+    this.submit();
+});
+
+// Attach listeners to existing item row
+document.addEventListener('DOMContentLoaded', function() {
+    const existingItemRow = document.querySelector('#itemsContainer .item-row');
+    if (existingItemRow) {
+        attachItemListeners(existingItemRow);
+    }
+});
+</script>
+{% endblock %}

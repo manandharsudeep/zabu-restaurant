@@ -1,0 +1,22 @@
+{
+  "name": "zabu-restaurant",
+  "version": "1.0.0",
+  "description": "Zabu Restaurant Management System",
+  "main": "manage.py",
+  "scripts": {
+    "start": "gunicorn restaurant_system.wsgi:application --bind 0.0.0.0:8000",
+    "build": "echo 'Build complete'",
+    "deploy": "echo 'Deploy to Render'"
+  },
+  "dependencies": {
+    "django": "^4.2.7",
+    "gunicorn": "^21.2.0",
+    "psycopg2-binary": "^2.9.7"
+  },
+  "engines": {
+    "python": ">=3.8"
+  },
+  "keywords": ["restaurant", "django", "food", "ordering"],
+  "author": "Zabu Restaurant",
+  "license": "MIT"
+}
